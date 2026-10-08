@@ -1,0 +1,3298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TeachClone — Full Coding Prompts</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#070B14;--s1:#0D1525;--s2:#111E32;--card:#162030;--b1:#1C2E48;--b2:#2A4060;
+--text:#DDE8F5;--m1:#5C7A9C;--m2:#8AAACB;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:1px solid var(--b1);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;flex-shrink:0}
+.logo-box{width:26px;height:26px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.srch{background:var(--s2);border:1px solid var(--b1);color:var(--text);font-size:12px;padding:5px 11px;border-radius:6px;font-family:var(--sans);outline:none;width:160px}
+.srch:focus{border-color:#6366F1}
+.srch::placeholder{color:var(--m1)}
+.hdr-note{font-size:11px;color:var(--m2);background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);padding:3px 10px;border-radius:20px;white-space:nowrap}
+/* LAYOUT */
+.layout{display:flex;height:calc(100vh - 52px)}
+/* SIDEBAR */
+.sb{width:210px;flex-shrink:0;border-right:1px solid var(--b1);overflow-y:auto;padding:10px 0;background:var(--s1)}
+.sb::-webkit-scrollbar{width:3px}.sb::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.sb-label{font-size:9.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--m1);padding:12px 14px 5px;margin-top:4px}
+.sb-label:first-child{margin-top:0}
+.sb-item{display:flex;align-items:center;gap:7px;padding:6px 14px;cursor:pointer;font-size:12px;color:var(--m2);transition:all .12s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sb-item.active{color:var(--text);border-left-color:#6366F1;background:rgba(99,102,241,.08)}
+.sb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sb-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:24px 28px}
+.main::-webkit-scrollbar{width:4px}.main::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+/* BANNER */
+.banner{border-radius:11px;padding:18px 22px;margin-bottom:18px;border:1px solid}
+.banner-top{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;opacity:.65;font-family:var(--mono)}
+.banner-title{font-size:19px;font-weight:600;margin-bottom:4px}
+.banner-sub{font-size:13px;opacity:.7}
+.banner-meta{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.banner-pill{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;border:1px solid}
+/* STAT BAR */
+.statbar{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 14px;margin-bottom:16px;font-size:12px;color:var(--m2)}
+.statbar strong{color:var(--text)}
+/* PROMPT CARDS */
+.pcard{background:var(--card);border:1px solid var(--b1);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .15s;scroll-margin-top:80px}
+.pcard:hover{border-color:var(--b2)}
+.pcard.open{border-color:rgba(99,102,241,.45)}
+.pcard.hidden{display:none}
+.pcard-hdr{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+.pcard-left{display:flex;align-items:center;gap:9px;min-width:0}
+.pidx{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.ptitle{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard-right{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.cbtn{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);color:#818CF8;font-size:11px;padding:4px 11px;border-radius:5px;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.cbtn:hover{background:rgba(99,102,241,.25)}
+.cbtn.ok{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.3);color:#34D399}
+.tog{color:var(--m1);font-size:17px;cursor:pointer;transition:transform .18s;display:inline-block;width:18px;text-align:center}
+.pcard.open .tog{transform:rotate(90deg)}
+.pbody{display:none;border-top:1px solid var(--b1)}
+.pbody.show{display:block}
+.pcode{background:#050810;padding:18px 20px;font-family:var(--mono);font-size:11.5px;line-height:1.8;color:#8AAACB;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto}
+.pcode::-webkit-scrollbar{width:3px}.pcode::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+/* NO RESULTS */
+.no-results{padding:40px;text-align:center;color:var(--m1);font-size:13px}
+/* MOBILE */
+@media(max-width:640px){.sb{display:none}.main{padding:14px}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo"><div class="logo-box">🧠</div>TeachClone <span style="color:var(--m1);font-weight:400;font-size:12px;margin-left:4px">/ coding prompts</span></div>
+  <div class="hdr-r">
+    <input class="srch" placeholder="Search prompts…" oninput="doSearch(this.value)" id="srch">
+    <div class="hdr-note">24 prompts · Copy &amp; paste into Codex</div>
+  </div>
+</div>
+<div class="layout">
+<div class="sb" id="sb"><div class="sb-label">⚙️ Project Setup</div>
+<div class="sb-item" onclick="goto('SETUP-1')" id="sb-SETUP-1">
+  <span class="sb-dot" style="background:#64748B"></span>
+  <span class="sb-text">pnpm-workspace.yaml + root packa…</span>
+</div>
+<div class="sb-item" onclick="goto('SETUP-2')" id="sb-SETUP-2">
+  <span class="sb-dot" style="background:#64748B"></span>
+  <span class="sb-text">docker/docker-compose.yml</span>
+</div>
+<div class="sb-item" onclick="goto('SETUP-3')" id="sb-SETUP-3">
+  <span class="sb-dot" style="background:#64748B"></span>
+  <span class="sb-text">.github/workflows/ci.yml + deplo…</span>
+</div>
+<div class="sb-label">📦 Shared Packages</div>
+<div class="sb-item" onclick="goto('PACKAGES-1')" id="sb-PACKAGES-1">
+  <span class="sb-dot" style="background:#7986CB"></span>
+  <span class="sb-text">packages/types/src/index.ts</span>
+</div>
+<div class="sb-label">🐍 Backend Foundation</div>
+<div class="sb-item" onclick="goto('BACKEND-1')" id="sb-BACKEND-1">
+  <span class="sb-dot" style="background:#FFD54F"></span>
+  <span class="sb-text">apps/api/app/config.py</span>
+</div>
+<div class="sb-item" onclick="goto('BACKEND-2')" id="sb-BACKEND-2">
+  <span class="sb-dot" style="background:#FFD54F"></span>
+  <span class="sb-text">apps/api/app/db/session.py + bas…</span>
+</div>
+<div class="sb-item" onclick="goto('BACKEND-3')" id="sb-BACKEND-3">
+  <span class="sb-dot" style="background:#FFD54F"></span>
+  <span class="sb-text">apps/api/app/models/ (all 15 fil…</span>
+</div>
+<div class="sb-item" onclick="goto('BACKEND-4')" id="sb-BACKEND-4">
+  <span class="sb-dot" style="background:#FFD54F"></span>
+  <span class="sb-text">apps/api/app/schemas/ (all 8 fil…</span>
+</div>
+<div class="sb-item" onclick="goto('BACKEND-5')" id="sb-BACKEND-5">
+  <span class="sb-dot" style="background:#FFD54F"></span>
+  <span class="sb-text">apps/api/app/dependencies.py</span>
+</div>
+<div class="sb-item" onclick="goto('BACKEND-6')" id="sb-BACKEND-6">
+  <span class="sb-dot" style="background:#FFD54F"></span>
+  <span class="sb-text">apps/api/app/worker/__init__.py …</span>
+</div>
+<div class="sb-label">⚡ API Services</div>
+<div class="sb-item" onclick="goto('SERVICES-1')" id="sb-SERVICES-1">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/storage.py</span>
+</div>
+<div class="sb-item" onclick="goto('SERVICES-2')" id="sb-SERVICES-2">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/audio_extr…</span>
+</div>
+<div class="sb-item" onclick="goto('SERVICES-3')" id="sb-SERVICES-3">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/transcribe…</span>
+</div>
+<div class="sb-item" onclick="goto('SERVICES-4')" id="sb-SERVICES-4">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/embedder.p…</span>
+</div>
+<div class="sb-item" onclick="goto('SERVICES-5')" id="sb-SERVICES-5">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/style_extr…</span>
+</div>
+<div class="sb-item" onclick="goto('SERVICES-6')" id="sb-SERVICES-6">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/prompt_bui…</span>
+</div>
+<div class="sb-item" onclick="goto('SERVICES-7')" id="sb-SERVICES-7">
+  <span class="sb-dot" style="background:#06B6D4"></span>
+  <span class="sb-text">apps/api/app/services/quiz_gener…</span>
+</div>
+<div class="sb-label">🔄 Celery Tasks</div>
+<div class="sb-item" onclick="goto('TASKS-1')" id="sb-TASKS-1">
+  <span class="sb-dot" style="background:#10B981"></span>
+  <span class="sb-text">apps/api/app/tasks/media_tasks.p…</span>
+</div>
+<div class="sb-item" onclick="goto('TASKS-2')" id="sb-TASKS-2">
+  <span class="sb-dot" style="background:#10B981"></span>
+  <span class="sb-text">apps/api/app/tasks/embedding_tas…</span>
+</div>
+<div class="sb-label">🛣️ API Routers</div>
+<div class="sb-item" onclick="goto('ROUTERS-1')" id="sb-ROUTERS-1">
+  <span class="sb-dot" style="background:#8B5CF6"></span>
+  <span class="sb-text">apps/api/app/main.py + all route…</span>
+</div>
+<div class="sb-label">🌐 Frontend</div>
+<div class="sb-item" onclick="goto('FRONTEND-1')" id="sb-FRONTEND-1">
+  <span class="sb-dot" style="background:#4FC3F7"></span>
+  <span class="sb-text">apps/web/ config files</span>
+</div>
+<div class="sb-item" onclick="goto('FRONTEND-2')" id="sb-FRONTEND-2">
+  <span class="sb-dot" style="background:#4FC3F7"></span>
+  <span class="sb-text">apps/web/lib/hooks/ and stores/</span>
+</div>
+<div class="sb-item" onclick="goto('FRONTEND-3')" id="sb-FRONTEND-3">
+  <span class="sb-dot" style="background:#4FC3F7"></span>
+  <span class="sb-text">apps/web/components/ (all compon…</span>
+</div>
+<div class="sb-item" onclick="goto('FRONTEND-4')" id="sb-FRONTEND-4">
+  <span class="sb-dot" style="background:#4FC3F7"></span>
+  <span class="sb-text">apps/web/app/ pages</span>
+</div>
+</div>
+<div class="main" id="main">
+  <div class="statbar">Run prompts <strong>in order</strong> within each section — each builds on the previous. Total: <strong>24 prompts</strong> covering every file in the project.</div>
+  <div class="pcard" id="card-SETUP-1">
+  <div class="pcard-hdr" onclick="toggle('SETUP-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(100,116,139,0.1);color:#64748B;border:1px solid rgba(100,116,139,0.3)">SETUP-1</span>
+      <span class="ptitle">pnpm-workspace.yaml + root package.json</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SETUP-1" onclick="cp('SETUP-1',event)">Copy</button>
+      <span class="tog" id="tog-SETUP-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SETUP-1">
+    <div class="pcode" id="txt-SETUP-1">Write the complete pnpm-workspace.yaml and root package.json for TeachClone monorepo.
+
+FILE 1: pnpm-workspace.yaml
+packages:
+  - &#x27;apps/*&#x27;
+  - &#x27;packages/*&#x27;
+
+FILE 2: package.json (root)
+{
+  &quot;name&quot;: &quot;teachclone&quot;,
+  &quot;private&quot;: true,
+  &quot;scripts&quot;: {
+    &quot;dev&quot;: &quot;pnpm --parallel -r dev&quot;,
+    &quot;build&quot;: &quot;pnpm -r build&quot;,
+    &quot;lint&quot;: &quot;pnpm -r lint&quot;,
+    &quot;test&quot;: &quot;pnpm -r test&quot;,
+    &quot;type-check&quot;: &quot;pnpm -r type-check&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;typescript&quot;: &quot;^5.4.0&quot;,
+    &quot;@types/node&quot;: &quot;^20.0.0&quot;,
+    &quot;prettier&quot;: &quot;^3.2.0&quot;,
+    &quot;eslint&quot;: &quot;^8.57.0&quot;
+  },
+  &quot;engines&quot;: { &quot;node&quot;: &quot;&gt;=20&quot;, &quot;pnpm&quot;: &quot;&gt;=9&quot; }
+}
+
+FILE 3: .gitignore
+Include ignores for:
+- Node: node_modules/, .next/, dist/, .turbo/, *.log, .pnpm-store/
+- Python: __pycache__/, *.pyc, .venv/, venv/, *.egg-info/, .pytest_cache/
+- Env: .env, .env.local (NOT .env.example)
+- IDE: .vscode/, .idea/, .DS_Store
+- ML: *.pt, *.bin, *.onnx
+- Temp: apps/api/tmp/, apps/api/uploads/
+- Coverage: coverage/, .coverage, htmlcov/
+- Build: *.tsbuildinfo
+
+FILE 4: .env.example
+Write all env vars from config.py with placeholder values.
+Group them by: App, Database, Redis, Qdrant, OpenAI, Anthropic, Clerk, Stripe, R2, Email, Whisper.</div>
+  </div>
+</div>
+<div class="pcard" id="card-SETUP-2">
+  <div class="pcard-hdr" onclick="toggle('SETUP-2')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(100,116,139,0.1);color:#64748B;border:1px solid rgba(100,116,139,0.3)">SETUP-2</span>
+      <span class="ptitle">docker/docker-compose.yml</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SETUP-2" onclick="cp('SETUP-2',event)">Copy</button>
+      <span class="tog" id="tog-SETUP-2">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SETUP-2">
+    <div class="pcode" id="txt-SETUP-2">Write the complete docker-compose.yml for local TeachClone development.
+
+FILE: docker/docker-compose.yml
+
+Services:
+
+postgres:
+  image: postgres:16-alpine
+  environment: POSTGRES_DB=teachclone, POSTGRES_USER=postgres, POSTGRES_PASSWORD=password
+  ports: [&quot;5432:5432&quot;]
+  volumes: [pgdata:/var/lib/postgresql/data]
+  healthcheck: {test: [&quot;CMD&quot;,&quot;pg_isready&quot;,&quot;-U&quot;,&quot;postgres&quot;], interval: 5s, retries: 5}
+
+redis:
+  image: redis:7-alpine
+  ports: [&quot;6379:6379&quot;]
+  command: redis-server --appendonly yes
+  volumes: [redisdata:/data]
+
+qdrant:
+  image: qdrant/qdrant:v1.9.1
+  ports: [&quot;6333:6333&quot;,&quot;6334:6334&quot;]
+  volumes: [qdrantdata:/qdrant/storage]
+  environment: QDRANT__TELEMETRY_DISABLED=true
+
+api:
+  build: {context: .., dockerfile: docker/Dockerfile.api}
+  volumes: [../apps/api:/app]
+  working_dir: /app
+  command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  ports: [&quot;8000:8000&quot;]
+  env_file: ../.env
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/teachclone
+    REDIS_URL: redis://redis:6379/0
+    QDRANT_URL: http://qdrant:6333
+  depends_on: {postgres: {condition: service_healthy}, redis: {condition: service_started}, qdrant: {condition: service_started}}
+
+worker:
+  build: {context: .., dockerfile: docker/Dockerfile.worker}
+  volumes: [../apps/api:/app]
+  working_dir: /app
+  command: celery -A app.worker worker --loglevel=info -Q media,ai -c 2
+  env_file: ../.env
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/teachclone
+    REDIS_URL: redis://redis:6379/0
+    QDRANT_URL: http://qdrant:6333
+  depends_on: [redis, postgres]
+
+volumes: pgdata, redisdata, qdrantdata
+
+Also write docker/Dockerfile.api:
+FROM python:3.11-slim
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends build-essential libpq-dev curl &amp;&amp; rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY apps/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY apps/api/ .
+EXPOSE 8000
+CMD [&quot;uvicorn&quot;,&quot;app.main:app&quot;,&quot;--host&quot;,&quot;0.0.0.0&quot;,&quot;--port&quot;,&quot;8000&quot;]
+
+Also write docker/Dockerfile.worker:
+FROM python:3.11-slim
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends build-essential libpq-dev ffmpeg git curl &amp;&amp; rm -rf /var/lib/apt/lists/*
+RUN pip install yt-dlp
+WORKDIR /app
+COPY apps/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN python -c &quot;from faster_whisper import WhisperModel; WhisperModel(&#x27;base&#x27;, device=&#x27;cpu&#x27;, compute_type=&#x27;int8&#x27;)&quot;
+COPY apps/api/ .
+ENV WHISPER_MODEL=base TORCH_NUM_THREADS=2
+CMD [&quot;celery&quot;,&quot;-A&quot;,&quot;app.worker&quot;,&quot;worker&quot;,&quot;--loglevel=info&quot;,&quot;-Q&quot;,&quot;media,ai&quot;,&quot;-c&quot;,&quot;2&quot;]</div>
+  </div>
+</div>
+<div class="pcard" id="card-SETUP-3">
+  <div class="pcard-hdr" onclick="toggle('SETUP-3')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(100,116,139,0.1);color:#64748B;border:1px solid rgba(100,116,139,0.3)">SETUP-3</span>
+      <span class="ptitle">.github/workflows/ci.yml + deploy.yml</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SETUP-3" onclick="cp('SETUP-3',event)">Copy</button>
+      <span class="tog" id="tog-SETUP-3">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SETUP-3">
+    <div class="pcode" id="txt-SETUP-3">Write the GitHub Actions CI/CD workflows.
+
+FILE: .github/workflows/ci.yml
+name: CI
+on:
+  push: {branches: [main]}
+  pull_request: {branches: [main]}
+
+jobs:
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: {version: 9}
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: pnpm}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r lint
+      - run: pnpm -r type-check
+
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: &quot;3.11&quot;}
+      - run: pip install ruff mypy
+      - run: ruff check apps/api/
+      - run: mypy apps/api/app/ --ignore-missing-imports
+
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: {POSTGRES_DB: teachclone_test, POSTGRES_USER: postgres, POSTGRES_PASSWORD: password}
+        ports: [&quot;5432:5432&quot;]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: [&quot;6379:6379&quot;]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: &quot;3.11&quot;}
+      - run: pip install -r apps/api/requirements.txt
+      - run: alembic upgrade head
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/teachclone_test
+      - run: pytest apps/api/tests/ -v --tb=short
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/teachclone_test
+          REDIS_URL: redis://localhost:6379/0
+          OPENAI_API_KEY: sk-test
+          ANTHROPIC_API_KEY: sk-ant-test
+          CLERK_SECRET_KEY: sk_test
+          CLERK_WEBHOOK_SECRET: whsec_test
+          STRIPE_SECRET_KEY: sk_test
+          STRIPE_WEBHOOK_SECRET: whsec_test
+
+FILE: .github/workflows/deploy.yml
+name: Deploy
+on:
+  push: {branches: [main]}
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r build
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: --prod
+  deploy-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: railway up --service api
+        env: {RAILWAY_TOKEN: &quot;${{ secrets.RAILWAY_TOKEN }}&quot;}</div>
+  </div>
+</div>
+<div class="pcard" id="card-PACKAGES-1">
+  <div class="pcard-hdr" onclick="toggle('PACKAGES-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(121,134,203,0.1);color:#7986CB;border:1px solid rgba(121,134,203,0.3)">PACKAGES-1</span>
+      <span class="ptitle">packages/types/src/index.ts</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-PACKAGES-1" onclick="cp('PACKAGES-1',event)">Copy</button>
+      <span class="tog" id="tog-PACKAGES-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-PACKAGES-1">
+    <div class="pcode" id="txt-PACKAGES-1">Write ALL shared TypeScript types for TeachClone.
+
+FILE: packages/types/src/index.ts
+
+Export every type with JSDoc. Include:
+
+// Enums as string literal unions
+export type Plan = &#x27;free&#x27; | &#x27;pro&#x27; | &#x27;creator&#x27; | &#x27;institution&#x27;
+export type StudentLevel = &#x27;k5&#x27; | &#x27;middle&#x27; | &#x27;highschool&#x27; | &#x27;undergrad&#x27; | &#x27;masters&#x27; | &#x27;professional&#x27;
+export type LearningStyle = &#x27;examples&#x27; | &#x27;theory&#x27; | &#x27;qa&#x27; | &#x27;storytelling&#x27;
+export type MediaStatus = &#x27;pending&#x27; | &#x27;processing&#x27; | &#x27;completed&#x27; | &#x27;failed&#x27;
+export type MessageRole = &#x27;user&#x27; | &#x27;assistant&#x27;
+export type OrgRole = &#x27;admin&#x27; | &#x27;teacher&#x27; | &#x27;student&#x27;
+export type SourceType = &#x27;youtube_url&#x27; | &#x27;file_upload&#x27; | &#x27;audio_upload&#x27;
+export type ToneType = &#x27;strict&#x27; | &#x27;friendly&#x27; | &#x27;socratic&#x27; | &#x27;storytelling&#x27; | &#x27;energetic&#x27; | &#x27;calm&#x27;
+export type ExplanationPattern = &#x27;analogy_first&#x27; | &#x27;example_first&#x27; | &#x27;theory_first&#x27; | &#x27;problem_first&#x27; | &#x27;narrative&#x27;
+export type VocabLevel = &#x27;elementary&#x27; | &#x27;intermediate&#x27; | &#x27;advanced&#x27; | &#x27;technical&#x27;
+
+// StyleProfile: teacher style analysis result
+export interface StyleProfile {
+  vocabularyLevel: VocabLevel
+  vocabularyScore: number
+  toneType: ToneType
+  toneConfidence: number
+  explanationPattern: ExplanationPattern
+  analogyDensity: number
+  avgSentenceLength: number
+  useOfHumor: number
+  useOfQuestions: number
+  signaturePhrases: string[]
+  vocabularySamples: string[]
+  pacing: &#x27;slow&#x27; | &#x27;moderate&#x27; | &#x27;fast&#x27;
+  explanationDepth: &#x27;surface&#x27; | &#x27;moderate&#x27; | &#x27;deep&#x27;
+  rawAnalysis: string
+}
+
+// StudentProfile: stored per session
+export interface StudentProfile {
+  level: StudentLevel
+  goal: string
+  learningStyle: LearningStyle
+  priorKnowledge: string
+}
+
+// Core DB entities
+export interface User {
+  id: string; clerkId: string; email: string; fullName: string
+  avatarUrl?: string; plan: Plan; stripeCustomerId?: string
+  createdAt: string; updatedAt: string
+}
+export interface Organization {
+  id: string; name: string; slug: string; ownerId: string
+  plan: Plan; seatLimit: number; logoUrl?: string; ssoEnabled: boolean
+  createdAt: string; updatedAt: string
+}
+export interface OrgMember {
+  id: string; orgId: string; userId: string; role: OrgRole
+  user?: User; createdAt: string
+}
+export interface TeacherProfile {
+  id: string; userId?: string; orgId?: string; name: string
+  description?: string; isPublic: boolean; styleProfile?: StyleProfile
+  totalVideos: number; ttsVoice: string; createdAt: string; updatedAt: string
+}
+export interface MediaSource {
+  id: string; teacherProfileId: string; uploadedBy: string
+  sourceType: SourceType; originalUrl?: string; storageKey?: string
+  fileName?: string; durationSeconds?: number; status: MediaStatus
+  errorMessage?: string; transcriptChunks?: number; createdAt: string
+}
+export interface StudentSession {
+  id: string; studentId: string; teacherProfileId: string
+  studentProfile: StudentProfile; currentEffectiveLevel?: StudentLevel
+  messageCount: number; lastActivityAt: string
+  sessionNotes?: SessionSummary; createdAt: string; updatedAt: string
+  teacherProfile?: TeacherProfile; messages?: Message[]
+}
+export interface Citation {
+  mediaSourceId: string; startTime: number; endTime: number; chunkText: string
+}
+export interface Message {
+  id: string; sessionId: string; role: MessageRole; content: string
+  citations: Citation[]; tokensUsed?: number; modelUsed?: string; createdAt: string
+}
+
+// Quiz types
+export interface MCQQuestion {
+  id: string; type: &#x27;mcq&#x27;; question: string
+  options: Record&lt;&#x27;A&#x27;|&#x27;B&#x27;|&#x27;C&#x27;|&#x27;D&#x27;, string&gt;
+  correctAnswer: &#x27;A&#x27;|&#x27;B&#x27;|&#x27;C&#x27;|&#x27;D&#x27;; explanation: string
+  sourceTimestamp?: number; difficulty: &#x27;easy&#x27;|&#x27;medium&#x27;|&#x27;hard&#x27;
+}
+export interface TrueFalseQuestion {
+  id: string; type: &#x27;true_false&#x27;; question: string
+  correctAnswer: boolean; explanation: string; sourceTimestamp?: number
+}
+export interface ShortAnswerQuestion {
+  id: string; type: &#x27;short_answer&#x27;; question: string
+  sampleAnswer: string; keyConcepts: string[]; sourceTimestamp?: number
+}
+export type Question = MCQQuestion | TrueFalseQuestion | ShortAnswerQuestion
+export interface QuizData { title: string; questions: Question[] }
+export interface Quiz {
+  id: string; sessionId: string; teacherProfileId: string
+  questions: Question[]; studentAnswers?: Record&lt;string, string|boolean&gt;
+  gradingResults?: Record&lt;string, GradingResult&gt;
+  score?: number; completedAt?: string; createdAt: string
+}
+export interface GradingResult {
+  isCorrect: boolean; score: number; feedback: string; correctAnswer?: string|boolean
+}
+
+// Session export
+export interface SessionSummary {
+  overview: string; keyConcepts: string[]
+  definitions: Array&lt;{term: string; definition: string}&gt;
+  takeaways: string[]; questionsToExplore: string[]
+  quizScore?: number; topicsToReview: string[]
+}
+
+// Gamification
+export interface UserStats {
+  userId: string; xpTotal: number; level: number; streakDays: number
+  longestStreak: number; lastSessionDate?: string
+  sessionsCompleted: number; quizzesCompleted: number
+  perfectQuizzes: number; videosProcessed: number
+}
+export interface BadgeDef { id: string; name: string; icon: string; xp: number; description: string }
+export interface UserBadge { userId: string; badgeId: string; earnedAt: string }
+export interface GamificationResult {
+  xpEarned: number; newTotal: number; oldLevel: number; newLevel: number
+  levelUp: boolean; newBadges: BadgeDef[]; streak: number
+}
+
+// Billing
+export interface PlanLimits {
+  videosPerMonth: number; messagesPerDay: number
+  sessions: number; exportsPerMonth: number; quizzesPerMonth: number
+}
+export interface MonthlyUsage {
+  videos: number; messages: number; exports: number; quizzes: number
+}
+export interface BillingStatus { plan: Plan; limits: PlanLimits; usage: MonthlyUsage }
+
+// API helpers
+export interface PaginatedResponse&lt;T&gt; {
+  items: T[]; total: number; page: number; perPage: number; hasMore: boolean
+}
+export interface ApiError { message: string; code: string; status: number }
+
+// Upload flow
+export interface UploadInitiateResponse {
+  mediaSourceId: string; uploadUrl: string; uploadKey: string; expiresAt: string
+}
+export interface ProcessingProgress { status: MediaStatus; transcriptChunks?: number; stage?: string }
+
+Also write packages/types/package.json:
+{ &quot;name&quot;: &quot;@teachclone/types&quot;, &quot;version&quot;: &quot;1.0.0&quot;, &quot;main&quot;: &quot;dist/index.js&quot;, &quot;types&quot;: &quot;dist/index.d.ts&quot;,
+  &quot;scripts&quot;: { &quot;build&quot;: &quot;tsc&quot;, &quot;dev&quot;: &quot;tsc --watch&quot; } }
+And packages/types/tsconfig.json pointing to src/index.ts, outputting to dist/.</div>
+  </div>
+</div>
+<div class="pcard" id="card-BACKEND-1">
+  <div class="pcard-hdr" onclick="toggle('BACKEND-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(255,213,79,0.1);color:#FFD54F;border:1px solid rgba(255,213,79,0.3)">BACKEND-1</span>
+      <span class="ptitle">apps/api/app/config.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-BACKEND-1" onclick="cp('BACKEND-1',event)">Copy</button>
+      <span class="tog" id="tog-BACKEND-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-BACKEND-1">
+    <div class="pcode" id="txt-BACKEND-1">Write the Pydantic Settings config for FastAPI.
+
+FILE: apps/api/app/config.py
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=&quot;.env&quot;, case_sensitive=True, extra=&quot;ignore&quot;)
+
+    APP_NAME: str = &quot;TeachClone API&quot;
+    VERSION: str = &quot;1.0.0&quot;
+    DEBUG: bool = False
+    APP_URL: str = &quot;http://localhost:3000&quot;
+    API_URL: str = &quot;http://localhost:8000&quot;
+
+    DATABASE_URL: str = &quot;postgresql+asyncpg://postgres:password@localhost:5432/teachclone&quot;
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+
+    REDIS_URL: str = &quot;redis://localhost:6379/0&quot;
+
+    QDRANT_URL: str = &quot;http://localhost:6333&quot;
+    QDRANT_COLLECTION: str = &quot;teachclone_chunks&quot;
+
+    OPENAI_API_KEY: str = &quot;&quot;
+    OPENAI_EMBEDDING_MODEL: str = &quot;text-embedding-3-large&quot;
+    OPENAI_EMBEDDING_DIM: int = 3072
+    OPENAI_TTS_MODEL: str = &quot;tts-1&quot;
+    OPENAI_VISION_MODEL: str = &quot;gpt-4o&quot;
+
+    ANTHROPIC_API_KEY: str = &quot;&quot;
+    ANTHROPIC_MODEL: str = &quot;claude-3-5-sonnet-20241022&quot;
+    ANTHROPIC_MAX_TOKENS: int = 1500
+
+    CLERK_SECRET_KEY: str = &quot;&quot;
+    CLERK_WEBHOOK_SECRET: str = &quot;&quot;
+    CLERK_JWKS_URL: str = &quot;https://api.clerk.com/v1/jwks&quot;
+
+    STRIPE_SECRET_KEY: str = &quot;&quot;
+    STRIPE_WEBHOOK_SECRET: str = &quot;&quot;
+    STRIPE_PRO_PRICE_ID: str = &quot;&quot;
+    STRIPE_CREATOR_PRICE_ID: str = &quot;&quot;
+    STRIPE_INSTITUTION_PRICE_ID: str = &quot;&quot;
+
+    R2_ACCOUNT_ID: str = &quot;&quot;
+    R2_ACCESS_KEY_ID: str = &quot;&quot;
+    R2_SECRET_ACCESS_KEY: str = &quot;&quot;
+    R2_BUCKET_NAME: str = &quot;teachclone-media&quot;
+    R2_PUBLIC_URL: str = &quot;&quot;
+
+    RESEND_API_KEY: str = &quot;&quot;
+    FROM_EMAIL: str = &quot;noreply@teachclone.app&quot;
+
+    WHISPER_MODEL: str = &quot;base&quot;
+    WHISPER_DEVICE: str = &quot;cpu&quot;
+    WHISPER_COMPUTE_TYPE: str = &quot;int8&quot;
+
+    SENTRY_DSN: str = &quot;&quot;
+
+    FREE_VIDEOS_PER_MONTH: int = 3
+    FREE_MESSAGES_PER_DAY: int = 50
+    FREE_QUIZZES_PER_MONTH: int = 5
+    FREE_EXPORTS_PER_MONTH: int = 2
+
+    @property
+    def r2_endpoint(self) -&gt; str:
+        return f&quot;https://{self.R2_ACCOUNT_ID}.r2.cloudflarestorage.com&quot;
+
+    @property
+    def price_to_plan(self) -&gt; dict[str, str]:
+        return {
+            self.STRIPE_PRO_PRICE_ID: &quot;pro&quot;,
+            self.STRIPE_CREATOR_PRICE_ID: &quot;creator&quot;,
+            self.STRIPE_INSTITUTION_PRICE_ID: &quot;institution&quot;,
+        }
+
+@lru_cache()
+def get_settings() -&gt; Settings:
+    return Settings()
+
+settings = get_settings()</div>
+  </div>
+</div>
+<div class="pcard" id="card-BACKEND-2">
+  <div class="pcard-hdr" onclick="toggle('BACKEND-2')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(255,213,79,0.1);color:#FFD54F;border:1px solid rgba(255,213,79,0.3)">BACKEND-2</span>
+      <span class="ptitle">apps/api/app/db/session.py + base.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-BACKEND-2" onclick="cp('BACKEND-2',event)">Copy</button>
+      <span class="tog" id="tog-BACKEND-2">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-BACKEND-2">
+    <div class="pcode" id="txt-BACKEND-2">Write the async SQLAlchemy session and base.
+
+FILE: apps/api/app/db/session.py
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from typing import AsyncGenerator
+from app.config import settings
+
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_pre_ping=True,
+    echo=settings.DEBUG,
+)
+
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+)
+
+class Base(DeclarativeBase):
+    pass
+
+async def get_db_session() -&gt; AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+FILE: apps/api/app/db/base.py
+Import ALL models here so Alembic detects them for autogenerate:
+from app.db.session import Base  # noqa
+from app.models.user import User  # noqa
+from app.models.organization import Organization  # noqa
+from app.models.org_member import OrgMember  # noqa
+from app.models.teacher_profile import TeacherProfile  # noqa
+from app.models.media_source import MediaSource  # noqa
+from app.models.transcript_chunk import TranscriptChunk  # noqa
+from app.models.processing_job import ProcessingJob  # noqa
+from app.models.student_session import StudentSession  # noqa
+from app.models.message import Message  # noqa
+from app.models.quiz import Quiz  # noqa
+from app.models.api_key import ApiKey  # noqa
+from app.models.audit_log import AuditLog  # noqa
+from app.models.user_stats import UserStats  # noqa
+from app.models.user_badge import UserBadge  # noqa
+from app.models.usage_log import UsageLog  # noqa
+
+FILE: apps/api/alembic.ini
+Standard alembic.ini with script_location = app/db/migrations
+
+FILE: apps/api/app/db/migrations/env.py
+Async alembic env.py for SQLAlchemy 2.0. Import Base from app.db.base.
+Use run_async_migrations() pattern with asyncio.run().
+Set target_metadata = Base.metadata.</div>
+  </div>
+</div>
+<div class="pcard" id="card-BACKEND-3">
+  <div class="pcard-hdr" onclick="toggle('BACKEND-3')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(255,213,79,0.1);color:#FFD54F;border:1px solid rgba(255,213,79,0.3)">BACKEND-3</span>
+      <span class="ptitle">apps/api/app/models/ (all 15 files)</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-BACKEND-3" onclick="cp('BACKEND-3',event)">Copy</button>
+      <span class="tog" id="tog-BACKEND-3">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-BACKEND-3">
+    <div class="pcode" id="txt-BACKEND-3">Write all 15 SQLAlchemy models.
+
+Write each as a separate file. All use mapped_column / Mapped syntax (SQLAlchemy 2.0).
+All include created_at with server_default=func.now() and updated_at with onupdate=func.now() where applicable.
+All use UUID(as_uuid=True) primary keys with default=uuid.uuid4.
+Import Base from app.db.session.
+
+FILE: apps/api/app/models/user.py
+Table: users
+Columns: id(UUID PK), clerk_id(str unique indexed), email(str unique indexed), full_name(str),
+avatar_url(str nullable), plan(Enum free/pro/creator/institution default free),
+stripe_customer_id(str unique nullable), stripe_subscription_id(str nullable),
+is_active(bool default True), created_at, updated_at
+Relationships: teacher_profiles, sessions(StudentSession), org_memberships(OrgMember),
+stats(UserStats one-to-one), api_keys(ApiKey)
+
+FILE: apps/api/app/models/organization.py
+Table: organizations
+Columns: id, name(str), slug(str unique indexed), owner_id(FK users indexed),
+plan(Enum), seat_limit(int default 50), sso_enabled(bool default False),
+sso_config(JSONB nullable), logo_url(str nullable),
+stripe_subscription_id(str nullable), created_at, updated_at
+Relationships: members(OrgMember), teacher_profiles(TeacherProfile), owner(User)
+
+FILE: apps/api/app/models/org_member.py
+Table: org_members
+Columns: id, org_id(FK organizations indexed), user_id(FK users indexed),
+role(Enum admin/teacher/student), created_at
+UniqueConstraint(org_id, user_id)
+Relationships: organization, user
+
+FILE: apps/api/app/models/teacher_profile.py
+Table: teacher_profiles
+Columns: id, user_id(FK users nullable indexed), org_id(FK organizations nullable indexed),
+name(str), description(Text nullable), is_public(bool default False),
+style_profile(JSONB nullable), total_videos(int default 0),
+tts_voice(str default &#x27;nova&#x27;), created_at, updated_at
+Relationships: user, organization, media_sources, sessions
+
+FILE: apps/api/app/models/media_source.py
+Table: media_sources
+Columns: id, teacher_profile_id(FK indexed), uploaded_by(FK users indexed),
+source_type(Enum youtube_url/file_upload/audio_upload),
+original_url(str nullable), storage_key(str nullable), file_name(str nullable),
+duration_seconds(int nullable), status(Enum pending/processing/completed/failed indexed),
+error_message(Text nullable), transcript_chunks(int nullable),
+processing_started_at(datetime nullable), processing_completed_at(datetime nullable),
+created_at, updated_at
+Relationships: teacher_profile, uploader(User), transcript_chunks_rel, processing_jobs
+
+FILE: apps/api/app/models/transcript_chunk.py
+Table: transcript_chunks
+Columns: id, media_source_id(FK indexed), chunk_index(int),
+text(Text), start_time(Float), end_time(Float),
+speaker_label(str nullable), token_count(int),
+embedding_id(str nullable), content_type(str default &#x27;audio&#x27;),
+created_at
+CompositeIndex on (media_source_id, chunk_index)
+Relationship: media_source
+
+FILE: apps/api/app/models/processing_job.py
+Table: processing_jobs
+Columns: id, media_source_id(FK indexed),
+job_type(Enum transcription/embedding/style_extraction/frame_analysis),
+celery_task_id(str nullable), status(Enum queued/running/completed/failed indexed),
+progress(int default 0), result_metadata(JSONB nullable), error(Text nullable),
+started_at(datetime nullable), completed_at(datetime nullable), created_at
+
+FILE: apps/api/app/models/student_session.py
+Table: student_sessions
+Columns: id, student_id(FK users indexed), teacher_profile_id(FK indexed),
+student_profile(JSONB not null), current_effective_level(str nullable),
+message_count(int default 0), last_activity_at(datetime server_default=now()),
+session_notes(JSONB nullable), created_at, updated_at
+Relationships: student(User), teacher_profile, messages(ordered by created_at), quizzes
+
+FILE: apps/api/app/models/message.py
+Table: messages
+Columns: id, session_id(FK indexed), role(Enum user/assistant),
+content(Text), citations(JSONB default []),
+tokens_used(int nullable), model_used(str nullable), created_at
+CompositeIndex on (session_id, created_at)
+
+FILE: apps/api/app/models/quiz.py
+Table: quizzes
+Columns: id, session_id(FK indexed), teacher_profile_id(FK indexed),
+questions(JSONB not null), student_answers(JSONB nullable),
+grading_results(JSONB nullable), score(Float nullable),
+completed_at(datetime nullable), created_at
+
+FILE: apps/api/app/models/api_key.py
+Table: api_keys
+Columns: id, user_id(FK indexed), key_hash(str(64) unique),
+key_prefix(str(16)), name(str), is_active(bool default True),
+last_used_at(datetime nullable), requests_today(int default 0), created_at
+
+FILE: apps/api/app/models/audit_log.py
+Table: audit_logs (immutable - no updated_at)
+Columns: id, org_id(FK nullable), actor_id(FK users), actor_email(str),
+action(str indexed), resource_type(str), resource_id(str),
+metadata(JSONB), ip_address(str nullable), user_agent(str nullable), created_at
+
+FILE: apps/api/app/models/user_stats.py
+Table: user_stats (one-to-one with users)
+Columns: user_id(UUID PK FK users), xp_total(int default 0),
+level(int default 1), streak_days(int default 0), longest_streak(int default 0),
+last_session_date(Date nullable), sessions_completed(int default 0),
+quizzes_completed(int default 0), perfect_quizzes(int default 0),
+videos_processed(int default 0)
+
+FILE: apps/api/app/models/user_badge.py
+Table: user_badges
+Columns: id, user_id(FK indexed), badge_id(str), earned_at(datetime server_default)
+UniqueConstraint(user_id, badge_id)
+
+FILE: apps/api/app/models/usage_log.py
+Table: usage_logs
+Columns: id, user_id(FK indexed),
+event_type(Enum video_processed/session_started/message_sent/quiz_generated/export_created),
+metadata(JSONB default {}), billing_period(str indexed e.g. &quot;2024-01&quot;), created_at
+CompositeIndex on (user_id, event_type, billing_period) for fast quota queries</div>
+  </div>
+</div>
+<div class="pcard" id="card-BACKEND-4">
+  <div class="pcard-hdr" onclick="toggle('BACKEND-4')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(255,213,79,0.1);color:#FFD54F;border:1px solid rgba(255,213,79,0.3)">BACKEND-4</span>
+      <span class="ptitle">apps/api/app/schemas/ (all 8 files)</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-BACKEND-4" onclick="cp('BACKEND-4',event)">Copy</button>
+      <span class="tog" id="tog-BACKEND-4">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-BACKEND-4">
+    <div class="pcode" id="txt-BACKEND-4">Write all Pydantic v2 request/response schemas.
+
+These are NOT the ORM models. These are Pydantic schemas for API input/output.
+All use model_config = ConfigDict(from_attributes=True) for ORM compatibility.
+
+FILE: apps/api/app/schemas/common.py
+class PaginatedResponse(BaseModel, Generic[T]): items, total, page, per_page, has_more
+class ErrorResponse(BaseModel): error, message, details (optional)
+class SuccessResponse(BaseModel): success=True, message
+
+FILE: apps/api/app/schemas/user.py
+class UserResponse: id, clerk_id, email, full_name, avatar_url, plan, created_at
+class UserUpdate: full_name(optional), avatar_url(optional)
+class UserStatsResponse: all UserStats fields + badges: list[BadgeResponse]
+class BadgeResponse: badge_id, name, icon, xp, earned_at
+
+FILE: apps/api/app/schemas/teacher_profile.py
+class TeacherProfileCreate: name(required), description, is_public=False, org_id(optional)
+class TeacherProfileUpdate: name, description, is_public, tts_voice (all optional)
+class TeacherProfileResponse: all fields including style_profile: dict|None, total_videos
+class StyleProfileResponse: all StyleProfile fields
+
+FILE: apps/api/app/schemas/media.py
+class YouTubeIngestRequest: teacher_profile_id(str), youtube_url(str, validated)
+class UploadInitiateRequest: teacher_profile_id, file_name, file_size(int), content_type(str)
+class UploadCompleteRequest: media_source_id, storage_key
+class MediaSourceResponse: all MediaSource fields
+class ProcessingProgressResponse: status, transcript_chunks, stage(optional)
+
+FILE: apps/api/app/schemas/session.py
+class StudentProfileInput: level(StudentLevel), goal(str), learning_style(LearningStyle), prior_knowledge(str)
+class SessionCreate: teacher_profile_id(str), student_profile(StudentProfileInput)
+class SessionResponse: all session fields + teacher_profile(TeacherProfileResponse optional) + messages(list optional)
+class AdjustLevelRequest: direction(Literal[&#x27;simpler&#x27;,&#x27;deeper&#x27;])
+
+FILE: apps/api/app/schemas/chat.py
+class ChatMessageRequest: content(str, min_length=1, max_length=4000)
+class CitationResponse: media_source_id, start_time, end_time, chunk_text
+class MessageResponse: id, session_id, role, content, citations(list[CitationResponse]), created_at
+class ChatDoneEvent: type=&#x27;done&#x27;, message_id, citations(list)
+class AdjustLevelResponse: level(str)
+
+FILE: apps/api/app/schemas/quiz.py
+class QuizGenerateRequest: topic(str optional), num_questions(int=5, ge=1, le=20)
+class QuizSubmitRequest: answers(dict[str, Any])  # question_id -&gt; answer
+class GradingResultResponse: is_correct, score, feedback, correct_answer(optional)
+class QuizSubmitResponse: score(float), results(dict[str, GradingResultResponse]), completed_at
+class QuizResponse: id, questions(list, correct_answer EXCLUDED for incomplete quizzes), score, completed_at
+
+FILE: apps/api/app/schemas/billing.py
+class CheckoutRequest: plan(Literal[&#x27;pro&#x27;,&#x27;creator&#x27;,&#x27;institution&#x27;])
+class CheckoutResponse: checkout_url(str)
+class PortalResponse: portal_url(str)
+class PlanLimitsResponse: videos_per_month, messages_per_day, sessions, exports_per_month, quizzes_per_month
+class BillingStatusResponse: plan, limits(PlanLimitsResponse), usage(dict)</div>
+  </div>
+</div>
+<div class="pcard" id="card-BACKEND-5">
+  <div class="pcard-hdr" onclick="toggle('BACKEND-5')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(255,213,79,0.1);color:#FFD54F;border:1px solid rgba(255,213,79,0.3)">BACKEND-5</span>
+      <span class="ptitle">apps/api/app/dependencies.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-BACKEND-5" onclick="cp('BACKEND-5',event)">Copy</button>
+      <span class="tog" id="tog-BACKEND-5">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-BACKEND-5">
+    <div class="pcode" id="txt-BACKEND-5">Write the FastAPI dependency injection functions.
+
+FILE: apps/api/app/dependencies.py
+
+from fastapi import Depends, Header, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import AsyncGenerator
+from cachetools import TTLCache
+import jwt, httpx, hashlib
+
+from app.db.session import AsyncSessionLocal
+from app.models.user import User
+from app.models.api_key import ApiKey
+from app.config import settings
+
+# 1. DB Session dependency
+async def get_db() -&gt; AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+
+# 2. JWKS cache (refresh every hour)
+_jwks_cache: TTLCache = TTLCache(maxsize=1, ttl=3600)
+
+async def _get_jwks() -&gt; dict:
+    if &quot;jwks&quot; not in _jwks_cache:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(settings.CLERK_JWKS_URL)
+            resp.raise_for_status()
+            _jwks_cache[&quot;jwks&quot;] = resp.json()
+    return _jwks_cache[&quot;jwks&quot;]
+
+# 3. Verify Clerk JWT
+async def verify_clerk_token(authorization: str = Header(...)) -&gt; str:
+    if not authorization.startswith(&quot;Bearer &quot;):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;Invalid authorization header&quot;)
+    token = authorization.split(&quot; &quot;, 1)[1]
+    try:
+        jwks = await _get_jwks()
+        header = jwt.get_unverified_header(token)
+        # Find matching key by kid
+        key_data = next((k for k in jwks[&quot;keys&quot;] if k[&quot;kid&quot;] == header.get(&quot;kid&quot;)), None)
+        if not key_data:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;Unknown signing key&quot;)
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(key_data)
+        payload = jwt.decode(token, public_key, algorithms=[&quot;RS256&quot;],
+                             options={&quot;verify_aud&quot;: False})
+        return payload[&quot;sub&quot;]  # clerk_id
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;Token expired&quot;)
+    except Exception:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;Invalid token&quot;)
+
+# 4. Get current user from DB
+async def get_current_user(
+    db: AsyncSession = Depends(get_db),
+    clerk_id: str = Depends(verify_clerk_token),
+) -&gt; User:
+    result = await db.execute(select(User).where(User.clerk_id == clerk_id, User.is_active == True))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;User not found. Please re-authenticate.&quot;)
+    return user
+
+# 5. Optional auth (for public pages)
+async def get_current_user_optional(
+    db: AsyncSession = Depends(get_db),
+    authorization: str = Header(default=&quot;&quot;),
+) -&gt; User | None:
+    if not authorization.startswith(&quot;Bearer &quot;):
+        return None
+    try:
+        clerk_id = await verify_clerk_token(authorization)
+        result = await db.execute(select(User).where(User.clerk_id == clerk_id))
+        return result.scalar_one_or_none()
+    except Exception:
+        return None
+
+# 6. Plan rank enforcer
+PLAN_RANK = {&quot;free&quot;: 0, &quot;pro&quot;: 1, &quot;creator&quot;: 2, &quot;institution&quot;: 3}
+
+def require_plan(required: str):
+    async def check(user: User = Depends(get_current_user)):
+        if PLAN_RANK.get(user.plan, 0) &lt; PLAN_RANK.get(required, 0):
+            raise HTTPException(
+                status.HTTP_402_PAYMENT_REQUIRED,
+                detail={&quot;error&quot;: &quot;upgrade_required&quot;, &quot;required_plan&quot;: required, &quot;upgrade_url&quot;: &quot;/pricing&quot;}
+            )
+        return user
+    return check
+
+# 7. API key auth for /v1/* routes
+async def check_api_key(
+    db: AsyncSession = Depends(get_db),
+    authorization: str = Header(...),
+) -&gt; User:
+    if not authorization.startswith(&quot;Bearer tc_live_&quot;):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;Invalid API key format&quot;)
+    raw_key = authorization.split(&quot; &quot;, 1)[1]
+    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+    result = await db.execute(
+        select(ApiKey).where(ApiKey.key_hash == key_hash, ApiKey.is_active == True)
+    )
+    api_key = result.scalar_one_or_none()
+    if not api_key:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;Invalid or revoked API key&quot;)
+    from sqlalchemy import update
+    from datetime import datetime
+    await db.execute(
+        update(ApiKey).where(ApiKey.id == api_key.user_id)
+        .values(last_used_at=datetime.utcnow(), requests_today=ApiKey.requests_today + 1)
+    )
+    user_result = await db.execute(select(User).where(User.id == api_key.user_id))
+    user = user_result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, &quot;User not found&quot;)
+    return user</div>
+  </div>
+</div>
+<div class="pcard" id="card-BACKEND-6">
+  <div class="pcard-hdr" onclick="toggle('BACKEND-6')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(255,213,79,0.1);color:#FFD54F;border:1px solid rgba(255,213,79,0.3)">BACKEND-6</span>
+      <span class="ptitle">apps/api/app/worker/__init__.py + requirements.txt</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-BACKEND-6" onclick="cp('BACKEND-6',event)">Copy</button>
+      <span class="tog" id="tog-BACKEND-6">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-BACKEND-6">
+    <div class="pcode" id="txt-BACKEND-6">Write the Celery app and requirements.
+
+FILE: apps/api/app/worker/__init__.py
+
+from celery import Celery
+from app.config import settings
+
+celery_app = Celery(
+    &quot;teachclone&quot;,
+    broker=settings.REDIS_URL,
+    backend=settings.REDIS_URL,
+    include=[
+        &quot;app.tasks.media_tasks&quot;,
+        &quot;app.tasks.embedding_tasks&quot;,
+        &quot;app.tasks.style_tasks&quot;,
+        &quot;app.tasks.vision_tasks&quot;,
+    ],
+)
+
+celery_app.conf.update(
+    task_serializer=&quot;json&quot;,
+    accept_content=[&quot;json&quot;],
+    result_serializer=&quot;json&quot;,
+    timezone=&quot;UTC&quot;,
+    enable_utc=True,
+    task_track_started=True,
+    task_acks_late=True,
+    worker_prefetch_multiplier=1,
+    task_routes={
+        &quot;media.*&quot;: {&quot;queue&quot;: &quot;media&quot;},
+        &quot;ai.*&quot;: {&quot;queue&quot;: &quot;ai&quot;},
+    },
+    task_default_queue=&quot;default&quot;,
+    task_soft_time_limit=1800,  # 30 min soft limit
+    task_time_limit=2400,       # 40 min hard limit
+)
+
+FILE: apps/api/requirements.txt
+Write the complete requirements.txt with pinned versions:
+
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# Data validation
+pydantic==2.7.1
+pydantic-settings==2.2.1
+email-validator==2.1.1
+
+# Database
+sqlalchemy[asyncio]==2.0.30
+asyncpg==0.29.0
+alembic==1.13.1
+
+# Cache / Queue
+celery[redis]==5.4.0
+redis==5.0.4
+cachetools==5.3.3
+
+# AI - LLM
+anthropic==0.28.0
+openai==1.30.0
+
+# AI - Transcription
+faster-whisper==1.0.0
+
+# AI - Vector DB
+qdrant-client==1.9.1
+
+# Media processing
+yt-dlp==2024.8.6
+ffmpeg-python==0.2.0
+
+# NLP
+textstat==0.7.3
+nltk==3.8.1
+
+# Storage (R2/S3)
+boto3==1.34.0
+
+# Auth
+PyJWT[crypto]==2.8.0
+cryptography==42.0.5
+svix==1.21.0
+
+# Payments
+stripe==9.9.0
+
+# PDF export
+reportlab==4.2.0
+
+# Email
+resend==2.0.0
+
+# Monitoring
+sentry-sdk[fastapi]==2.5.0
+structlog==24.1.0
+
+# HTTP client
+httpx==0.27.0
+
+# Dev / Test
+pytest==8.2.0
+pytest-asyncio==0.23.7
+ruff==0.4.4
+mypy==1.10.0</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-1">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-1</span>
+      <span class="ptitle">apps/api/app/services/storage.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-1" onclick="cp('SERVICES-1',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-1">
+    <div class="pcode" id="txt-SERVICES-1">Write the Cloudflare R2 storage service.
+
+FILE: apps/api/app/services/storage.py
+
+import boto3, uuid
+from botocore.config import Config
+from app.config import settings
+
+class StorageService:
+    def __init__(self):
+        self.client = boto3.client(
+            &quot;s3&quot;,
+            endpoint_url=settings.r2_endpoint,
+            aws_access_key_id=settings.R2_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
+            config=Config(signature_version=&quot;s3v4&quot;),
+            region_name=&quot;auto&quot;,
+        )
+        self.bucket = settings.R2_BUCKET_NAME
+
+    def generate_key(self, user_id: str, profile_id: str, filename: str) -&gt; str:
+        ext = filename.rsplit(&quot;.&quot;, 1)[-1] if &quot;.&quot; in filename else &quot;bin&quot;
+        return f&quot;media/{user_id}/{profile_id}/{uuid.uuid4()}.{ext}&quot;
+
+    def generate_presigned_upload_url(self, key: str, content_type: str, expires: int = 900) -&gt; str:
+        return self.client.generate_presigned_url(
+            &quot;put_object&quot;,
+            Params={&quot;Bucket&quot;: self.bucket, &quot;Key&quot;: key, &quot;ContentType&quot;: content_type},
+            ExpiresIn=expires, HttpMethod=&quot;PUT&quot;,
+        )
+
+    def generate_presigned_download_url(self, key: str, expires: int = 86400) -&gt; str:
+        return self.client.generate_presigned_url(
+            &quot;get_object&quot;,
+            Params={&quot;Bucket&quot;: self.bucket, &quot;Key&quot;: key},
+            ExpiresIn=expires,
+        )
+
+    def object_exists(self, key: str) -&gt; bool:
+        try:
+            self.client.head_object(Bucket=self.bucket, Key=key)
+            return True
+        except Exception:
+            return False
+
+    def delete_object(self, key: str) -&gt; bool:
+        try:
+            self.client.delete_object(Bucket=self.bucket, Key=key)
+            return True
+        except Exception:
+            return False
+
+    def download_to_path(self, key: str, local_path: str) -&gt; None:
+        self.client.download_file(self.bucket, key, local_path)
+
+    def upload_bytes(self, key: str, data: bytes, content_type: str) -&gt; str:
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, ContentType=content_type)
+        return f&quot;{settings.R2_PUBLIC_URL}/{key}&quot;
+
+storage_service = StorageService()</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-2">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-2')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-2</span>
+      <span class="ptitle">apps/api/app/services/audio_extractor.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-2" onclick="cp('SERVICES-2',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-2">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-2">
+    <div class="pcode" id="txt-SERVICES-2">Write the audio extraction service using yt-dlp and FFmpeg.
+
+FILE: apps/api/app/services/audio_extractor.py
+
+import asyncio, os, json
+from pathlib import Path
+
+class AudioExtractor:
+    async def from_youtube_url(self, url: str, output_dir: str) -&gt; str:
+        &quot;&quot;&quot;Download YouTube audio as WAV. Returns path to .wav file.&quot;&quot;&quot;
+        template = os.path.join(output_dir, &quot;%(id)s.%(ext)s&quot;)
+        cmd = [
+            &quot;yt-dlp&quot;, &quot;--format&quot;, &quot;bestaudio/best&quot;,
+            &quot;--extract-audio&quot;, &quot;--audio-format&quot;, &quot;wav&quot;, &quot;--audio-quality&quot;, &quot;0&quot;,
+            &quot;--no-playlist&quot;, &quot;--quiet&quot;, &quot;--no-warnings&quot;,
+            &quot;--output&quot;, template, url,
+        ]
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        _, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(f&quot;yt-dlp failed: {stderr.decode()[:500]}&quot;)
+        wavs = list(Path(output_dir).glob(&quot;*.wav&quot;))
+        if not wavs:
+            raise RuntimeError(&quot;No WAV output from yt-dlp&quot;)
+        return str(wavs[0])
+
+    async def from_video_file(self, input_path: str, output_dir: str) -&gt; str:
+        &quot;&quot;&quot;Extract mono 16kHz WAV from video file using ffmpeg.&quot;&quot;&quot;
+        output_path = os.path.join(output_dir, &quot;audio.wav&quot;)
+        cmd = [
+            &quot;ffmpeg&quot;, &quot;-i&quot;, input_path, &quot;-vn&quot;,
+            &quot;-acodec&quot;, &quot;pcm_s16le&quot;, &quot;-ar&quot;, &quot;16000&quot;, &quot;-ac&quot;, &quot;1&quot;, &quot;-y&quot;, output_path,
+        ]
+        proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE)
+        _, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(f&quot;ffmpeg failed: {stderr.decode()[:500]}&quot;)
+        return output_path
+
+    async def get_duration(self, file_path: str) -&gt; float:
+        &quot;&quot;&quot;Get media duration in seconds via ffprobe.&quot;&quot;&quot;
+        cmd = [&quot;ffprobe&quot;, &quot;-v&quot;, &quot;quiet&quot;, &quot;-print_format&quot;, &quot;json&quot;, &quot;-show_streams&quot;, file_path]
+        proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, _ = await proc.communicate()
+        try:
+            data = json.loads(stdout)
+            for stream in data.get(&quot;streams&quot;, []):
+                if &quot;duration&quot; in stream:
+                    return float(stream[&quot;duration&quot;])
+        except Exception:
+            pass
+        return 0.0
+
+audio_extractor = AudioExtractor()</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-3">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-3')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-3</span>
+      <span class="ptitle">apps/api/app/services/transcriber.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-3" onclick="cp('SERVICES-3',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-3">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-3">
+    <div class="pcode" id="txt-SERVICES-3">Write the faster-whisper transcription service.
+
+FILE: apps/api/app/services/transcriber.py
+
+import threading
+from dataclasses import dataclass
+from faster_whisper import WhisperModel
+from app.config import settings
+
+@dataclass
+class TranscriptChunkData:
+    text: str
+    start_time: float
+    end_time: float
+    speaker_label: str | None
+    chunk_index: int
+    token_count: int
+
+_model: WhisperModel | None = None
+_lock = threading.Lock()
+
+def get_model() -&gt; WhisperModel:
+    global _model
+    if _model is None:
+        with _lock:
+            if _model is None:
+                _model = WhisperModel(
+                    settings.WHISPER_MODEL,
+                    device=settings.WHISPER_DEVICE,
+                    compute_type=settings.WHISPER_COMPUTE_TYPE,
+                )
+    return _model
+
+class Transcriber:
+    MAX_TOKENS = 400
+    OVERLAP_WORDS = 12
+    WORDS_PER_TOKEN = 0.75  # conservative estimate
+
+    def transcribe(self, audio_path: str) -&gt; list[TranscriptChunkData]:
+        model = get_model()
+        segments, _ = model.transcribe(
+            audio_path, beam_size=5, language=None,
+            word_timestamps=False, vad_filter=True,
+            vad_parameters={&quot;min_silence_duration_ms&quot;: 500},
+        )
+        return self._segments_to_chunks(list(segments))
+
+    def _segments_to_chunks(self, segments) -&gt; list[TranscriptChunkData]:
+        chunks = []
+        current_words: list[str] = []
+        current_start = 0.0
+        current_end = 0.0
+        idx = 0
+
+        for seg in segments:
+            words = seg.text.strip().split()
+            if not words:
+                continue
+            if not current_words:
+                current_start = seg.start
+
+            est_tokens = len(current_words) / self.WORDS_PER_TOKEN
+            seg_tokens = len(words) / self.WORDS_PER_TOKEN
+
+            if est_tokens + seg_tokens &gt; self.MAX_TOKENS and current_words:
+                # Save chunk
+                chunks.append(TranscriptChunkData(
+                    text=&quot; &quot;.join(current_words), start_time=current_start,
+                    end_time=seg.start, speaker_label=None, chunk_index=idx,
+                    token_count=int(est_tokens),
+                ))
+                idx += 1
+                # Overlap
+                overlap = current_words[-self.OVERLAP_WORDS:]
+                current_words = overlap + words
+                current_start = seg.start
+            else:
+                current_words.extend(words)
+            current_end = seg.end
+
+        if current_words:
+            chunks.append(TranscriptChunkData(
+                text=&quot; &quot;.join(current_words), start_time=current_start,
+                end_time=current_end, speaker_label=None, chunk_index=idx,
+                token_count=int(len(current_words) / self.WORDS_PER_TOKEN),
+            ))
+        return chunks
+
+transcriber = Transcriber()</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-4">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-4')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-4</span>
+      <span class="ptitle">apps/api/app/services/embedder.py + vector_store.py + retrieval.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-4" onclick="cp('SERVICES-4',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-4">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-4">
+    <div class="pcode" id="txt-SERVICES-4">Write the embedding and vector search services.
+
+FILE: apps/api/app/services/embedder.py
+
+import numpy as np
+from openai import AsyncOpenAI
+from app.config import settings
+
+class Embedder:
+    BATCH = 100
+
+    def __init__(self):
+        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+
+    async def embed_texts(self, texts: list[str]) -&gt; list[list[float]]:
+        results = []
+        for i in range(0, len(texts), self.BATCH):
+            batch = [t.replace(&quot;\n&quot;, &quot; &quot;).strip() for t in texts[i:i+self.BATCH]]
+            resp = await self.client.embeddings.create(
+                model=settings.OPENAI_EMBEDDING_MODEL,
+                input=batch,
+                dimensions=settings.OPENAI_EMBEDDING_DIM,
+            )
+            results.extend(item.embedding for item in resp.data)
+        return results
+
+    async def embed_single(self, text: str) -&gt; list[float]:
+        return (await self.embed_texts([text]))[0]
+
+    def compute_sparse_vector(self, text: str) -&gt; dict[int, float]:
+        words = text.lower().split()
+        freq: dict[str, int] = {}
+        for w in words:
+            w = w.strip(&quot;.,!?;:\&quot;&#x27;()[]{}&quot;)
+            if len(w) &gt; 2:
+                freq[w] = freq.get(w, 0) + 1
+        result = {}
+        total = max(len(words), 1)
+        for word, count in freq.items():
+            idx = abs(hash(word)) % 100_000
+            tf = count / total
+            result[idx] = round(tf * (1 + np.log(count + 1)), 4)
+        return result
+
+embedder = Embedder()
+
+FILE: apps/api/app/services/vector_store.py
+
+from dataclasses import dataclass
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.models import (
+    VectorParams, Distance, SparseVectorParams, PointStruct,
+    Filter, FieldCondition, MatchValue, SparseVector,
+    NamedVector, NamedSparseVector, HnswConfigDiff, OptimizersConfigDiff,
+)
+from app.config import settings
+
+@dataclass
+class ChunkPoint:
+    id: str
+    dense_vector: list[float]
+    sparse_vector: dict[int, float]
+    payload: dict
+
+@dataclass
+class SearchResult:
+    id: str
+    score: float
+    text: str
+    start_time: float
+    end_time: float
+    media_source_id: str
+    content_type: str
+
+class VectorStore:
+    COLLECTION = settings.QDRANT_COLLECTION
+    DIM = settings.OPENAI_EMBEDDING_DIM
+
+    def __init__(self):
+        self.client = AsyncQdrantClient(url=settings.QDRANT_URL)
+
+    async def ensure_collection(self):
+        existing = [c.name for c in (await self.client.get_collections()).collections]
+        if self.COLLECTION in existing:
+            return
+        await self.client.create_collection(
+            collection_name=self.COLLECTION,
+            vectors_config={&quot;dense&quot;: VectorParams(size=self.DIM, distance=Distance.COSINE)},
+            sparse_vectors_config={&quot;sparse&quot;: SparseVectorParams()},
+            hnsw_config=HnswConfigDiff(m=16, ef_construct=100),
+            optimizers_config=OptimizersConfigDiff(indexing_threshold=20000),
+        )
+        for field, schema in [(&quot;teacher_profile_id&quot;,&quot;keyword&quot;),(&quot;media_source_id&quot;,&quot;keyword&quot;),
+                               (&quot;content_type&quot;,&quot;keyword&quot;),(&quot;start_time&quot;,&quot;float&quot;)]:
+            await self.client.create_payload_index(self.COLLECTION, field, schema)
+
+    async def upsert_chunks(self, chunks: list[ChunkPoint]) -&gt; int:
+        BATCH = 100
+        total = 0
+        for i in range(0, len(chunks), BATCH):
+            batch = chunks[i:i+BATCH]
+            points = []
+            for c in batch:
+                idxs = list(c.sparse_vector.keys())
+                vals = list(c.sparse_vector.values())
+                points.append(PointStruct(
+                    id=c.id,
+                    vector={&quot;dense&quot;: c.dense_vector, &quot;sparse&quot;: SparseVector(indices=idxs, values=vals)},
+                    payload=c.payload,
+                ))
+            await self.client.upsert(collection_name=self.COLLECTION, points=points)
+            total += len(points)
+        return total
+
+    async def hybrid_search(self, query_dense: list[float], query_sparse: dict[int,float],
+                             teacher_profile_id: str, top_k: int = 8) -&gt; list[SearchResult]:
+        filt = Filter(must=[FieldCondition(key=&quot;teacher_profile_id&quot;, match=MatchValue(value=teacher_profile_id))])
+        dense_res = await self.client.search(self.COLLECTION,
+            query_vector=NamedVector(name=&quot;dense&quot;, vector=query_dense), query_filter=filt, limit=top_k*2)
+        sparse_res = await self.client.search(self.COLLECTION,
+            query_vector=NamedSparseVector(name=&quot;sparse&quot;,
+                vector=SparseVector(indices=list(query_sparse.keys()), values=list(query_sparse.values()))),
+            query_filter=filt, limit=top_k*2)
+        # RRF merge k=60
+        scores: dict[str, float] = {}
+        for rank, hit in enumerate(dense_res):
+            scores[str(hit.id)] = scores.get(str(hit.id), 0) + 1/(61+rank)
+        for rank, hit in enumerate(sparse_res):
+            scores[str(hit.id)] = scores.get(str(hit.id), 0) + 1/(61+rank)
+        all_hits = {str(h.id): h for h in dense_res + sparse_res}
+        top_ids = sorted(scores, key=scores.__getitem__, reverse=True)[:top_k]
+        results = []
+        for pid in top_ids:
+            h = all_hits.get(pid)
+            if h:
+                p = h.payload or {}
+                results.append(SearchResult(id=pid, score=scores[pid], text=p.get(&quot;text&quot;,&quot;&quot;),
+                    start_time=p.get(&quot;start_time&quot;,0), end_time=p.get(&quot;end_time&quot;,0),
+                    media_source_id=p.get(&quot;media_source_id&quot;,&quot;&quot;), content_type=p.get(&quot;content_type&quot;,&quot;audio&quot;)))
+        return results
+
+    async def delete_by_media_source(self, media_source_id: str):
+        await self.client.delete(self.COLLECTION,
+            points_selector=Filter(must=[FieldCondition(key=&quot;media_source_id&quot;, match=MatchValue(value=media_source_id))]))
+
+vector_store = VectorStore()
+
+FILE: apps/api/app/services/retrieval.py
+
+from app.services.embedder import embedder
+from app.services.vector_store import vector_store, SearchResult
+
+async def retrieve_context(query: str, teacher_profile_id: str, top_k: int = 8) -&gt; list[SearchResult]:
+    dense = await embedder.embed_single(query)
+    sparse = embedder.compute_sparse_vector(query)
+    return await vector_store.hybrid_search(dense, sparse, teacher_profile_id, top_k)
+
+def format_context_chunks(results: list[SearchResult]) -&gt; str:
+    if not results:
+        return &quot;(No relevant content found in knowledge base)&quot;
+    lines = []
+    for i, r in enumerate(results, 1):
+        m, s = int(r.start_time//60), int(r.start_time%60)
+        lines.append(f&quot;[{i}] \u23f1{m}:{s:02d} \u2014 {r.text.strip()}&quot;)
+    return &quot;\n&quot;.join(lines)</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-5">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-5')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-5</span>
+      <span class="ptitle">apps/api/app/services/style_extractor.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-5" onclick="cp('SERVICES-5',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-5">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-5">
+    <div class="pcode" id="txt-SERVICES-5">Write the teacher style extraction service.
+
+FILE: apps/api/app/services/style_extractor.py
+
+import re, json
+from collections import Counter
+from anthropic import AsyncAnthropic
+from app.config import settings
+
+ANALOGY_PATTERN = re.compile(
+    r&quot;\b(like|imagine|think of|similar to|just as|as if|picture this|consider|analogous|metaphor|kind of like)\b&quot;,
+    re.IGNORECASE
+)
+
+class StyleExtractor:
+    def __init__(self):
+        self.claude = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+    async def extract(self, chunks) -&gt; dict:
+        full_text = &quot; &quot;.join(c.text for c in chunks)
+        words = full_text.split()
+        if not words:
+            return self._default_profile()
+
+        sentences = [s.strip() for s in re.split(r&quot;[.!?]+&quot;, full_text) if len(s.strip()) &gt; 10]
+        avg_sentence_length = len(words) / max(len(sentences), 1)
+        analogy_density = len(ANALOGY_PATTERN.findall(full_text)) / max(len(words)/1000, 0.1)
+        use_of_questions = full_text.count(&quot;?&quot;) / max(len(words)/1000, 0.1)
+
+        # Signature phrases (3-grams and 4-grams, filtered for meaningfulness)
+        tokens = [w.lower().strip(&quot;.,!?;:&#x27;\&quot;&quot;) for w in words if len(w) &gt; 1]
+        ngrams = [&quot; &quot;.join(tokens[i:i+3]) for i in range(len(tokens)-2)]
+        ngrams += [&quot; &quot;.join(tokens[i:i+4]) for i in range(len(tokens)-3)]
+        stop_starts = (&quot;the &quot;,&quot;and &quot;,&quot;but &quot;,&quot;so &quot;,&quot;in &quot;,&quot;of &quot;,&quot;to &quot;,&quot;a &quot;,&quot;that &quot;,&quot;this &quot;,&quot;it &quot;,&quot;we &quot;,&quot;you &quot;,&quot;i &quot;)
+        counter = Counter(ngrams)
+        sig = [p for p,_ in counter.most_common(40)
+               if not any(p.startswith(s) for s in stop_starts) and counter[p] &gt;= 2][:8]
+
+        # Vocabulary sample (distinctive non-stopword words)
+        STOP = {&quot;the&quot;,&quot;a&quot;,&quot;an&quot;,&quot;and&quot;,&quot;or&quot;,&quot;but&quot;,&quot;in&quot;,&quot;on&quot;,&quot;at&quot;,&quot;to&quot;,&quot;for&quot;,&quot;of&quot;,&quot;with&quot;,&quot;by&quot;,
+                &quot;from&quot;,&quot;is&quot;,&quot;was&quot;,&quot;are&quot;,&quot;were&quot;,&quot;be&quot;,&quot;been&quot;,&quot;have&quot;,&quot;has&quot;,&quot;had&quot;,&quot;do&quot;,&quot;does&quot;,&quot;did&quot;,
+                &quot;will&quot;,&quot;would&quot;,&quot;could&quot;,&quot;should&quot;,&quot;may&quot;,&quot;might&quot;,&quot;this&quot;,&quot;that&quot;,&quot;these&quot;,&quot;those&quot;,
+                &quot;i&quot;,&quot;you&quot;,&quot;he&quot;,&quot;she&quot;,&quot;it&quot;,&quot;we&quot;,&quot;they&quot;,&quot;what&quot;,&quot;how&quot;,&quot;why&quot;,&quot;when&quot;,&quot;where&quot;}
+        word_freq = Counter(w.lower().strip(&quot;.,!?;:&#x27;\&quot;()[]{}&quot;) for w in words if len(w) &gt; 3)
+        vocab = [w for w,_ in word_freq.most_common(60) if w not in STOP][:10]
+
+        # Vocab complexity from average word length
+        avg_wl = sum(len(w) for w in words)/max(len(words),1)
+        vocab_score = round(max(1, min(18, avg_wl * 1.9 + avg_sentence_length * 0.06)), 1)
+
+        # LLM classification on first 5000 chars
+        llm = await self._llm_classify(full_text[:5000])
+
+        return {
+            &quot;vocabulary_level&quot;: self._to_level(vocab_score),
+            &quot;vocabulary_score&quot;: vocab_score,
+            &quot;avg_sentence_length&quot;: round(avg_sentence_length, 1),
+            &quot;analogy_density&quot;: round(analogy_density, 2),
+            &quot;use_of_questions&quot;: round(use_of_questions, 2),
+            &quot;signature_phrases&quot;: sig,
+            &quot;vocabulary_samples&quot;: vocab,
+            **llm,
+        }
+
+    def _to_level(self, score: float) -&gt; str:
+        if score &lt; 6: return &quot;elementary&quot;
+        if score &lt; 10: return &quot;intermediate&quot;
+        if score &lt; 14: return &quot;advanced&quot;
+        return &quot;technical&quot;
+
+    async def _llm_classify(self, text: str) -&gt; dict:
+        prompt = f&quot;&quot;&quot;Analyze this educational transcript and return ONLY a valid JSON object, no markdown.
+
+TRANSCRIPT:
+{text}
+
+Return exactly:
+{{
+  &quot;tone_type&quot;: &quot;friendly|strict|socratic|storytelling|energetic|calm&quot;,
+  &quot;tone_confidence&quot;: 0.85,
+  &quot;explanation_pattern&quot;: &quot;analogy_first|example_first|theory_first|problem_first|narrative&quot;,
+  &quot;use_of_humor&quot;: 0.2,
+  &quot;pacing&quot;: &quot;slow|moderate|fast&quot;,
+  &quot;explanation_depth&quot;: &quot;surface|moderate|deep&quot;,
+  &quot;raw_analysis&quot;: &quot;2-3 sentence description of this teacher unique style and what makes them effective&quot;
+}}&quot;&quot;&quot;
+        try:
+            msg = await self.claude.messages.create(
+                model=settings.ANTHROPIC_MODEL, max_tokens=500,
+                messages=[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:prompt}]
+            )
+            return json.loads(msg.content[0].text)
+        except Exception:
+            return self._default_llm()
+
+    def _default_profile(self) -&gt; dict:
+        return {**{&quot;vocabulary_level&quot;:&quot;intermediate&quot;,&quot;vocabulary_score&quot;:8.0,
+                   &quot;avg_sentence_length&quot;:15.0,&quot;analogy_density&quot;:0.2,&quot;use_of_questions&quot;:1.0,
+                   &quot;signature_phrases&quot;:[],&quot;vocabulary_samples&quot;:[]}, **self._default_llm()}
+
+    def _default_llm(self) -&gt; dict:
+        return {&quot;tone_type&quot;:&quot;friendly&quot;,&quot;tone_confidence&quot;:0.5,&quot;explanation_pattern&quot;:&quot;example_first&quot;,
+                &quot;use_of_humor&quot;:0.1,&quot;pacing&quot;:&quot;moderate&quot;,&quot;explanation_depth&quot;:&quot;moderate&quot;,
+                &quot;raw_analysis&quot;:&quot;Teaching style analysis unavailable.&quot;}
+
+    def merge_profiles(self, existing: dict | None, new: dict) -&gt; dict:
+        if not existing:
+            return new
+        merged = {**new}
+        for k in [&quot;vocabulary_score&quot;,&quot;avg_sentence_length&quot;,&quot;analogy_density&quot;,&quot;use_of_questions&quot;,&quot;use_of_humor&quot;]:
+            if k in existing and k in new:
+                merged[k] = round((existing[k] + new[k]) / 2, 2)
+        phrases = list(dict.fromkeys(existing.get(&quot;signature_phrases&quot;,[]) + new.get(&quot;signature_phrases&quot;,[])))
+        merged[&quot;signature_phrases&quot;] = phrases[:10]
+        return merged
+
+style_extractor = StyleExtractor()</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-6">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-6')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-6</span>
+      <span class="ptitle">apps/api/app/services/prompt_builder.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-6" onclick="cp('SERVICES-6',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-6">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-6">
+    <div class="pcode" id="txt-SERVICES-6">Write the adaptive prompt builder — most critical service file.
+
+FILE: apps/api/app/services/prompt_builder.py
+
+LEVEL_INSTRUCTIONS: dict[str, str] = {
+    &quot;k5&quot;:          &quot;You are talking to a 10-year-old. Use extremely simple words. Very short sentences (under 10 words). Only everyday analogies (toys, sports, food). Zero jargon. Always show an example first.&quot;,
+    &quot;middle&quot;:      &quot;You are talking to a 13-year-old. Simple clear sentences. Relate to school subjects. Brief analogies. Explain every technical term you use immediately after using it.&quot;,
+    &quot;highschool&quot;:  &quot;Clear language for a 16-year-old. Technical terms are fine if briefly defined the first time. Use real-world examples relevant to young adults.&quot;,
+    &quot;undergrad&quot;:   &quot;University level. Assume basic domain knowledge. Use precise terminology but define specialized sub-field terms. Mention tradeoffs and caveats.&quot;,
+    &quot;masters&quot;:     &quot;Expert vocabulary assumed. Focus on nuance, edge cases, and depth. Compare approaches. Reference established work when relevant.&quot;,
+    &quot;professional&quot;:&quot;Peer-level communication. Dense and precise. Use jargon freely. Assume 5+ years hands-on experience. Be efficient.&quot;,
+}
+
+STYLE_INSTRUCTIONS: dict[str, str] = {
+    &quot;examples&quot;:    &quot;ALWAYS lead with a concrete real-world example before any theory. Make it specific and vivid.&quot;,
+    &quot;theory&quot;:      &quot;Lead with the underlying principle first. State the rule clearly. Then illustrate with examples.&quot;,
+    &quot;qa&quot;:          &quot;Engage Socratically. After every answer, ask one targeted follow-up question. Never give the full answer immediately.&quot;,
+    &quot;storytelling&quot;:&quot;Frame every explanation as a story. Setup (why it matters) -&gt; Conflict (the problem) -&gt; Resolution (the concept).&quot;,
+}
+
+TONE_STYLES: dict[str, str] = {
+    &quot;friendly&quot;:    &quot;Warm, encouraging, conversational. Use &#x27;you&#x27; and &#x27;we&#x27;. Celebrate progress.&quot;,
+    &quot;strict&quot;:      &quot;Precise and direct. No filler. Correct errors immediately. Hold high standards.&quot;,
+    &quot;socratic&quot;:    &quot;Never just give the answer. Ask guiding questions. Let the student discover.&quot;,
+    &quot;storytelling&quot;:&quot;Narrative voice. Use metaphors. Make the abstract feel alive.&quot;,
+    &quot;energetic&quot;:   &quot;High energy. Show genuine excitement. Use emphasis. Be contagious.&quot;,
+    &quot;calm&quot;:        &quot;Patient and measured. Never rush. Every question is valid.&quot;,
+}
+
+def build_system_prompt(teacher_profile, student_session, context_results, turn: int = 0) -&gt; str:
+    style = teacher_profile.style_profile or {}
+    student = student_session.student_profile or {}
+    level = student_session.current_effective_level or student.get(&quot;level&quot;, &quot;undergrad&quot;)
+    tone = style.get(&quot;tone_type&quot;, &quot;friendly&quot;)
+    pattern = style.get(&quot;explanation_pattern&quot;, &quot;example_first&quot;)
+    sig = style.get(&quot;signature_phrases&quot;, [])[:4]
+    analysis = style.get(&quot;raw_analysis&quot;, &quot;A knowledgeable educator.&quot;)
+    analogy = style.get(&quot;analogy_density&quot;, 0.2)
+    humor = style.get(&quot;use_of_humor&quot;, 0.1)
+
+    context_text = _format_context(context_results)
+    turn_note = &quot;&quot;
+    if turn == 0:
+        turn_note = &quot;\n[FIRST TURN: Be warm and brief. Acknowledge the student&#x27;s goal before diving in.]&quot;
+    elif turn &gt;= 10:
+        turn_note = f&quot;\n[TURN {turn}: Student is engaged and following well. Increase depth and nuance as appropriate.]&quot;
+
+    phrase_note = f&quot;Occasionally use phrases like: {&#x27;, &#x27;.join(repr(p) for p in sig)}&quot; if sig else &quot;&quot;
+    analogy_note = &quot;Aim for at least one analogy per explanation.&quot; if analogy &gt; 0.25 else &quot;Use analogies only when they genuinely clarify.&quot;
+    humor_note = &quot;Include light, natural humor.&quot; if humor &gt; 0.35 else &quot;&quot;
+
+    return f&quot;&quot;&quot;You are an AI teaching assistant embodying the style of {teacher_profile.name}.
+
+=== YOUR TEACHING IDENTITY ===
+{analysis}
+Tone: {TONE_STYLES.get(tone, TONE_STYLES[&quot;friendly&quot;])}
+Structure every explanation using: {STYLE_INSTRUCTIONS.get(pattern, STYLE_INSTRUCTIONS[&quot;examples&quot;])}
+{analogy_note}
+{humor_note}
+{phrase_note}
+
+=== STUDENT CONTEXT ==={turn_note}
+Level: {level.upper()} — {LEVEL_INSTRUCTIONS.get(level, LEVEL_INSTRUCTIONS[&quot;undergrad&quot;])}
+Learning preference: {STYLE_INSTRUCTIONS.get(student.get(&quot;learning_style&quot;,&quot;examples&quot;), STYLE_INSTRUCTIONS[&quot;examples&quot;])}
+Today&#x27;s goal: {student.get(&quot;goal&quot;,&quot;Learn from this content&quot;)}
+Prior knowledge: {student.get(&quot;prior_knowledge&quot;,&quot;Not specified&quot;)}
+
+=== REFERENCE KNOWLEDGE BASE ===
+Use ONLY the content below. If question is not covered, say &quot;The reference material doesn&#x27;t cover this directly — from general knowledge...&quot;
+{context_text}
+
+=== MANDATORY RULES ===
+1. Calibrate vocabulary to {level.upper()} level in every single sentence
+2. Follow the {pattern} structure every time
+3. Cite sources inline as [\u23f1 M:SS] when referencing specific content
+4. End with exactly ONE Socratic question (not a yes/no question)
+5. Max length: {&quot;2-3 short paragraphs&quot; if level in (&quot;k5&quot;,&quot;middle&quot;) else &quot;4-6 paragraphs&quot;}
+6. Never break character or say &quot;As an AI&quot;
+7. Never answer from outside the knowledge base without flagging it&quot;&quot;&quot;
+
+def _format_context(results) -&gt; str:
+    if not results:
+        return &quot;(No content retrieved)&quot;
+    lines = []
+    for i, r in enumerate(results, 1):
+        m, s = int(r.start_time//60), int(r.start_time%60)
+        lines.append(f&quot;[{i}] \u23f1{m}:{s:02d} \u2014 {r.text.strip()}&quot;)
+    return &quot;\n&quot;.join(lines)</div>
+  </div>
+</div>
+<div class="pcard" id="card-SERVICES-7">
+  <div class="pcard-hdr" onclick="toggle('SERVICES-7')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(6,182,212,0.1);color:#06B6D4;border:1px solid rgba(6,182,212,0.3)">SERVICES-7</span>
+      <span class="ptitle">apps/api/app/services/quiz_generator.py + session_summarizer.py + export_service.py + tts_service.py + billing.py + gamification.py + api_keys.py + email.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-SERVICES-7" onclick="cp('SERVICES-7',event)">Copy</button>
+      <span class="tog" id="tog-SERVICES-7">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-SERVICES-7">
+    <div class="pcode" id="txt-SERVICES-7">Write all remaining service files.
+
+FILE: apps/api/app/services/quiz_generator.py
+Implement QuizGenerator class with:
+- async generate(teacher_profile_id, student_profile, topic, num_questions, context_text) -&gt; dict
+  Calls Claude with detailed prompt requesting JSON with MCQ/TF/ShortAnswer questions
+  Mix: 60% MCQ, 20% TF, 20% short_answer
+  Returns parsed JSON dict
+- async grade_short_answer(question, student_answer, level) -&gt; dict
+  Returns {score: float, is_correct: bool, feedback: str}
+- grade_objective(question, student_answer) -&gt; dict
+  Returns {score, is_correct, correct_answer, feedback}
+Singleton: quiz_generator = QuizGenerator()
+
+FILE: apps/api/app/services/session_summarizer.py
+Implement async summarize_session(db, session_id) -&gt; dict:
+- Fetch all messages for session (ordered)
+- Fetch quiz results if any
+- Call Claude with structured prompt requesting JSON:
+  {overview, key_concepts[], definitions[{term,definition}], takeaways[], questions_to_explore[], quiz_score, topics_to_review[]}
+- Return dict matching SessionSummary type
+
+FILE: apps/api/app/services/export_service.py
+Implement:
+- async export_as_pdf(session, summary: dict) -&gt; bytes
+  Use reportlab to build PDF:
+  - Header: TeachClone logo text + teacher name + date
+  - Section: Session Overview (summary.overview)
+  - Section: Key Concepts (bullet list)
+  - Section: Important Definitions (two-column table)
+  - Section: Key Takeaways (numbered list)
+  - Section: Follow-up Questions
+  - Footer with session_id and generation date
+  Returns PDF bytes
+
+- async export_as_markdown(session, summary: dict) -&gt; str
+  Returns clean Markdown with YAML frontmatter:
+  ---
+  teacher: profile_name
+  date: ISO date
+  level: student level
+  session_id: uuid
+  ---
+  # Session Notes: [overview first sentence]
+  ... sections with ## headers
+
+FILE: apps/api/app/services/tts_service.py
+Implement:
+- async synthesize(text: str, voice: str = &quot;nova&quot;) -&gt; bytes
+  Strip markdown (**/*, #, [⏱...]) from text
+  Split into sentences (max 4096 chars per API call)
+  Call OpenAI TTS API for each chunk
+  Concatenate MP3 bytes and return
+
+FILE: apps/api/app/services/billing.py
+Implement BillingService with:
+- get_plan_limits(plan: str) -&gt; dict
+  Returns limits dict for each plan:
+  free: {videos_per_month:3, messages_per_day:50, sessions:10, exports_per_month:2, quizzes_per_month:5}
+  pro: {videos_per_month:20, messages_per_day:500, sessions:999, exports_per_month:999, quizzes_per_month:999}
+  creator: {videos_per_month:999, ...all unlimited}
+  institution: same as creator
+- async create_checkout_session(user, price_id, success_url, cancel_url) -&gt; str
+  Use stripe.checkout.Session.create() with mode=&quot;subscription&quot;
+  Return checkout URL
+- async create_portal_session(user, return_url) -&gt; str
+  Use stripe.billing_portal.Session.create()
+  Return portal URL
+- async check_quota(db, user, event_type) -&gt; tuple[bool, str]
+  Check usage_logs for current billing_period
+  Return (allowed, reason)
+Singleton: billing_service = BillingService()
+
+FILE: apps/api/app/services/gamification.py
+Write the complete gamification service (already defined in previous session, reproduce in full):
+XP_EVENTS dict, BADGE_DEFINITIONS dict with lambda conditions,
+async award_xp(db, user_id, event_type, multiplier) -&gt; GamificationResult
+All badge checking logic, streak calculation, level-up detection.
+from app.models.user_stats import UserStats
+from app.models.user_badge import UserBadge
+
+FILE: apps/api/app/services/api_keys.py
+Implement:
+- generate_api_key() -&gt; tuple[str, str, str]
+  Returns (full_key, key_hash, key_prefix)
+  full_key format: &quot;tc_live_{urlsafe_b64(32 random bytes)}&quot;
+  key_hash: hashlib.sha256(full_key.encode()).hexdigest()
+  key_prefix: full_key[:16]
+- async create_api_key(db, user_id, name) -&gt; tuple[ApiKey, str]
+  Creates DB record, returns (db_record, full_key_shown_once)
+- async revoke_api_key(db, key_id, user_id) -&gt; bool
+
+FILE: apps/api/app/services/email.py
+Implement using resend Python SDK:
+- async send_invitation_email(to_email, inviter_name, org_name, role, invitation_url) -&gt; bool
+  HTML email with org name, inviter, role, big CTA button, 7-day expiry notice</div>
+  </div>
+</div>
+<div class="pcard" id="card-TASKS-1">
+  <div class="pcard-hdr" onclick="toggle('TASKS-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(16,185,129,0.1);color:#10B981;border:1px solid rgba(16,185,129,0.3)">TASKS-1</span>
+      <span class="ptitle">apps/api/app/tasks/media_tasks.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-TASKS-1" onclick="cp('TASKS-1',event)">Copy</button>
+      <span class="tog" id="tog-TASKS-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-TASKS-1">
+    <div class="pcode" id="txt-TASKS-1">Write the media processing Celery tasks.
+
+FILE: apps/api/app/tasks/media_tasks.py
+
+import os, asyncio, tempfile
+from celery import chord
+from app.worker import celery_app
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+@celery_app.task(name=&quot;media.process_youtube&quot;, bind=True, max_retries=3, default_retry_delay=60)
+def process_youtube(self, media_source_id: str):
+    &quot;&quot;&quot;Download YouTube audio -&gt; transcribe -&gt; save chunks -&gt; trigger embed + frame analysis.&quot;&quot;&quot;
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.audio_extractor import audio_extractor
+    from app.services.transcriber import transcriber
+    from sqlalchemy import select
+    import datetime
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+            try:
+                source.status = &quot;processing&quot;
+                source.processing_started_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                with tempfile.TemporaryDirectory() as tmp:
+                    self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:15,&quot;stage&quot;:&quot;downloading&quot;})
+                    audio_path = await audio_extractor.from_youtube_url(source.original_url, tmp)
+                    source.duration_seconds = int(await audio_extractor.get_duration(audio_path))
+                    await db.commit()
+
+                    self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:40,&quot;stage&quot;:&quot;transcribing&quot;})
+                    chunks = transcriber.transcribe(audio_path)
+
+                self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:75,&quot;stage&quot;:&quot;saving&quot;})
+                db_chunks = [TranscriptChunk(
+                    media_source_id=source.id, chunk_index=c.chunk_index, text=c.text,
+                    start_time=c.start_time, end_time=c.end_time, token_count=c.token_count,
+                    content_type=&quot;audio&quot;,
+                ) for c in chunks]
+                db.add_all(db_chunks)
+                source.transcript_chunks = len(db_chunks)
+                source.status = &quot;completed&quot;
+                source.processing_completed_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:90,&quot;stage&quot;:&quot;queuing_ai&quot;})
+                from app.tasks.embedding_tasks import embed_and_store
+                from app.tasks.vision_tasks import analyze_frames
+                from app.tasks.style_tasks import extract_style
+                chord([embed_and_store.s(media_source_id), analyze_frames.s(media_source_id)])(
+                    extract_style.s(media_source_id=media_source_id)
+                )
+
+            except Exception as exc:
+                source.status = &quot;failed&quot;
+                source.error_message = str(exc)[:500]
+                await db.commit()
+                raise self.retry(exc=exc)
+
+    _run(_impl())
+
+
+@celery_app.task(name=&quot;media.process_uploaded_file&quot;, bind=True, max_retries=3, default_retry_delay=60)
+def process_uploaded_file(self, media_source_id: str):
+    &quot;&quot;&quot;Download from R2 -&gt; extract audio -&gt; transcribe -&gt; save chunks -&gt; trigger AI pipeline.&quot;&quot;&quot;
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.audio_extractor import audio_extractor
+    from app.services.storage import storage_service
+    from app.services.transcriber import transcriber
+    from sqlalchemy import select
+    import datetime
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+            try:
+                source.status = &quot;processing&quot;
+                source.processing_started_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                with tempfile.TemporaryDirectory() as tmp:
+                    self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:10,&quot;stage&quot;:&quot;downloading&quot;})
+                    raw = os.path.join(tmp, source.file_name or &quot;media.mp4&quot;)
+                    storage_service.download_to_path(source.storage_key, raw)
+
+                    if source.source_type == &quot;audio_upload&quot;:
+                        audio_path = raw
+                    else:
+                        self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:25,&quot;stage&quot;:&quot;extracting_audio&quot;})
+                        audio_path = await audio_extractor.from_video_file(raw, tmp)
+
+                    source.duration_seconds = int(await audio_extractor.get_duration(audio_path))
+                    await db.commit()
+
+                    self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:40,&quot;stage&quot;:&quot;transcribing&quot;})
+                    chunks = transcriber.transcribe(audio_path)
+
+                self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:75,&quot;stage&quot;:&quot;saving&quot;})
+                db_chunks = [TranscriptChunk(
+                    media_source_id=source.id, chunk_index=c.chunk_index, text=c.text,
+                    start_time=c.start_time, end_time=c.end_time, token_count=c.token_count,
+                    content_type=&quot;audio&quot;,
+                ) for c in chunks]
+                db.add_all(db_chunks)
+                source.transcript_chunks = len(db_chunks)
+                source.status = &quot;completed&quot;
+                source.processing_completed_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                from app.tasks.embedding_tasks import embed_and_store
+                from app.tasks.vision_tasks import analyze_frames
+                from app.tasks.style_tasks import extract_style
+                chord([embed_and_store.s(media_source_id), analyze_frames.s(media_source_id)])(
+                    extract_style.s(media_source_id=media_source_id)
+                )
+
+            except Exception as exc:
+                source.status = &quot;failed&quot;
+                source.error_message = str(exc)[:500]
+                await db.commit()
+                raise self.retry(exc=exc)
+
+    _run(_impl())</div>
+  </div>
+</div>
+<div class="pcard" id="card-TASKS-2">
+  <div class="pcard-hdr" onclick="toggle('TASKS-2')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(16,185,129,0.1);color:#10B981;border:1px solid rgba(16,185,129,0.3)">TASKS-2</span>
+      <span class="ptitle">apps/api/app/tasks/embedding_tasks.py + style_tasks.py + vision_tasks.py</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-TASKS-2" onclick="cp('TASKS-2',event)">Copy</button>
+      <span class="tog" id="tog-TASKS-2">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-TASKS-2">
+    <div class="pcode" id="txt-TASKS-2">Write embedding, style, and vision Celery tasks.
+
+FILE: apps/api/app/tasks/embedding_tasks.py
+
+import asyncio
+from app.worker import celery_app
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+@celery_app.task(name=&quot;ai.embed_and_store&quot;, bind=True, max_retries=2)
+def embed_and_store(self, media_source_id: str):
+    &quot;&quot;&quot;Embed audio transcript chunks from a media source and store in Qdrant.&quot;&quot;&quot;
+    from app.db.session import AsyncSessionLocal
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.models.media_source import MediaSource
+    from app.services.embedder import embedder
+    from app.services.vector_store import vector_store, ChunkPoint
+    from sqlalchemy import select
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+            profile_id = str(source.teacher_profile_id)
+
+            chunks = (await db.execute(
+                select(TranscriptChunk)
+                .where(TranscriptChunk.media_source_id == media_source_id,
+                       TranscriptChunk.content_type == &quot;audio&quot;)
+                .order_by(TranscriptChunk.chunk_index)
+            )).scalars().all()
+
+            if not chunks:
+                return
+
+            texts = [c.text for c in chunks]
+            self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:20,&quot;stage&quot;:&quot;embedding&quot;})
+            dense_vecs = await embedder.embed_texts(texts)
+
+            self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:70,&quot;stage&quot;:&quot;building_points&quot;})
+            points = []
+            for chunk, dense in zip(chunks, dense_vecs):
+                sparse = embedder.compute_sparse_vector(chunk.text)
+                points.append(ChunkPoint(
+                    id=str(chunk.id), dense_vector=dense, sparse_vector=sparse,
+                    payload={&quot;text&quot;:chunk.text,&quot;media_source_id&quot;:media_source_id,
+                             &quot;teacher_profile_id&quot;:profile_id,&quot;start_time&quot;:chunk.start_time,
+                             &quot;end_time&quot;:chunk.end_time,&quot;chunk_index&quot;:chunk.chunk_index,&quot;content_type&quot;:&quot;audio&quot;}
+                ))
+
+            self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:85,&quot;stage&quot;:&quot;storing&quot;})
+            await vector_store.ensure_collection()
+            await vector_store.upsert_chunks(points)
+
+            for chunk, point in zip(chunks, points):
+                chunk.embedding_id = point.id
+            await db.commit()
+            self.update_state(state=&quot;PROGRESS&quot;, meta={&quot;progress&quot;:100,&quot;stage&quot;:&quot;done&quot;})
+
+    _run(_impl())
+    return {&quot;status&quot;: &quot;done&quot;, &quot;media_source_id&quot;: media_source_id}
+
+
+FILE: apps/api/app/tasks/style_tasks.py
+
+import asyncio
+from app.worker import celery_app
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+@celery_app.task(name=&quot;ai.extract_style&quot;, bind=True)
+def extract_style(self, chord_results, media_source_id: str):
+    &quot;&quot;&quot;Run after embed_and_store + analyze_frames chord. Analyzes ALL chunks for teacher profile.&quot;&quot;&quot;
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.teacher_profile import TeacherProfile
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.style_extractor import style_extractor
+    from sqlalchemy import select
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+
+            # All audio chunks across ALL videos in this teacher profile
+            all_chunks = (await db.execute(
+                select(TranscriptChunk)
+                .join(MediaSource, TranscriptChunk.media_source_id == MediaSource.id)
+                .where(MediaSource.teacher_profile_id == source.teacher_profile_id,
+                       TranscriptChunk.content_type == &quot;audio&quot;)
+                .order_by(TranscriptChunk.chunk_index)
+            )).scalars().all()
+
+            if not all_chunks:
+                return
+
+            new_profile = await style_extractor.extract(all_chunks)
+
+            teacher = (await db.execute(
+                select(TeacherProfile).where(TeacherProfile.id == source.teacher_profile_id)
+            )).scalar_one()
+
+            merged = style_extractor.merge_profiles(teacher.style_profile, new_profile)
+            teacher.style_profile = merged
+            await db.commit()
+
+    _run(_impl())
+
+
+FILE: apps/api/app/tasks/vision_tasks.py
+
+import asyncio, os, tempfile, json, base64, glob
+from app.worker import celery_app
+from app.config import settings
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+async def _extract_keyframes(video_path: str, frames_dir: str) -&gt; list[dict]:
+    &quot;&quot;&quot;Extract scene-change keyframes using ffmpeg scene detection.&quot;&quot;&quot;
+    cmd = [&quot;ffmpeg&quot;, &quot;-i&quot;, video_path, &quot;-vf&quot;, &quot;select=gt(scene\\,0.35)&quot;,
+           &quot;-vsync&quot;, &quot;vfr&quot;, f&quot;{frames_dir}/frame_%06d.jpg&quot;, &quot;-loglevel&quot;, &quot;quiet&quot;, &quot;-y&quot;]
+    proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE)
+    await proc.communicate()
+    files = sorted(glob.glob(f&quot;{frames_dir}/frame_*.jpg&quot;))
+    # Estimate timestamps: assume 1 keyframe every ~3 seconds on average
+    return [{&quot;path&quot;: f, &quot;timestamp&quot;: i * 3.5, &quot;index&quot;: i} for i, f in enumerate(files)]
+
+async def _analyze_frame_batch(frames: list[dict], client) -&gt; list[dict]:
+    &quot;&quot;&quot;Send batch of 4 frames to GPT-4o Vision.&quot;&quot;&quot;
+    if not frames:
+        return []
+    content = []
+    for i, f in enumerate(frames):
+        with open(f[&quot;path&quot;], &quot;rb&quot;) as img:
+            b64 = base64.b64encode(img.read()).decode()
+        content.append({&quot;type&quot;:&quot;image_url&quot;,&quot;image_url&quot;:{&quot;url&quot;:f&quot;data:image/jpeg;base64,{b64}&quot;,&quot;detail&quot;:&quot;low&quot;}})
+        content.append({&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:f&quot;Frame {i} at ~{f[&#x27;timestamp&#x27;]:.0f}s:&quot;})
+    content.append({&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:
+        &#x27;For each frame return a JSON array. Each element: {&quot;frame_idx&quot;:N,&quot;content_type&quot;:&quot;diagram|equation|code|text_slide|whiteboard|graph|talking_head&quot;,&quot;description&quot;:&quot;...&quot;,&quot;extracted_text&quot;:&quot;verbatim text or null&quot;}\nReturn ONLY JSON array.&#x27;
+    })
+    try:
+        resp = await client.chat.completions.create(
+            model=settings.OPENAI_VISION_MODEL,
+            messages=[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:content}],
+            max_tokens=1500,
+        )
+        return json.loads(resp.choices[0].message.content)
+    except Exception:
+        return []
+
+@celery_app.task(name=&quot;ai.analyze_frames&quot;, bind=True)
+def analyze_frames(self, media_source_id: str):
+    &quot;&quot;&quot;Extract video frames, analyze with GPT-4o Vision, store as visual TranscriptChunks.&quot;&quot;&quot;
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.storage import storage_service
+    from app.services.embedder import embedder
+    from app.services.vector_store import vector_store, ChunkPoint
+    from sqlalchemy import select
+    from openai import AsyncOpenAI
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+
+            # Only process uploaded video files (not audio, not YouTube — no stored video for YT)
+            if source.source_type != &quot;file_upload&quot; or not source.storage_key:
+                return
+
+            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            profile_id = str(source.teacher_profile_id)
+
+            with tempfile.TemporaryDirectory() as tmp:
+                video_path = os.path.join(tmp, &quot;video.mp4&quot;)
+                storage_service.download_to_path(source.storage_key, video_path)
+
+                frames_dir = os.path.join(tmp, &quot;frames&quot;)
+                os.makedirs(frames_dir)
+                frames = await _extract_keyframes(video_path, frames_dir)
+                if not frames:
+                    return
+
+                visual_data = []
+                BATCH = 4
+                for i in range(0, len(frames), BATCH):
+                    batch = frames[i:i+BATCH]
+                    results = await _analyze_frame_batch(batch, client)
+                    for item in results:
+                        if item.get(&quot;content_type&quot;) == &quot;talking_head&quot;:
+                            continue
+                        frame = batch[item.get(&quot;frame_idx&quot;, 0) % len(batch)]
+                        parts = [f&quot;[VISUAL at {frame[&#x27;timestamp&#x27;]:.0f}s] {item.get(&#x27;description&#x27;,&#x27;&#x27;)}&quot;]
+                        if item.get(&quot;extracted_text&quot;):
+                            parts.append(item[&quot;extracted_text&quot;])
+                        visual_data.append({&quot;text&quot;:&quot; &quot;.join(parts),&quot;start_time&quot;:frame[&quot;timestamp&quot;],&quot;end_time&quot;:frame[&quot;timestamp&quot;]+10})
+
+                if not visual_data:
+                    return
+
+                # Get last chunk index
+                from sqlalchemy import func
+                last_idx = (await db.execute(
+                    select(func.max(TranscriptChunk.chunk_index))
+                    .where(TranscriptChunk.media_source_id == media_source_id)
+                )).scalar() or 0
+
+                new_chunks = []
+                for i, vd in enumerate(visual_data):
+                    c = TranscriptChunk(
+                        media_source_id=media_source_id, chunk_index=last_idx+i+1,
+                        text=vd[&quot;text&quot;], start_time=vd[&quot;start_time&quot;], end_time=vd[&quot;end_time&quot;],
+                        content_type=&quot;visual&quot;, token_count=len(vd[&quot;text&quot;].split()),
+                    )
+                    db.add(c)
+                    new_chunks.append(c)
+                await db.flush()
+
+                texts = [c.text for c in new_chunks]
+                dense_vecs = await embedder.embed_texts(texts)
+                await vector_store.ensure_collection()
+                points = []
+                for chunk, dense in zip(new_chunks, dense_vecs):
+                    sparse = embedder.compute_sparse_vector(chunk.text)
+                    points.append(ChunkPoint(
+                        id=str(chunk.id), dense_vector=dense, sparse_vector=sparse,
+                        payload={&quot;text&quot;:chunk.text,&quot;media_source_id&quot;:media_source_id,
+                                 &quot;teacher_profile_id&quot;:profile_id,&quot;start_time&quot;:chunk.start_time,
+                                 &quot;end_time&quot;:chunk.end_time,&quot;chunk_index&quot;:chunk.chunk_index,&quot;content_type&quot;:&quot;visual&quot;}
+                    ))
+                    chunk.embedding_id = str(chunk.id)
+                await vector_store.upsert_chunks(points)
+                await db.commit()
+
+    _run(_impl())
+    return {&quot;status&quot;: &quot;done&quot;, &quot;media_source_id&quot;: media_source_id}</div>
+  </div>
+</div>
+<div class="pcard" id="card-ROUTERS-1">
+  <div class="pcard-hdr" onclick="toggle('ROUTERS-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(139,92,246,0.1);color:#8B5CF6;border:1px solid rgba(139,92,246,0.3)">ROUTERS-1</span>
+      <span class="ptitle">apps/api/app/main.py + all routers</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-ROUTERS-1" onclick="cp('ROUTERS-1',event)">Copy</button>
+      <span class="tog" id="tog-ROUTERS-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-ROUTERS-1">
+    <div class="pcode" id="txt-ROUTERS-1">Write the FastAPI main app and all routers.
+
+FILE: apps/api/app/main.py
+FastAPI app factory. Registers all routers. Sets up CORS, Sentry, lifespan (ensure Qdrant collection on startup).
+Includes all routers:
+- /health (health.py)
+- /auth (auth.py)
+- /webhooks (webhooks.py) - public, no auth
+- /users (users.py)
+- /organizations (organizations.py)
+- /profiles (teacher_profiles.py)
+- /media (media.py)
+- /sessions (sessions.py)
+- /chat (chat.py)
+- /quizzes (quizzes.py)
+- /billing (billing.py)
+- /voice (voice.py)
+- /export (export.py)
+- /v1 (v1/__init__.py)
+
+FILE: apps/api/app/routers/health.py
+GET /health -&gt; {status:&quot;ok&quot;, version, timestamp}
+GET /health/db -&gt; test db select 1
+GET /health/qdrant -&gt; test qdrant get_collections
+
+FILE: apps/api/app/routers/auth.py
+POST /auth/sync -&gt; sync Clerk user to DB (called after sign-in from frontend)
+  - get user from clerk_id (from token)
+  - if user exists: return it
+  - if not: create user + UserStats record
+  - Return UserResponse
+
+FILE: apps/api/app/routers/webhooks.py
+POST /webhooks/clerk (no auth) -&gt; verify Svix webhook signature
+  handle: user.created (create User + UserStats), user.updated (update name/email), user.deleted (is_active=False)
+POST /webhooks/stripe (no auth) -&gt; verify Stripe webhook signature
+  handle: checkout.session.completed -&gt; update user plan from metadata.price_id
+  handle: customer.subscription.updated -&gt; update plan
+  handle: customer.subscription.deleted -&gt; set plan=&#x27;free&#x27;
+
+FILE: apps/api/app/routers/users.py
+GET /users/me -&gt; return current user with stats
+PUT /users/me -&gt; update full_name, avatar_url
+GET /users/me/stats -&gt; return UserStats + earned badges
+
+FILE: apps/api/app/routers/teacher_profiles.py
+POST /profiles -&gt; create TeacherProfile (user_id or org_id)
+GET /profiles -&gt; list user&#x27;s profiles (+ org profiles if org member)
+GET /profiles/{id} -&gt; get single profile with style_profile
+PUT /profiles/{id} -&gt; update (owner only)
+DELETE /profiles/{id} -&gt; delete + cascade (vectors, media, sessions)
+GET /profiles/{id}/style -&gt; return style_profile JSON or 404 if not yet extracted
+
+FILE: apps/api/app/routers/media.py
+POST /media/youtube -&gt; validate URL, check quota, create MediaSource, enqueue process_youtube task
+POST /media/upload/initiate -&gt; validate content_type/size, generate R2 presigned URL, create MediaSource
+POST /media/upload/complete -&gt; verify R2 object exists, enqueue process_uploaded_file task
+GET /media/{id}/status -&gt; return status + transcript_chunks count
+GET /media/{id}/progress -&gt; SSE stream of {status, transcript_chunks, stage} every 2 seconds until done
+DELETE /media/{id} -&gt; delete from R2 + Qdrant + DB (owner only)
+GET /media/profile/{teacher_profile_id} -&gt; list media_sources for profile (paginated)
+
+FILE: apps/api/app/routers/sessions.py
+POST /sessions -&gt; create session with teacher_profile_id + student_profile body
+GET /sessions -&gt; list user sessions, newest first, paginated
+GET /sessions/{id} -&gt; session with last 20 messages
+DELETE /sessions/{id} -&gt; delete session + messages
+GET /sessions/{id}/summary -&gt; return or generate SessionSummary (cache in session_notes)
+On session creation: log usage event &#x27;session_started&#x27;, award XP
+
+FILE: apps/api/app/routers/chat.py
+POST /chat/{session_id}/message -&gt; SSE streaming response
+  1. Validate session ownership
+  2. Load teacher_profile with style_profile
+  3. Load last 10 messages as history
+  4. retrieve_context(user_message, teacher_profile_id)
+  5. build_system_prompt(teacher, session, context, turn=message_count)
+  6. Stream from Anthropic Claude API
+  7. On stream complete: save user+assistant messages, extract citations, update session.message_count
+  8. SSE events: {type:&quot;token&quot;,token:&quot;...&quot;} then {type:&quot;done&quot;,message_id,citations:[]}
+  9. Award XP every 5 messages
+POST /chat/{session_id}/adjust-level -&gt; {direction: simpler|deeper} -&gt; update current_effective_level
+
+FILE: apps/api/app/routers/quizzes.py
+POST /sessions/{session_id}/quiz -&gt; generate quiz from context, save to DB, return without correct answers
+POST /quizzes/{quiz_id}/submit -&gt; grade all answers, save results, award XP
+GET /quizzes/{quiz_id}/results -&gt; return full results with explanations (only after completed)
+
+FILE: apps/api/app/routers/billing.py
+POST /billing/checkout -&gt; create Stripe checkout session, return {checkout_url}
+POST /billing/portal -&gt; create Stripe customer portal session, return {portal_url}
+GET /billing/status -&gt; return {plan, limits, usage_this_month}
+
+FILE: apps/api/app/routers/voice.py
+POST /voice/transcribe -&gt; accept audio file upload, transcribe with faster-whisper, return {text}
+POST /chat/{session_id}/speak -&gt; get message by ID, synthesize TTS, stream audio/mpeg
+  Cache: store synthesized audio in R2 at voice/{message_id}.mp3, serve from cache on repeat
+
+FILE: apps/api/app/routers/export.py
+POST /sessions/{session_id}/export -&gt; generate and return PDF or Markdown file
+  Body: {format: &quot;pdf&quot;|&quot;markdown&quot;}
+  Check export quota, generate via export_service, stream as file download
+GET /sessions/{session_id}/summary -&gt; return SessionSummary JSON
+
+FILE: apps/api/app/routers/organizations.py
+POST /organizations -&gt; create org (institution plan required)
+GET /organizations/{slug} -&gt; get org details (member only)
+POST /organizations/{id}/members/invite -&gt; send invite email, create OrgInvitation
+POST /organizations/invitations/{token}/accept -&gt; add user to org
+GET /organizations/{id}/members -&gt; list members (admin only)
+PUT /organizations/{id}/members/{user_id}/role -&gt; change role (admin only)
+DELETE /organizations/{id}/members/{user_id} -&gt; remove member (admin only)
+GET /organizations/{id}/leaderboard -&gt; top 10 by XP this week
+
+FILE: apps/api/app/routers/v1/__init__.py and profile.py, sessions.py, chat.py
+Public API (API-key authenticated):
+GET /v1/profiles -&gt; list user teacher profiles
+POST /v1/sessions -&gt; create session
+POST /v1/sessions/{id}/chat -&gt; synchronous (non-streaming) chat response
+POST /v1/sessions/{id}/quiz -&gt; generate quiz</div>
+  </div>
+</div>
+<div class="pcard" id="card-FRONTEND-1">
+  <div class="pcard-hdr" onclick="toggle('FRONTEND-1')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(79,195,247,0.1);color:#4FC3F7;border:1px solid rgba(79,195,247,0.3)">FRONTEND-1</span>
+      <span class="ptitle">apps/web/ config files</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-FRONTEND-1" onclick="cp('FRONTEND-1',event)">Copy</button>
+      <span class="tog" id="tog-FRONTEND-1">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-FRONTEND-1">
+    <div class="pcode" id="txt-FRONTEND-1">Write all Next.js config and setup files.
+
+FILE: apps/web/package.json
+{
+  &quot;name&quot;: &quot;@teachclone/web&quot;,
+  &quot;scripts&quot;: {&quot;dev&quot;:&quot;next dev&quot;,&quot;build&quot;:&quot;next build&quot;,&quot;lint&quot;:&quot;next lint&quot;,&quot;type-check&quot;:&quot;tsc --noEmit&quot;},
+  &quot;dependencies&quot;: {
+    &quot;next&quot;: &quot;14.2.3&quot;, &quot;react&quot;: &quot;^18&quot;, &quot;react-dom&quot;: &quot;^18&quot;,
+    &quot;@clerk/nextjs&quot;: &quot;^5.1.0&quot;,
+    &quot;ai&quot;: &quot;^3.1.0&quot;,
+    &quot;@tanstack/react-query&quot;: &quot;^5.40.0&quot;,
+    &quot;zustand&quot;: &quot;^4.5.2&quot;,
+    &quot;axios&quot;: &quot;^1.7.0&quot;,
+    &quot;react-markdown&quot;: &quot;^9.0.1&quot;, &quot;remark-gfm&quot;: &quot;^4.0.0&quot;,
+    &quot;@stripe/stripe-js&quot;: &quot;^3.3.0&quot;,
+    &quot;lucide-react&quot;: &quot;^0.379.0&quot;,
+    &quot;react-dropzone&quot;: &quot;^14.2.3&quot;,
+    &quot;recharts&quot;: &quot;^2.12.7&quot;,
+    &quot;sonner&quot;: &quot;^1.4.41&quot;,
+    &quot;@radix-ui/react-tooltip&quot;: &quot;^1.0.7&quot;,
+    &quot;class-variance-authority&quot;: &quot;^0.7.0&quot;,
+    &quot;clsx&quot;: &quot;^2.1.1&quot;,
+    &quot;tailwind-merge&quot;: &quot;^2.3.0&quot;,
+    &quot;@teachclone/types&quot;: &quot;workspace:*&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;@types/react&quot;: &quot;^18&quot;, &quot;@types/react-dom&quot;: &quot;^18&quot;,
+    &quot;typescript&quot;: &quot;^5&quot;, &quot;tailwindcss&quot;: &quot;^3.4.0&quot;,
+    &quot;autoprefixer&quot;: &quot;^10&quot;, &quot;postcss&quot;: &quot;^8&quot;,
+    &quot;@teachclone/config&quot;: &quot;workspace:*&quot;, &quot;eslint&quot;: &quot;^8&quot;,
+    &quot;eslint-config-next&quot;: &quot;14.2.3&quot;
+  }
+}
+
+FILE: apps/web/next.config.js
+/** @type {import(&#x27;next&#x27;).NextConfig} */
+const nextConfig = {
+  images: {
+    domains: [&#x27;img.clerk.com&#x27;, &#x27;images.clerk.dev&#x27;, process.env.R2_PUBLIC_DOMAIN || &#x27;pub.r2.dev&#x27;],
+  },
+  async headers() {
+    return [{
+      source: &#x27;/(.*)&#x27;,
+      headers: [
+        {key:&#x27;X-Content-Type-Options&#x27;,value:&#x27;nosniff&#x27;},
+        {key:&#x27;X-Frame-Options&#x27;,value:&#x27;DENY&#x27;},
+        {key:&#x27;X-XSS-Protection&#x27;,value:&#x27;1; mode=block&#x27;},
+        {key:&#x27;Referrer-Policy&#x27;,value:&#x27;strict-origin-when-cross-origin&#x27;},
+      ]
+    }]
+  },
+  experimental: { serverActions: { allowedOrigins: [&#x27;localhost:3000&#x27;] } },
+}
+module.exports = nextConfig
+
+FILE: apps/web/tailwind.config.ts
+Full shadcn/ui compatible Tailwind config with:
+- content: [&#x27;./app/**/*.{ts,tsx}&#x27;, &#x27;./components/**/*.{ts,tsx}&#x27;]
+- darkMode: &#x27;class&#x27;
+- theme.extend: colors with CSS variable references (--background, --foreground, --primary, etc.)
+  All standard shadcn color variables
+- plugins: [require(&quot;tailwindcss-animate&quot;)]
+
+FILE: apps/web/app/globals.css
+CSS variables for both :root (light) and .dark themes.
+Standard shadcn/ui CSS variables (background, foreground, card, primary, muted, accent, destructive, border, input, ring, radius).
+Base body styles: bg-background text-foreground.
+
+FILE: apps/web/tsconfig.json
+Strict TypeScript config extending @teachclone/config/tsconfig-base.json.
+Paths: &quot;@/*&quot;: [&quot;./&quot;], &quot;@teachclone/types&quot;: [&quot;../../packages/types/src&quot;]
+
+FILE: apps/web/middleware.ts (already written above - reproduce here)
+Clerk authMiddleware with public routes list and afterAuth redirect logic.
+
+FILE: apps/web/lib/api-client.ts (already written above - reproduce here)
+Typed axios instance with Clerk auth interceptor.
+Also export getServerApiHeaders() for server components.
+
+FILE: apps/web/lib/utils/formatters.ts
+export function formatTimestamp(seconds: number): string - returns &quot;M:SS&quot; format
+export function formatDuration(seconds: number): string - returns &quot;Xh Ym&quot; or &quot;X min&quot;
+export function formatRelativeTime(date: string): string - &quot;2 hours ago&quot; etc
+export function formatPlan(plan: string): string - &quot;Student Pro&quot; etc
+export function formatLevel(level: string): string - &quot;High School&quot; etc
+
+FILE: apps/web/lib/utils/validators.ts
+export function isValidYouTubeUrl(url: string): boolean
+export function isValidEmail(email: string): boolean
+export function isValidOrgSlug(slug: string): boolean</div>
+  </div>
+</div>
+<div class="pcard" id="card-FRONTEND-2">
+  <div class="pcard-hdr" onclick="toggle('FRONTEND-2')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(79,195,247,0.1);color:#4FC3F7;border:1px solid rgba(79,195,247,0.3)">FRONTEND-2</span>
+      <span class="ptitle">apps/web/lib/hooks/ and stores/</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-FRONTEND-2" onclick="cp('FRONTEND-2',event)">Copy</button>
+      <span class="tog" id="tog-FRONTEND-2">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-FRONTEND-2">
+    <div class="pcode" id="txt-FRONTEND-2">Write all custom hooks and Zustand stores.
+
+FILE: apps/web/lib/hooks/useMediaUpload.ts
+Already defined above - reproduce in full with types.
+
+FILE: apps/web/lib/hooks/useVoiceInput.ts
+&#x27;use client&#x27;
+import { useState, useRef, useCallback } from &#x27;react&#x27;
+
+type VoiceStatus = &#x27;idle&#x27;|&#x27;listening&#x27;|&#x27;processing&#x27;|&#x27;error&#x27;
+
+export function useVoiceInput(onTranscript: (text: string) =&gt; void) {
+  const [status, setStatus] = useState&lt;VoiceStatus&gt;(&#x27;idle&#x27;)
+  const [error, setError] = useState&lt;string|null&gt;(null)
+  const recognitionRef = useRef&lt;any&gt;(null)
+
+  const isSupported = typeof window !== &#x27;undefined&#x27; &amp;&amp; &#x27;SpeechRecognition&#x27; in window || &#x27;webkitSpeechRecognition&#x27; in window
+
+  const start = useCallback(() =&gt; {
+    if (!isSupported) { setError(&#x27;Voice input not supported in this browser&#x27;); return }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = &#x27;en-US&#x27;
+    recognition.onstart = () =&gt; setStatus(&#x27;listening&#x27;)
+    recognition.onresult = (e: any) =&gt; {
+      const text = e.results[0][0].transcript
+      setStatus(&#x27;processing&#x27;)
+      onTranscript(text)
+      setStatus(&#x27;idle&#x27;)
+    }
+    recognition.onerror = (e: any) =&gt; { setError(e.error); setStatus(&#x27;error&#x27;) }
+    recognition.onend = () =&gt; setStatus(&#x27;idle&#x27;)
+    recognitionRef.current = recognition
+    recognition.start()
+  }, [isSupported, onTranscript])
+
+  const stop = useCallback(() =&gt; {
+    recognitionRef.current?.stop()
+    setStatus(&#x27;idle&#x27;)
+  }, [])
+
+  return { start, stop, status, error, isSupported }
+}
+
+FILE: apps/web/lib/hooks/useQuota.ts
+&#x27;use client&#x27;
+import { useQuery } from &#x27;@tanstack/react-query&#x27;
+import api from &#x27;@/lib/api-client&#x27;
+import type { BillingStatus } from &#x27;@teachclone/types&#x27;
+
+export function useQuota() {
+  const { data, isLoading } = useQuery&lt;BillingStatus&gt;({
+    queryKey: [&#x27;billing-status&#x27;],
+    queryFn: () =&gt; api.get(&#x27;/billing/status&#x27;).then(r =&gt; r.data),
+    staleTime: 60_000,
+  })
+  return {
+    isLoading,
+    plan: data?.plan,
+    canUploadVideo: data ? data.usage.videos &lt; (data.limits.videosPerMonth === 999 ? Infinity : data.limits.videosPerMonth) : true,
+    canSendMessage: data ? data.usage.messages &lt; (data.limits.messagesPerDay === 999 ? Infinity : data.limits.messagesPerDay) : true,
+    usage: data?.usage,
+    limits: data?.limits,
+  }
+}
+
+FILE: apps/web/lib/stores/useSessionStore.ts
+&#x27;use client&#x27;
+import { create } from &#x27;zustand&#x27;
+import type { StudentSession, StudentProfile, StudentLevel } from &#x27;@teachclone/types&#x27;
+
+interface SessionStore {
+  activeSession: StudentSession | null
+  defaultStudentProfile: StudentProfile | null
+  setActiveSession: (s: StudentSession | null) =&gt; void
+  setDefaultProfile: (p: StudentProfile) =&gt; void
+  clearSession: () =&gt; void
+}
+
+export const useSessionStore = create&lt;SessionStore&gt;((set) =&gt; ({
+  activeSession: null,
+  defaultStudentProfile: typeof window !== &#x27;undefined&#x27;
+    ? JSON.parse(localStorage.getItem(&#x27;defaultStudentProfile&#x27;) || &#x27;null&#x27;)
+    : null,
+  setActiveSession: (s) =&gt; set({ activeSession: s }),
+  setDefaultProfile: (p) =&gt; {
+    if (typeof window !== &#x27;undefined&#x27;) localStorage.setItem(&#x27;defaultStudentProfile&#x27;, JSON.stringify(p))
+    set({ defaultStudentProfile: p })
+  },
+  clearSession: () =&gt; set({ activeSession: null }),
+}))
+
+FILE: apps/web/lib/stores/useUserStore.ts
+&#x27;use client&#x27;
+import { create } from &#x27;zustand&#x27;
+import type { User } from &#x27;@teachclone/types&#x27;
+
+interface UserStore {
+  user: User | null
+  setUser: (u: User | null) =&gt; void
+}
+export const useUserStore = create&lt;UserStore&gt;((set) =&gt; ({
+  user: null,
+  setUser: (u) =&gt; set({ user: u }),
+}))</div>
+  </div>
+</div>
+<div class="pcard" id="card-FRONTEND-3">
+  <div class="pcard-hdr" onclick="toggle('FRONTEND-3')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(79,195,247,0.1);color:#4FC3F7;border:1px solid rgba(79,195,247,0.3)">FRONTEND-3</span>
+      <span class="ptitle">apps/web/components/ (all components)</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-FRONTEND-3" onclick="cp('FRONTEND-3',event)">Copy</button>
+      <span class="tog" id="tog-FRONTEND-3">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-FRONTEND-3">
+    <div class="pcode" id="txt-FRONTEND-3">Write all React components.
+
+FILE: apps/web/components/chat/MessageBubble.tsx (already written above - reproduce with full imports)
+
+FILE: apps/web/components/chat/CitationChip.tsx (already written above - reproduce)
+
+FILE: apps/web/components/chat/StreamingIndicator.tsx
+&#x27;use client&#x27;
+export function StreamingIndicator() {
+  return (
+    &lt;div className=&quot;flex gap-1.5 px-5 py-4&quot;&gt;
+      {[0,1,2].map(i =&gt; (
+        &lt;div key={i} className=&quot;h-2 w-2 rounded-full bg-primary/50 animate-bounce&quot;
+             style={{animationDelay:`${i*0.15}s`,animationDuration:&#x27;0.8s&#x27;}} /&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}
+
+FILE: apps/web/components/chat/ChatInput.tsx (already written - reproduce with full code)
+
+FILE: apps/web/components/chat/VoiceButton.tsx
+&#x27;use client&#x27;
+import { Mic, MicOff, Loader2 } from &#x27;lucide-react&#x27;
+import { Button } from &#x27;@/components/ui/button&#x27;
+import { useVoiceInput } from &#x27;@/lib/hooks/useVoiceInput&#x27;
+
+interface Props { onTranscript: (text: string) =&gt; void; disabled?: boolean }
+export function VoiceButton({ onTranscript, disabled }: Props) {
+  const { start, stop, status, isSupported } = useVoiceInput(onTranscript)
+  if (!isSupported) return null
+  return (
+    &lt;Button type=&quot;button&quot; variant=&quot;ghost&quot; size=&quot;icon&quot;
+            onClick={status === &#x27;listening&#x27; ? stop : start}
+            disabled={disabled || status === &#x27;processing&#x27;}
+            className={status === &#x27;listening&#x27; ? &#x27;text-red-400 animate-pulse&#x27; : &#x27;text-muted-foreground&#x27;}&gt;
+      {status === &#x27;processing&#x27; ? &lt;Loader2 className=&quot;h-4 w-4 animate-spin&quot; /&gt; :
+       status === &#x27;listening&#x27; ? &lt;MicOff className=&quot;h-4 w-4&quot; /&gt; : &lt;Mic className=&quot;h-4 w-4&quot; /&gt;}
+    &lt;/Button&gt;
+  )
+}
+
+FILE: apps/web/components/media/ProcessingProgress.tsx
+&#x27;use client&#x27;
+import { useEffect, useState } from &#x27;react&#x27;
+import { Progress } from &#x27;@/components/ui/progress&#x27;
+import { CheckCircle, XCircle, Loader2 } from &#x27;lucide-react&#x27;
+
+const STAGE_LABELS: Record&lt;string,string&gt; = {
+  downloading:&#x27;Downloading audio...&#x27;, transcribing:&#x27;Transcribing speech...&#x27;,
+  saving:&#x27;Saving transcript...&#x27;, embedding:&#x27;Creating embeddings...&#x27;,
+  storing:&#x27;Storing in knowledge base...&#x27;, done:&#x27;Complete!&#x27;,
+}
+
+export function ProcessingProgress({ mediaSourceId }: { mediaSourceId: string }) {
+  const [status, setStatus] = useState&lt;string&gt;(&#x27;pending&#x27;)
+  const [chunks, setChunks] = useState&lt;number&gt;(0)
+  const [stage, setStage] = useState&lt;string&gt;(&#x27;queued&#x27;)
+
+  useEffect(() =&gt; {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    const es = new EventSource(`${apiUrl}/media/${mediaSourceId}/progress`)
+    es.onmessage = (e) =&gt; {
+      try {
+        const data = JSON.parse(e.data)
+        setStatus(data.status)
+        if (data.transcript_chunks) setChunks(data.transcript_chunks)
+        if (data.stage) setStage(data.stage)
+        if (data.status === &#x27;completed&#x27; || data.status === &#x27;failed&#x27;) es.close()
+      } catch {}
+    }
+    es.onerror = () =&gt; es.close()
+    return () =&gt; es.close()
+  }, [mediaSourceId])
+
+  if (status === &#x27;completed&#x27;) return (
+    &lt;div className=&quot;flex items-center gap-2 text-sm text-emerald-400&quot;&gt;
+      &lt;CheckCircle className=&quot;h-4 w-4&quot; /&gt; Processed {chunks} chunks. Ready to chat!
+    &lt;/div&gt;
+  )
+  if (status === &#x27;failed&#x27;) return (
+    &lt;div className=&quot;flex items-center gap-2 text-sm text-destructive&quot;&gt;
+      &lt;XCircle className=&quot;h-4 w-4&quot; /&gt; Processing failed. Please try again.
+    &lt;/div&gt;
+  )
+  return (
+    &lt;div className=&quot;space-y-2&quot;&gt;
+      &lt;div className=&quot;flex items-center gap-2 text-sm text-muted-foreground&quot;&gt;
+        &lt;Loader2 className=&quot;h-3 w-3 animate-spin&quot; /&gt;
+        {STAGE_LABELS[stage] || &#x27;Processing...&#x27;}
+      &lt;/div&gt;
+      &lt;Progress value={status === &#x27;processing&#x27; ? 50 : 10} className=&quot;h-1 animate-pulse&quot; /&gt;
+    &lt;/div&gt;
+  )
+}
+
+FILE: apps/web/components/profile/TeacherProfileCard.tsx
+&#x27;use client&#x27;
+import Link from &#x27;next/link&#x27;
+import { Card, CardContent, CardFooter } from &#x27;@/components/ui/card&#x27;
+import { Button } from &#x27;@/components/ui/button&#x27;
+import { Badge } from &#x27;@/components/ui/badge&#x27;
+import { Video, MessageSquare, ArrowRight } from &#x27;lucide-react&#x27;
+import type { TeacherProfile } from &#x27;@teachclone/types&#x27;
+
+export function TeacherProfileCard({ profile }: { profile: TeacherProfile }) {
+  const style = profile.styleProfile
+  return (
+    &lt;Card className=&quot;flex flex-col hover:border-primary/50 transition-colors&quot;&gt;
+      &lt;CardContent className=&quot;flex-1 pt-6&quot;&gt;
+        &lt;div className=&quot;flex items-start justify-between mb-3&quot;&gt;
+          &lt;h3 className=&quot;font-semibold text-sm leading-tight&quot;&gt;{profile.name}&lt;/h3&gt;
+          {profile.isPublic &amp;&amp; &lt;Badge variant=&quot;outline&quot; className=&quot;text-xs&quot;&gt;Public&lt;/Badge&gt;}
+        &lt;/div&gt;
+        {profile.description &amp;&amp; (
+          &lt;p className=&quot;text-xs text-muted-foreground mb-3 line-clamp-2&quot;&gt;{profile.description}&lt;/p&gt;
+        )}
+        {style &amp;&amp; (
+          &lt;div className=&quot;flex flex-wrap gap-1 mb-3&quot;&gt;
+            &lt;Badge variant=&quot;secondary&quot; className=&quot;text-xs&quot;&gt;{style.toneType}&lt;/Badge&gt;
+            &lt;Badge variant=&quot;secondary&quot; className=&quot;text-xs&quot;&gt;{style.vocabularyLevel}&lt;/Badge&gt;
+          &lt;/div&gt;
+        )}
+        &lt;div className=&quot;flex gap-3 text-xs text-muted-foreground&quot;&gt;
+          &lt;span className=&quot;flex items-center gap-1&quot;&gt;&lt;Video className=&quot;h-3 w-3&quot;/&gt;{profile.totalVideos} videos&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/CardContent&gt;
+      &lt;CardFooter className=&quot;pt-0 gap-2&quot;&gt;
+        &lt;Link href={`/profiles/${profile.id}`} className=&quot;flex-1&quot;&gt;
+          &lt;Button variant=&quot;outline&quot; size=&quot;sm&quot; className=&quot;w-full&quot;&gt;Manage&lt;/Button&gt;
+        &lt;/Link&gt;
+        &lt;Link href={`/profiles/${profile.id}?action=start`} className=&quot;flex-1&quot;&gt;
+          &lt;Button size=&quot;sm&quot; className=&quot;w-full gap-1&quot;&gt;Learn &lt;ArrowRight className=&quot;h-3 w-3&quot;/&gt;&lt;/Button&gt;
+        &lt;/Link&gt;
+      &lt;/CardFooter&gt;
+    &lt;/Card&gt;
+  )
+}
+
+FILE: apps/web/components/profile/LevelSelector.tsx
+&#x27;use client&#x27;
+import type { StudentLevel } from &#x27;@teachclone/types&#x27;
+
+const LEVELS: Array&lt;{value: StudentLevel; label: string; desc: string; icon: string}&gt; = [
+  {value:&#x27;k5&#x27;,label:&#x27;K-5&#x27;,desc:&#x27;Elementary school&#x27;,icon:&#x27;🎒&#x27;},
+  {value:&#x27;middle&#x27;,label:&#x27;Middle School&#x27;,desc:&#x27;Grades 6-8&#x27;,icon:&#x27;📐&#x27;},
+  {value:&#x27;highschool&#x27;,label:&#x27;High School&#x27;,desc:&#x27;Grades 9-12&#x27;,icon:&#x27;🎓&#x27;},
+  {value:&#x27;undergrad&#x27;,label:&#x27;Undergrad&#x27;,desc:&#x27;College level&#x27;,icon:&#x27;📚&#x27;},
+  {value:&#x27;masters&#x27;,label:&#x27;Graduate&#x27;,desc:&#x27;Masters / PhD&#x27;,icon:&#x27;🔬&#x27;},
+  {value:&#x27;professional&#x27;,label:&#x27;Professional&#x27;,desc:&#x27;Industry expert&#x27;,icon:&#x27;💼&#x27;},
+]
+
+interface Props { value: StudentLevel | null; onChange: (level: StudentLevel) =&gt; void }
+export function LevelSelector({ value, onChange }: Props) {
+  return (
+    &lt;div className=&quot;grid grid-cols-2 sm:grid-cols-3 gap-3&quot;&gt;
+      {LEVELS.map(l =&gt; (
+        &lt;button key={l.value} onClick={() =&gt; onChange(l.value)}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all
+                  ${value === l.value ? &#x27;border-primary bg-primary/10 text-primary&#x27; : &#x27;border-border hover:border-primary/50&#x27;}`}&gt;
+          &lt;span className=&quot;text-2xl&quot;&gt;{l.icon}&lt;/span&gt;
+          &lt;div&gt;
+            &lt;div className=&quot;font-medium text-sm&quot;&gt;{l.label}&lt;/div&gt;
+            &lt;div className=&quot;text-xs text-muted-foreground&quot;&gt;{l.desc}&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}
+
+FILE: apps/web/components/gamification/XPBar.tsx
+&#x27;use client&#x27;
+import { Progress } from &#x27;@/components/ui/progress&#x27;
+
+interface Props { xpTotal: number; level: number }
+export function XPBar({ xpTotal, level }: Props) {
+  const xpInLevel = xpTotal % 1000
+  const pct = (xpInLevel / 1000) * 100
+  return (
+    &lt;div className=&quot;space-y-1.5&quot;&gt;
+      &lt;div className=&quot;flex justify-between text-xs&quot;&gt;
+        &lt;span className=&quot;font-medium&quot;&gt;Level {level}&lt;/span&gt;
+        &lt;span className=&quot;text-muted-foreground&quot;&gt;{xpInLevel} / 1000 XP&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;Progress value={pct} className=&quot;h-2&quot; /&gt;
+      &lt;div className=&quot;flex justify-between text-xs text-muted-foreground&quot;&gt;
+        &lt;span&gt;{xpTotal.toLocaleString()} total XP&lt;/span&gt;
+        &lt;span&gt;Level {level+1} at {(level)*1000} XP&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}
+
+FILE: apps/web/components/gamification/LevelUpModal.tsx
+&#x27;use client&#x27;
+import { Dialog, DialogContent } from &#x27;@/components/ui/dialog&#x27;
+import { Button } from &#x27;@/components/ui/button&#x27;
+import type { GamificationResult } from &#x27;@teachclone/types&#x27;
+
+interface Props { result: GamificationResult | null; onClose: () =&gt; void }
+export function LevelUpModal({ result, onClose }: Props) {
+  if (!result?.levelUp &amp;&amp; !result?.newBadges.length) return null
+  return (
+    &lt;Dialog open={true} onOpenChange={onClose}&gt;
+      &lt;DialogContent className=&quot;text-center max-w-sm&quot;&gt;
+        &lt;div className=&quot;text-6xl mb-4&quot;&gt;{result.levelUp ? &#x27;🎉&#x27; : &#x27;🏆&#x27;}&lt;/div&gt;
+        {result.levelUp &amp;&amp; (
+          &lt;&gt;&lt;h2 className=&quot;text-2xl font-bold mb-1&quot;&gt;Level Up!&lt;/h2&gt;
+          &lt;p className=&quot;text-muted-foreground mb-4&quot;&gt;You reached Level {result.newLevel}&lt;/p&gt;&lt;/&gt;
+        )}
+        {result.newBadges.length &gt; 0 &amp;&amp; (
+          &lt;div className=&quot;space-y-2 mb-4&quot;&gt;
+            &lt;p className=&quot;font-medium&quot;&gt;New badge{result.newBadges.length&gt;1?&#x27;s&#x27;:&#x27;&#x27;}!&lt;/p&gt;
+            {result.newBadges.map(b =&gt; (
+              &lt;div key={b.id} className=&quot;flex items-center gap-2 bg-muted rounded-lg p-2&quot;&gt;
+                &lt;span className=&quot;text-2xl&quot;&gt;{b.icon}&lt;/span&gt;
+                &lt;div className=&quot;text-left&quot;&gt;
+                  &lt;div className=&quot;font-medium text-sm&quot;&gt;{b.name}&lt;/div&gt;
+                  &lt;div className=&quot;text-xs text-muted-foreground&quot;&gt;+{b.xp} XP&lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            ))}
+          &lt;/div&gt;
+        )}
+        &lt;div className=&quot;text-sm text-muted-foreground mb-4&quot;&gt;+{result.xpEarned} XP earned&lt;/div&gt;
+        &lt;Button onClick={onClose} className=&quot;w-full&quot;&gt;Continue Learning&lt;/Button&gt;
+      &lt;/DialogContent&gt;
+    &lt;/Dialog&gt;
+  )
+}</div>
+  </div>
+</div>
+<div class="pcard" id="card-FRONTEND-4">
+  <div class="pcard-hdr" onclick="toggle('FRONTEND-4')">
+    <div class="pcard-left">
+      <span class="pidx" style="background:rgba(79,195,247,0.1);color:#4FC3F7;border:1px solid rgba(79,195,247,0.3)">FRONTEND-4</span>
+      <span class="ptitle">apps/web/app/ pages</span>
+    </div>
+    <div class="pcard-right">
+      <button class="cbtn" id="cb-FRONTEND-4" onclick="cp('FRONTEND-4',event)">Copy</button>
+      <span class="tog" id="tog-FRONTEND-4">›</span>
+    </div>
+  </div>
+  <div class="pbody" id="body-FRONTEND-4">
+    <div class="pcode" id="txt-FRONTEND-4">Write all page components.
+
+FILE: apps/web/app/(auth)/sign-in/[[...sign-in]]/page.tsx
+import { SignIn } from &#x27;@clerk/nextjs&#x27;
+Center the ClerkSignIn component on a full-height page with TeachClone branding above it.
+
+FILE: apps/web/app/(auth)/sign-up/[[...sign-up]]/page.tsx
+Same pattern with SignUp component.
+
+FILE: apps/web/app/(protected)/dashboard/page.tsx (already written above - reproduce)
+
+FILE: apps/web/app/(protected)/onboarding/page.tsx
+4-step client-side wizard:
+Step 1: LevelSelector component
+Step 2: Learning style selector (4 cards: examples/theory/qa/storytelling)
+Step 3: Goal input (textarea: &quot;What do you want to learn?&quot;) + Prior knowledge (optional)
+Step 4: &quot;You&#x27;re all set!&quot; with a &quot;Go to Dashboard&quot; button
+Save student_profile to localStorage via useSessionStore.setDefaultProfile()
+After step 4: router.push(&#x27;/dashboard&#x27;)
+Animate step transitions with simple CSS opacity/translate.
+
+FILE: apps/web/app/(protected)/profiles/new/page.tsx
+Client page. Form with:
+- Name field (required, min 2 chars)
+- Description textarea (optional)
+- &quot;Make public&quot; toggle (shadcn Switch component)
+On submit: POST /profiles, then router.push(`/profiles/${id}`)
+Show loading spinner on submit button.
+
+FILE: apps/web/app/(protected)/profiles/[id]/page.tsx
+Server component fetching profile by ID.
+Pass to client ProfilePageClient component.
+Tabs using shadcn Tabs:
+- &quot;Add Content&quot;: side-by-side YouTubeInput and MediaDropzone
+- &quot;Content Library&quot;: list of media_sources, status badges, ProcessingProgress for pending/processing ones
+- &quot;Style Profile&quot;: StyleProfileDisplay (show vocabulary level, tone, explanation pattern, analogy density, signature phrases)
+- &quot;Start Learning&quot;: show student level selector + goal input + button that creates session and redirects to /chat/{id}
+
+FILE: apps/web/app/(protected)/chat/[session_id]/page.tsx (already written above - reproduce in full)
+
+FILE: apps/web/app/(protected)/progress/page.tsx
+Client page. Fetch /users/me/stats.
+Show: XPBar, streak info (&quot;🔥 7 day streak!&quot;), stats grid (sessions/quizzes/perfect/videos).
+BadgeGrid showing all BADGE_DEFINITIONS — earned ones colored, locked ones dimmed with requirement hint.
+
+FILE: apps/web/app/(protected)/pricing/page.tsx
+Marketing page with 4 plan cards.
+Current plan badge if user is signed in.
+Upgrade buttons call POST /billing/checkout, redirect to checkout_url.
+&quot;Manage subscription&quot; links to POST /billing/portal.
+
+FILE: apps/web/app/(protected)/settings/api/page.tsx
+API key management:
+- List existing keys (GET /settings/api-keys): show prefix, name, last used
+- Create new key button → modal → POST /settings/api-keys → show full key ONCE with copy button + warning
+- Revoke button per key (DELETE /settings/api-keys/{id})
+
+FILE: apps/web/app/(protected)/admin/[org_slug]/dashboard/page.tsx
+Server component. Fetch org stats.
+Show: total members, active sessions today, most-used profiles, usage chart (last 30 days).
+Use recharts LineChart for daily active users.
+
+FILE: apps/web/app/(protected)/admin/[org_slug]/members/page.tsx
+Client page with searchable members table:
+Columns: avatar, name, email, role (editable dropdown), sessions, last active, remove button.
+&quot;Invite Member&quot; button → dialog with email + role selector → POST /organizations/{id}/members/invite.
+
+FILE: apps/web/app/page.tsx (landing page)
+Full marketing landing page with sections:
+1. Hero: gradient heading, subheading, 2 CTA buttons (Sign Up free / Watch Demo)
+2. How it works: 3 steps with icons (Upload → AI Processes → Learn at Your Level)
+3. Features: 6 cards grid
+4. Comparison table vs NotebookLM
+5. Pricing: 4 cards
+6. Footer: links to pricing/sign-in
+
+FILE: apps/web/app/api/webhooks/clerk/route.ts
+Next.js route handler for Clerk webhooks (mirror of backend Clerk webhook).
+This just forwards to the API backend — the real processing happens in FastAPI.
+Or: handle user sync here by calling POST /auth/sync after user.created event.
+
+FILE: apps/web/components/layout/Sidebar.tsx
+&#x27;use client&#x27;
+Left navigation sidebar for the protected app.
+Links: Dashboard, Sessions (recent), Settings, Progress, Pricing.
+User avatar + name at bottom (from Clerk useUser hook).
+Collapse to icon-only on mobile.
+
+FILE: apps/web/components/layout/Header.tsx  
+Top header for protected pages.
+Left: breadcrumb (page title).
+Right: notification bell (future), UserButton from Clerk.
+
+FILE: apps/web/components/admin/AnalyticsCharts.tsx
+&#x27;use client&#x27;
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from &#x27;recharts&#x27;
+Props: { data: Array&lt;{date: string; sessions: number; messages: number}&gt; }
+Show two lines: sessions (primary color) and messages (muted color).
+Custom tooltip showing date + values.
+
+FILE: apps/web/components/admin/MembersTable.tsx
+&#x27;use client&#x27;
+Searchable table of org members.
+Columns: name/email, role (Select dropdown for admin), sessions count, last active, Remove button.
+Filter input at top.
+Confirm dialog before removing a member.
+
+FILE: apps/web/components/quiz/QuizModal.tsx
+Full-screen dialog for taking a quiz.
+Shows progress: &quot;Question 2 of 5&quot;
+Renders QuizQuestion based on question type.
+After all questions submitted: shows QuizResults.
+&#x27;use client&#x27; with useState for answers and current question index.
+
+FILE: apps/web/components/quiz/QuizQuestion.tsx
+Renders one question. Switches on type:
+- mcq: 4 radio button cards
+- true_false: two large buttons (True / False)  
+- short_answer: textarea with 500 char limit and character counter
+
+FILE: apps/web/components/quiz/QuizResults.tsx
+Shows final score as large number (e.g. &quot;4/5&quot;) with color coding.
+Lists each question with correct/incorrect icon + feedback text.
+Source timestamp chips for each question.
+&quot;Back to Chat&quot; button.
+
+SCRIPTS|scripts/ and docs/|Write utility scripts and documentation.
+
+FILE: scripts/seed_dev.py
+Python script to populate dev database with test data:
+1. Create test user: email=test@example.com, clerk_id=test_clerk_id, plan=pro
+2. Create teacher profile: name=&quot;3Blue1Brown Style&quot;, description=&quot;Math explanations with visual intuition&quot;
+3. Create 1 sample media_source (status=completed)
+4. Create 10 sample transcript_chunks
+5. Create 1 student_session with undergrad level
+6. Create 5 sample messages alternating user/assistant
+7. Create UserStats for the test user
+Print &quot;Seed complete!&quot; with record counts.
+Use asyncio.run() with SQLAlchemy async session.
+
+FILE: scripts/create_qdrant_collection.py
+Standalone script to ensure Qdrant collection exists:
+import asyncio
+from app.services.vector_store import vector_store
+async def main():
+    await vector_store.ensure_collection()
+    print(&quot;Qdrant collection ready!&quot;)
+asyncio.run(main())
+
+FILE: scripts/migrate.sh
+#!/bin/bash
+Check DATABASE_URL is set, then run:
+cd apps/api &amp;&amp; alembic upgrade head
+echo &quot;Migrations complete!&quot;
+
+FILE: docs/architecture.md
+Write a comprehensive architecture document:
+- System overview (3 paragraphs)
+- ASCII diagram of the 6-layer pipeline
+- Data flow description (step by step for a user session)
+- Technology choices and rationale (table: tech -&gt; reason -&gt; alternatives considered)
+- Database schema overview
+- Deployment architecture
+- Security model
+
+FILE: docs/deployment.md
+Step-by-step production deployment guide:
+1. Set up Cloudflare R2 bucket
+2. Configure Clerk application
+3. Set up Stripe products and webhooks
+4. Deploy PostgreSQL (Railway/Neon)
+5. Deploy Redis (Upstash)
+6. Deploy Qdrant (Qdrant Cloud or self-hosted)
+7. Deploy API to Railway (environment variables list)
+8. Deploy worker to Railway
+9. Deploy web to Vercel
+10. Run initial migrations
+11. Test end-to-end with seed data</div>
+  </div>
+</div>
+
+  <div class="no-results" id="no-results" style="display:none">No prompts match your search.</div>
+</div>
+</div>
+<script>
+const ALL_IDS = ["SETUP-1", "SETUP-2", "SETUP-3", "PACKAGES-1", "BACKEND-1", "BACKEND-2", "BACKEND-3", "BACKEND-4", "BACKEND-5", "BACKEND-6", "SERVICES-1", "SERVICES-2", "SERVICES-3", "SERVICES-4", "SERVICES-5", "SERVICES-6", "SERVICES-7", "TASKS-1", "TASKS-2", "ROUTERS-1", "FRONTEND-1", "FRONTEND-2", "FRONTEND-3", "FRONTEND-4"];
+const BANNERS = {"SETUP":{bg:"rgba(100,116,139,0.1)",border:"rgba(100,116,139,0.3)",color:"#64748B",name:"⚙️ Project Setup",count:3},"PACKAGES":{bg:"rgba(121,134,203,0.1)",border:"rgba(121,134,203,0.3)",color:"#7986CB",name:"📦 Shared Packages",count:1},"BACKEND":{bg:"rgba(255,213,79,0.1)",border:"rgba(255,213,79,0.3)",color:"#FFD54F",name:"🐍 Backend Foundation",count:6},"SERVICES":{bg:"rgba(6,182,212,0.1)",border:"rgba(6,182,212,0.3)",color:"#06B6D4",name:"⚡ API Services",count:7},"TASKS":{bg:"rgba(16,185,129,0.1)",border:"rgba(16,185,129,0.3)",color:"#10B981",name:"🔄 Celery Tasks",count:2},"ROUTERS":{bg:"rgba(139,92,246,0.1)",border:"rgba(139,92,246,0.3)",color:"#8B5CF6",name:"🛣️ API Routers",count:1},"FRONTEND":{bg:"rgba(79,195,247,0.1)",border:"rgba(79,195,247,0.3)",color:"#4FC3F7",name:"🌐 Frontend",count:4},};
+let activeId = ALL_IDS[0];
+
+function goto(id) {
+  // Deactivate all sidebar items
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sb-'+id)?.classList.add('active');
+  activeId = id;
+  // Scroll card into view and open it
+  const card = document.getElementById('card-'+id);
+  if (card) {
+    card.scrollIntoView({behavior:'smooth', block:'start'});
+    if (!card.classList.contains('open')) toggle(id);
+  }
+}
+
+function toggle(id) {
+  const card = document.getElementById('card-'+id);
+  const body = document.getElementById('body-'+id);
+  const tog = document.getElementById('tog-'+id);
+  if (!card) return;
+  const wasOpen = card.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.pcard.open').forEach(c => {
+    c.classList.remove('open');
+    c.querySelector('.pbody')?.classList.remove('show');
+  });
+  if (!wasOpen) {
+    card.classList.add('open');
+    body.classList.add('show');
+    // Update sidebar
+    document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('sb-'+id)?.classList.add('active');
+    activeId = id;
+  }
+}
+
+function cp(id, e) {
+  e.stopPropagation();
+  const text = document.getElementById('txt-'+id)?.innerText || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('cb-'+id);
+    if (!btn) return;
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function doSearch(q) {
+  const query = q.toLowerCase().trim();
+  let visible = 0;
+  ALL_IDS.forEach(id => {
+    const card = document.getElementById('card-'+id);
+    if (!card) return;
+    if (!query) {
+      card.classList.remove('hidden');
+      visible++;
+      return;
+    }
+    const title = card.querySelector('.ptitle')?.textContent.toLowerCase() || '';
+    const content = document.getElementById('txt-'+id)?.textContent.toLowerCase() || '';
+    const pidx = id.toLowerCase();
+    if (title.includes(query) || content.includes(query) || pidx.includes(query)) {
+      card.classList.remove('hidden');
+      visible++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+}
+
+// Open first card on load
+window.addEventListener('load', () => {
+  const firstId = ALL_IDS[0];
+  if (firstId) {
+    toggle(firstId);
+    document.getElementById('sb-'+firstId)?.classList.add('active');
+  }
+});
+</script>
+</body>
+</html>

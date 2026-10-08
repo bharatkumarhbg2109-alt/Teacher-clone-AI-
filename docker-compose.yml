@@ -1,0 +1,56 @@
+# AI Teacher Clone — Docker Compose
+# Quickstart:
+#   docker compose up --build
+#   Open http://localhost:5175 in your browser
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-teacher-backend
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - backend-graph-db:/app/graph_db
+      - backend-uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - ai-teacher-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ai-teacher-frontend
+    ports:
+      - "5175:5175"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - ai-teacher-net
+
+  # Optional local Ollama LLM service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai-teacher-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - ai-teacher-net
+
+volumes:
+  backend-graph-db:
+  backend-uploads:
+  ollama-models:
+
+networks:
+  ai-teacher-net:
+    driver: bridge

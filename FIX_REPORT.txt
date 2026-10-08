@@ -1,0 +1,105 @@
+================================
+TEACHCLONE FIX REPORT
+Date: 2026-08-09
+================================
+RESULT: SUCCESS
+
+Iterations run: 1 (single deep pass down one dependency chain; each fix was
+tested before the next was applied)
+
+--------------------------------
+ROOT CAUSE FOUND
+--------------------------------
+The "Not Found" popup in the screenshot was NOT a dead server. Both servers
+were running; the frontend's "Add YouTube" call (POST /media/youtube) hit a
+route that did not exist -> HTTP 404 {"detail":"Not Found"}.
+
+Reason: apps/api/app/main.py registers most routers through
+`_include_optional()`, which SILENTLY swallows ModuleNotFoundError. The
+interpreter actually running the backend (system/Anaconda Python — the
+project's own apps/api/.venv is a broken shim created under another user) was
+missing several packages the routers import, so those whole routers were
+dropped at startup and every call to them 404'd.
+
+Missing packages and the routers they silently killed:
+  - sse_starlette   -> media router (the screenshot bug) + chat router
+  - anthropic       -> quizzes, export, v1_api routers
+  - qdrant_client   -> chat, quizzes, v1_api (import chain via vector_store)
+  - celery          -> POST /media/youtube 500 (task dispatch import)
+  - yt_dlp          -> YouTube download step
+
+Three further issues surfaced behind the 404 once the routers loaded:
+  1. celery INLINE_TASKS mode called task.update_state() against a REDIS
+     result backend that is not running -> 500
+     ("You need to install the redis library ...").
+  2. audio_extractor.py / dna_extractor.py launched the bare `yt-dlp`
+     command, but yt-dlp.exe is in Anaconda\Scripts which is not on the
+     backend process PATH -> FileNotFoundError [WinError 2].
+  3. A stale Next.js .next cache made some existing routes
+     (/dashboard, /profiles/[id]) phantom-404 in the browser.
+
+--------------------------------
+FIX APPLIED
+--------------------------------
+1. Installed the missing packages into the interpreter running the backend:
+     python -m pip install "sse-starlette==2.1.3" "starlette==0.41.3" \
+       anthropic "qdrant-client==1.9.1" "celery==5.4.0" yt-dlp
+   Notes:
+     - starlette pinned to 0.41.3 so it stays <0.42 (fastapi 0.115.6 needs it);
+       the latest sse-starlette had pulled starlette 1.6.0 and broken fastapi.
+     - qdrant-client pinned to 1.9.1; newer versions removed
+       `NamedSparseVector`, which app/services/vector_store.py imports.
+
+2. apps/api/app/worker/__init__.py — under INLINE_TASKS (local no-infra mode):
+     - result_backend = "cache+memory://"  (update_state needs a backend but
+       no Redis in local mode)
+     - task_eager_propagates = False        (a failed ingest marks the source
+       "failed" instead of 500'ing the request)
+
+3. apps/api/app/services/audio_extractor.py and .../dna_extractor.py — invoke
+   yt-dlp as `python -m yt_dlp` when the `yt-dlp` console script is not on
+   PATH, so downloads work regardless of how the server is launched.
+
+4. Cleared apps/web/.next and restarted `next dev` -> all routes serve 200.
+
+(No production behavior changed: items 2 are gated on INLINE_TASKS=true, and
+item 3 only adds a PATH-independent fallback.)
+
+--------------------------------
+TO START THE PROJECT
+--------------------------------
+Terminal 1 (Backend):
+  cd "E:\AI Teacher Clone\teacher_project - Copy\apps\api"
+  "C:\Users\bhara\anaconda3\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Terminal 2 (Frontend):
+  cd "E:\AI Teacher Clone\teacher_project - Copy\apps\web"
+  npm run dev
+
+(or just double-click start_backend.bat then start_frontend.bat)
+
+--------------------------------
+VERIFICATION
+--------------------------------
+  Backend Health : GET /health -> 200
+      {"status":"ok","version":"0.1.0","dev_mode":true}
+  Media router   : POST /media/youtube (invalid url) -> 400 "Invalid YouTube URL"
+                   POST /media/youtube (valid url)   -> 201 (was 404 "Not Found")
+                   -> source processed to status "completed" (download +
+                      Whisper transcription ran inline)
+  GET /media/profile/{id} -> 200 with the source list (frontend "Content
+      library" now renders; badge shows "Ready")
+  Frontend       : http://localhost:3000/profiles/<id> -> 200, no console
+      errors, Add-content form works, no "Not Found" popup.
+
+  Route groups now registered:
+    /auth /billing /chat /checkpoints /discover /dna /health /media
+    /organizations /profiles /quizzes /sessions /storage /t /users /v1
+    /voice /webhooks
+
+KNOWN LIMITATION
+  YouTube occasionally blocks server-side downloads (bot detection); such a
+  video is recorded as source status "Failed" with the yt-dlp reason — this is
+  an external limitation, not a code error. FFmpeg + Whisper (medium) are
+  installed and working; yt-dlp runs via the Python module.
+================================

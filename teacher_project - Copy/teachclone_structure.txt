@@ -1,0 +1,1108 @@
+==============================================================================
+  TEACHCLONE — COMPLETE PROJECT FILE & FOLDER STRUCTURE
+==============================================================================
+
+  Legend:
+  📁 Directory   📄 .ts/.tsx   🐍 .py   ⚙️ .yml   {} .json
+  🎨 .css   📝 .md   🐳 Docker   🔑 .env   💻 .sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 1 — VISUAL FILE TREE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+teachclone/
+├── 📁  apps/
+├── 📁  web/
+├── 📁  app/
+├── 📁  (auth)/
+    ├── 📁  sign-in/
+    ├── 📄  page.tsx
+    ├── 📁  sign-up/
+    ├── 📄  page.tsx
+├── 📁  (protected)/
+    ├── 📁  dashboard/
+    ├── 📄  page.tsx
+    ├── 📄  loading.tsx
+    ├── 📄  error.tsx
+    ├── 📁  onboarding/
+    ├── 📄  page.tsx
+    ├── 📁  chat/
+    ├── 📁  [session_id]/
+        ├── 📄  page.tsx
+        ├── 📄  loading.tsx
+        ├── 📁  _components/
+        ├── 📄  ChatThread.tsx
+        ├── 📄  SessionSidebar.tsx
+        ├── 📄  QuizTrigger.tsx
+    ├── 📁  profiles/
+    ├── 📁  new/
+        ├── 📄  page.tsx
+    ├── 📁  [id]/
+        ├── 📄  page.tsx
+        ├── 📁  _components/
+    ├── 📁  progress/
+    ├── 📄  page.tsx
+    ├── 📁  pricing/
+    ├── 📄  page.tsx
+    ├── 📁  settings/
+    ├── 📁  account/
+        ├── 📄  page.tsx
+    ├── 📁  api/
+        ├── 📄  page.tsx
+    ├── 📁  admin/
+    ├── 📁  [org_slug]/
+        ├── 📁  dashboard/
+        ├── 📄  page.tsx
+        ├── 📁  members/
+        ├── 📄  page.tsx
+        ├── 📁  profiles/
+        ├── 📄  page.tsx
+        ├── 📁  analytics/
+        ├── 📄  page.tsx
+        ├── 📁  settings/
+        ├── 📁  general/
+            ├── 📄  page.tsx
+        ├── 📁  security/
+            ├── 📄  page.tsx
+        ├── 📁  billing/
+            ├── 📄  page.tsx
+├── 📁  api/
+    ├── 📁  webhooks/
+    ├── 📁  clerk/
+        ├── 📄  route.ts
+├── 📄  layout.tsx
+├── 📄  page.tsx
+├── 🎨  globals.css
+├── 📁  components/
+├── 📁  ui/
+├── 📁  chat/
+    ├── 📄  MessageBubble.tsx
+    ├── 📄  CitationChip.tsx
+    ├── 📄  StreamingIndicator.tsx
+    ├── 📄  ChatInput.tsx
+    ├── 📄  VoiceButton.tsx
+├── 📁  media/
+    ├── 📄  MediaDropzone.tsx
+    ├── 📄  ProcessingProgress.tsx
+    ├── 📄  YouTubeInput.tsx
+├── 📁  quiz/
+    ├── 📄  QuizModal.tsx
+    ├── 📄  QuizQuestion.tsx
+    ├── 📄  QuizResults.tsx
+├── 📁  profile/
+    ├── 📄  TeacherProfileCard.tsx
+    ├── 📄  StyleProfileBadges.tsx
+    ├── 📄  LevelSelector.tsx
+├── 📁  gamification/
+    ├── 📄  XPBar.tsx
+    ├── 📄  BadgeGrid.tsx
+    ├── 📄  StreakBadge.tsx
+    ├── 📄  LevelUpModal.tsx
+├── 📁  admin/
+    ├── 📄  MembersTable.tsx
+    ├── 📄  AnalyticsCharts.tsx
+    ├── 📄  Leaderboard.tsx
+├── 📁  layout/
+    ├── 📄  Sidebar.tsx
+    ├── 📄  Header.tsx
+    ├── 📄  MobileNav.tsx
+├── 📁  lib/
+├── 📄  api-client.ts
+├── 📁  hooks/
+    ├── 📄  useMediaUpload.ts
+    ├── 📄  useVoiceInput.ts
+    ├── 📄  useStreamingChat.ts
+    ├── 📄  useQuota.ts
+├── 📁  stores/
+    ├── 📄  useSessionStore.ts
+    ├── 📄  useUserStore.ts
+├── 📁  utils/
+    ├── 📄  formatters.ts
+    ├── 📄  validators.ts
+├── 📁  public/
+├── 📄  middleware.ts
+├── {}  next.config.js
+├── 📄  tailwind.config.ts
+├── {}  tsconfig.json
+├── {}  package.json
+├── 📁  api/
+├── 📁  app/
+├── 🐍  main.py
+├── 🐍  config.py
+├── 🐍  dependencies.py
+├── 📁  db/
+    ├── 🐍  session.py
+    ├── 🐍  base.py
+    ├── 📁  migrations/
+    ├── 🐍  env.py
+    ├── 🐍  script.py.mako
+    ├── 📁  versions/
+        ├── 🐍  001_initial_schema.py
+        ├── 🐍  002_add_gamification.py
+        ├── 🐍  003_add_audit_logs.py
+├── 📁  models/
+    ├── 🐍  user.py
+    ├── 🐍  organization.py
+    ├── 🐍  org_member.py
+    ├── 🐍  teacher_profile.py
+    ├── 🐍  media_source.py
+    ├── 🐍  transcript_chunk.py
+    ├── 🐍  processing_job.py
+    ├── 🐍  student_session.py
+    ├── 🐍  message.py
+    ├── 🐍  quiz.py
+    ├── 🐍  api_key.py
+    ├── 🐍  audit_log.py
+    ├── 🐍  user_stats.py
+    ├── 🐍  user_badge.py
+    ├── 🐍  usage_log.py
+├── 📁  schemas/
+    ├── 🐍  user.py
+    ├── 🐍  organization.py
+    ├── 🐍  teacher_profile.py
+    ├── 🐍  media.py
+    ├── 🐍  session.py
+    ├── 🐍  chat.py
+    ├── 🐍  quiz.py
+    ├── 🐍  billing.py
+    ├── 🐍  common.py
+├── 📁  routers/
+    ├── 🐍  health.py
+    ├── 🐍  auth.py
+    ├── 🐍  users.py
+    ├── 🐍  organizations.py
+    ├── 🐍  teacher_profiles.py
+    ├── 🐍  media.py
+    ├── 🐍  sessions.py
+    ├── 🐍  chat.py
+    ├── 🐍  quizzes.py
+    ├── 🐍  billing.py
+    ├── 🐍  voice.py
+    ├── 🐍  export.py
+    ├── 🐍  webhooks.py
+    ├── 📁  v1/
+    ├── 🐍  __init__.py
+    ├── 🐍  profiles.py
+    ├── 🐍  sessions.py
+    ├── 🐍  chat.py
+├── 📁  services/
+    ├── 🐍  storage.py
+    ├── 🐍  audio_extractor.py
+    ├── 🐍  transcriber.py
+    ├── 🐍  frame_sampler.py
+    ├── 🐍  vision_analyzer.py
+    ├── 🐍  style_extractor.py
+    ├── 🐍  embedder.py
+    ├── 🐍  vector_store.py
+    ├── 🐍  retrieval.py
+    ├── 🐍  prompt_builder.py
+    ├── 🐍  quiz_generator.py
+    ├── 🐍  session_summarizer.py
+    ├── 🐍  export_service.py
+    ├── 🐍  tts_service.py
+    ├── 🐍  billing.py
+    ├── 🐍  gamification.py
+    ├── 🐍  api_keys.py
+    ├── 🐍  email.py
+├── 📁  tasks/
+    ├── 🐍  __init__.py
+    ├── 🐍  media_tasks.py
+    ├── 🐍  embedding_tasks.py
+    ├── 🐍  style_tasks.py
+    ├── 🐍  vision_tasks.py
+├── 📁  worker/
+    ├── 🐍  __init__.py
+├── 📁  middleware/
+    ├── 🐍  auth.py
+    ├── 🐍  rate_limit.py
+    ├── 🐍  audit.py
+├── {}  alembic.ini
+├── 🐍  requirements.txt
+├── 🐳  Dockerfile
+├── 📁  packages/
+├── 📁  types/
+├── 📁  src/
+├── 📄  index.ts
+├── {}  package.json
+├── {}  tsconfig.json
+├── 📁  config/
+├── {}  eslint-preset.js
+├── {}  tsconfig-base.json
+├── {}  prettier.config.js
+├── 📁  docker/
+├── ⚙️  docker-compose.yml
+├── ⚙️  docker-compose.prod.yml
+├── 🐳  Dockerfile.api
+├── 🐳  Dockerfile.worker
+├── 📁  .github/
+├── 📁  workflows/
+├── ⚙️  ci.yml
+├── ⚙️  deploy.yml
+├── 📁  scripts/
+├── 🐍  seed_dev.py
+├── 🐍  create_qdrant_collection.py
+├── 💻  migrate.sh
+├── 📁  docs/
+├── 📝  architecture.md
+├── 📝  api-reference.md
+├── 📝  deployment.md
+├── ⚙️  pnpm-workspace.yaml
+├── 🔑  .env.example
+├── 📝  .gitignore
+├── 📝  README.md
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 2 — FILE & FOLDER DESCRIPTIONS
+  (Click any file in the interactive HTML to see these details)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ──────────────────────────────────────────────────────────────────────────
+  ⚙️   ROOT
+  ──────────────────────────────────────────────────────────────────────────
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  📦  teachclone                                             │
+  │  Type: ROOT                                                 │
+  └────────────────────────────────────────────────────────────┘
+    Monorepo root. Managed with pnpm workspaces. Contains two apps (web +
+    api) and shared packages. Run everything from here.
+    Key points:
+      •  pnpm install — installs all workspace deps
+      •  pnpm dev — starts both web and api in parallel
+      •  docker compose up — starts Postgres, Redis, Qdrant, API, Worker, Web
+    Structure / Example:
+        teachclone/
+        ├── apps/           ← web + api apps
+        ├── packages/       ← shared types + config
+        ├── docker/         ← compose + Dockerfiles
+        ├── .github/        ← CI/CD workflows
+        ├── scripts/        ← dev utility scripts
+        └── docs/           ← architecture docs
+
+  ──────────────────────────────────────────────────────────────────────────
+  🗂️   APPLICATIONS
+  ──────────────────────────────────────────────────────────────────────────
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  🗂️  apps                                                   │
+  │  Type: DIR                                                  │
+  └────────────────────────────────────────────────────────────┘
+    Contains the two runnable applications: the Next.js frontend and the
+    FastAPI backend.
+
+  ──────────────────────────────────────────────────────────────────────────
+  🌐  FRONTEND  (Next.js 14)
+  ──────────────────────────────────────────────────────────────────────────
+
+    ┌────────────────────────────────────────────────────────────┐
+    │  🌐  apps/web                                               │
+    │  Type: NEXT.JS APP                                          │
+    └────────────────────────────────────────────────────────────┘
+      Next.js 14 frontend with App Router. TypeScript, Tailwind CSS,
+      shadcn/ui. Deployed to Vercel.
+      Key points:
+        •  App Router with route groups: (auth) and (protected)
+        •  Clerk for authentication + middleware
+        •  Vercel AI SDK for streaming chat
+        •  Zustand + React Query for state management
+      Tech stack:  Next.js 14 | TypeScript | Tailwind CSS | shadcn/ui | Clerk | Stripe | Vercel AI SDK
+
+      ┌────────────────────────────────────────────────────────────┐
+      │  📁  apps/web/app                                           │
+      │  Type: NEXT.JS PAGES                                        │
+      └────────────────────────────────────────────────────────────┘
+        All routes for the web app using Next.js App Router. Each folder = a
+        URL route. Route groups in parentheses don\
+        Key points:
+          •  (auth) group → /sign-in, /sign-up (public, Clerk-handled)
+          •  (protected) group → all authenticated pages
+          •  app/api/ → server-side API routes (webhooks)
+          •  layout.tsx at root wraps every page with ClerkProvider + QueryProvider
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🔐  apps/web/app/(auth)                                    │
+        │  Type: ROUTE GROUP                                          │
+        └────────────────────────────────────────────────────────────┘
+          Public auth pages. These are not protected by Clerk middleware.
+          Contains sign-in and sign-up pages powered by Clerk components.
+          Structure / Example:
+              (auth)/
+              ├── sign-in/[[...sign-in]]/page.tsx   ← Clerk <SignIn />
+              └── sign-up/[[...sign-up]]/page.tsx   ← Clerk <SignUp />
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🔒  apps/web/app/(protected)                               │
+        │  Type: ROUTE GROUP                                          │
+        └────────────────────────────────────────────────────────────┘
+          All authenticated routes. Every page here is protected by Clerk
+          middleware — unauthenticated users are redirected to /sign-in.
+          Structure / Example:
+              (protected)/
+              ├── dashboard/         ← /dashboard — main hub
+              ├── onboarding/        ← /onboarding — post-signup wizard
+              ├── chat/[session_id]/ ← /chat/abc123 — AI teaching session
+              ├── profiles/
+              │   ├── new/           ← create teacher profile
+              │   └── [id]/          ← manage a profile
+              ├── progress/          ← XP, streaks, badges
+              ├── pricing/           ← plan comparison + upgrade
+              ├── settings/
+              │   ├── account/       ← profile, preferences
+              │   └── api/           ← API key management
+              └── admin/[org_slug]/  ← institution admin panel
+
+          ┌────────────────────────────────────────────────────────────┐
+          │  🏠  apps/web/app/(protected)/dashboard                     │
+          │  Type: PAGE                                                 │
+          └────────────────────────────────────────────────────────────┘
+            Main hub after login. Shows teacher profile cards, recent sessions,
+            monthly usage bar, and quick-action buttons.
+            Key points:
+              •  Fetches GET /teacher-profiles (user\
+              •  ,
+              •  ,
+              •  ,
+            Structure / Example:
+                dashboard/
+                ├── page.tsx       ← server component, fetches data
+                ├── loading.tsx    ← skeleton loader
+                └── error.tsx      ← error boundary
+
+            ┌────────────────────────────────────────────────────────────┐
+            │  💬  apps/web/app/(protected)/chat/[session_id]             │
+            │  Type: PAGE                                                 │
+            └────────────────────────────────────────────────────────────┘
+              The core AI teaching chat interface. Streaming messages, citation
+              chips, voice input, quiz trigger, and session controls.
+              Key points:
+                •  useChat from Vercel AI SDK for streaming
+                •  Left sidebar: session info + teacher profile + export button
+                •  Message thread: markdown rendering + citation chips
+                •  Bottom input: text + mic button + send
+                •  "Simpler ↓" / "Deeper ↑" buttons below each AI message
+              Structure / Example:
+                  chat/[session_id]/
+                  ├── page.tsx          ← fetches session + messages
+                  ├── loading.tsx
+                  └── _components/      ← page-local components
+                      ├── ChatThread.tsx
+                      ├── SessionSidebar.tsx
+                      └── QuizTrigger.tsx
+
+            ┌────────────────────────────────────────────────────────────┐
+            │  🏢  apps/web/app/(protected)/admin/[org_slug]              │
+            │  Type: ADMIN PAGES                                          │
+            └────────────────────────────────────────────────────────────┘
+              Institution admin panel. Only accessible by org admins. Manage
+              members, profiles, analytics, and security settings.
+              Structure / Example:
+                  admin/[org_slug]/
+                  ├── dashboard/    ← overview stats + charts
+                  ├── members/      ← invite, remove, change roles
+                  ├── profiles/     ← manage org teacher profiles
+                  ├── analytics/    ← student progress, usage
+                  └── settings/
+                      ├── general/  ← org name, logo
+                      ├── security/ ← SSO, 2FA, allowed domains
+                      └── billing/  ← seats, invoices
+
+      ┌────────────────────────────────────────────────────────────┐
+      │  🧩  apps/web/components                                    │
+      │  Type: COMPONENTS                                           │
+      └────────────────────────────────────────────────────────────┘
+        All reusable React components, organized by feature domain. Each
+        subfolder owns a specific product concern.
+        Structure / Example:
+            components/
+            ├── ui/            ← shadcn/ui base components (auto-generated)
+            ├── chat/          ← chat bubble, citations, streaming indicator
+            ├── media/         ← dropzone, progress bar, YouTube input
+            ├── quiz/          ← quiz modal, question types, results
+            ├── profile/       ← teacher profile card, style badges
+            ├── gamification/  ← XP bar, badge grid, level-up modal
+            ├── admin/         ← members table, analytics charts
+            └── layout/        ← sidebar, header, mobile nav
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  💬  apps/web/components/chat                               │
+        │  Type: COMPONENTS                                           │
+        └────────────────────────────────────────────────────────────┘
+          Chat UI components. These compose the main /chat/[session_id]
+          experience.
+          Structure / Example:
+              chat/
+              ├── MessageBubble.tsx      ← renders user or AI message with markdown
+              ├── CitationChip.tsx       ← "[0:42]" badge with timestamp tooltip
+              ├── StreamingIndicator.tsx ← animated "..." while AI is responding
+              ├── ChatInput.tsx          ← textarea + send + mic button
+              └── VoiceButton.tsx        ← mic icon, handles SpeechRecognition API
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🎬  apps/web/components/media                              │
+        │  Type: COMPONENTS                                           │
+        └────────────────────────────────────────────────────────────┘
+          Media upload UI. Handles YouTube URL input and drag-and-drop file
+          uploads with real-time progress.
+          Structure / Example:
+              media/
+              ├── MediaDropzone.tsx       ← drag-and-drop area, calls useMediaUpload hook
+              ├── ProcessingProgress.tsx  ← connects to SSE, shows stage + progress bar
+              └── YouTubeInput.tsx        ← URL input with format validation
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  📝  apps/web/components/quiz                               │
+        │  Type: COMPONENTS                                           │
+        └────────────────────────────────────────────────────────────┘
+          Quiz generation and taking UI. Handles MCQ, true/false, and
+          short-answer questions.
+          Structure / Example:
+              quiz/
+              ├── QuizModal.tsx     ← full-screen modal wrapping the quiz flow
+              ├── QuizQuestion.tsx  ← renders one question (adapts to type)
+              └── QuizResults.tsx   ← score, per-question feedback, source clips
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🏆  apps/web/components/gamification                       │
+        │  Type: COMPONENTS                                           │
+        └────────────────────────────────────────────────────────────┘
+          XP and achievement UI. Drives daily retention through visible
+          progress.
+          Structure / Example:
+              gamification/
+              ├── XPBar.tsx          ← animated level progress bar
+              ├── BadgeGrid.tsx      ← all badges: earned (glow) / locked (dim)
+              ├── StreakBadge.tsx    ← "🔥 7 days" shown in chat sidebar
+              └── LevelUpModal.tsx   ← celebration animation on level up
+
+      ┌────────────────────────────────────────────────────────────┐
+      │  🔧  apps/web/lib                                           │
+      │  Type: LIB                                                  │
+      └────────────────────────────────────────────────────────────┘
+        All non-component frontend logic: API client, custom hooks, Zustand
+        stores, and utility functions.
+        Structure / Example:
+            lib/
+            ├── api-client.ts     ← typed axios instance with Clerk auth interceptor
+            ├── hooks/            ← custom React hooks
+            ├── stores/           ← Zustand global stores
+            └── utils/            ← formatters, validators, helpers
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🔌  apps/web/lib/api-client.ts                             │
+        │  Type: TS FILE                                              │
+        └────────────────────────────────────────────────────────────┘
+          Typed API client. Axios instance preconfigured with base URL, auth
+          interceptor (attaches Clerk JWT), and error normalization.
+          Key points:
+            •  Base URL: process.env.NEXT_PUBLIC_API_URL
+            •  Request interceptor: await clerk.session?.getToken() → Bearer header
+            •  Response interceptor: maps errors to { message, code, status }
+            •  Exports typed functions: getMe(), syncUser(), getProfiles(), etc.
+          Structure / Example:
+              // Usage
+              import api from '@/lib/api-client'
+              const profiles = await api.get<TeacherProfile[]>('/teacher-profiles')
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  ⚓  apps/web/lib/hooks                                     │
+        │  Type: HOOKS                                                │
+        └────────────────────────────────────────────────────────────┘
+          Custom React hooks encapsulating complex stateful logic.
+          Structure / Example:
+              hooks/
+              ├── useMediaUpload.ts    ← presign → upload to R2 → complete (with progress %)
+              ├── useVoiceInput.ts     ← SpeechRecognition API wrapper + MediaRecorder fallback
+              ├── useStreamingChat.ts  ← wraps Vercel AI SDK useChat for TeachClone API format
+              └── useQuota.ts          ← fetches /billing/status, returns { canUpload, canChat }
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🗃️  apps/web/lib/stores                                    │
+        │  Type: ZUSTAND                                              │
+        └────────────────────────────────────────────────────────────┘
+          Zustand global state stores. Kept minimal — most server state lives in
+          React Query.
+          Structure / Example:
+              stores/
+              ├── useSessionStore.ts  ← active session_id, student_profile, current_level
+              └── useUserStore.ts     ← current user, plan, org membership
+
+      ┌────────────────────────────────────────────────────────────┐
+      │  🛡️  apps/web/middleware.ts                                 │
+      │  Type: TS FILE                                              │
+      └────────────────────────────────────────────────────────────┘
+        Next.js middleware. Uses Clerk\
+        Structure / Example:
+            // Public routes (no auth needed)
+            publicRoutes: ['/', '/pricing', '/sign-in', '/sign-up', '/api/webhooks/(.*)']
+            
+            // After sign-in → redirect to /dashboard
+            // After sign-up → redirect to /onboarding
+            // Unauthenticated access to protected routes → redirect to /sign-in
+
+      ┌────────────────────────────────────────────────────────────┐
+      │  ⚙️  apps/web/next.config.js                                │
+      │  Type: CONFIG                                               │
+      └────────────────────────────────────────────────────────────┘
+        Next.js configuration. Sets up env vars, image domains, security
+        headers, and experimental features.
+        Key points:
+          •  images.domains: includes Clerk CDN + R2 public URL
+          •  headers(): CSP, X-Frame-Options, HSTS for all routes
+          •  experimental.serverActions: true
+          •  env: exposes NEXT_PUBLIC_* vars to browser
+
+  ──────────────────────────────────────────────────────────────────────────
+  🐍  BACKEND   (FastAPI)
+  ──────────────────────────────────────────────────────────────────────────
+
+    ┌────────────────────────────────────────────────────────────┐
+    │  🐍  apps/api                                               │
+    │  Type: FASTAPI APP                                          │
+    └────────────────────────────────────────────────────────────┘
+      Python FastAPI backend. Handles all business logic, AI orchestration,
+      and database operations. Deployed to Railway/Render.
+      Tech stack:  FastAPI | Python 3.11 | SQLAlchemy 2.0 | Celery | Qdrant | Anthropic Claude | OpenAI
+      Structure / Example:
+          api/
+          ├── app/           ← main application package
+          ├── alembic.ini    ← migration config
+          ├── requirements.txt
+          └── Dockerfile
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🚀  apps/api/app/main.py                                   │
+        │  Type: PY FILE                                              │
+        └────────────────────────────────────────────────────────────┘
+          FastAPI app factory. Creates the app, registers all routers, adds
+          middleware, and handles startup/shutdown events.
+          Key points:
+            •  Creates FastAPI(title="TeachClone API", version="1.0.0")
+            •  CORS middleware: allows NEXT_PUBLIC_APP_URL origin
+            •  Mounts all routers with prefixes (/auth, /media, /chat, /v1, etc.)
+            •  Startup: ensure Qdrant collection exists, test DB connection
+            •  Includes custom exception handlers for auth, quota, not-found errors
+          Structure / Example:
+              app = FastAPI(title="TeachClone API")
+              app.add_middleware(CORSMiddleware, allow_origins=[settings.APP_URL])
+              app.include_router(health.router)
+              app.include_router(auth.router, prefix="/auth")
+              app.include_router(media.router, prefix="/media")
+              app.include_router(chat.router, prefix="/chat")
+              app.include_router(v1.router, prefix="/v1")
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  ⚙️  apps/api/app/config.py                                 │
+        │  Type: PY FILE                                              │
+        └────────────────────────────────────────────────────────────┘
+          Pydantic Settings class. Reads all environment variables with type
+          validation and provides defaults.
+          Structure / Example:
+              class Settings(BaseSettings):
+                DATABASE_URL: str
+                REDIS_URL: str
+                QDRANT_URL: str = "http://localhost:6333"
+                OPENAI_API_KEY: str
+                ANTHROPIC_API_KEY: str
+                CLERK_SECRET_KEY: str
+                CLERK_WEBHOOK_SECRET: str
+                STRIPE_SECRET_KEY: str
+                R2_BUCKET_NAME: str
+                ...
+              settings = Settings()  # singleton, import everywhere
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🔗  apps/api/app/dependencies.py                           │
+        │  Type: PY FILE                                              │
+        └────────────────────────────────────────────────────────────┘
+          FastAPI dependency functions. Injected into route handlers via
+          Depends().
+          Structure / Example:
+              async def get_db() -> AsyncSession          # DB session per request
+              async def verify_clerk_token(auth: str)      # validate JWT, return clerk_id
+              async def get_current_user(db, token) -> User # fetch user from DB
+              async def require_plan(plan: str)             # 402 if user plan insufficient
+              async def check_api_key(key: str) -> User     # for /v1/* routes
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🗄️  apps/api/app/models                                    │
+        │  Type: MODELS                                               │
+        └────────────────────────────────────────────────────────────┘
+          SQLAlchemy ORM models. Each file maps to one or more database tables.
+          Structure / Example:
+              models/
+              ├── user.py            ← users table
+              ├── organization.py    ← organizations table
+              ├── org_member.py      ← org_members (user ↔ org junction)
+              ├── teacher_profile.py ← teacher_profiles + style_profile JSONB
+              ├── media_source.py    ← media_sources (videos/audio)
+              ├── transcript_chunk.py← transcript_chunks (text + timestamps)
+              ├── processing_job.py  ← job tracking per media_source
+              ├── student_session.py ← sessions with student_profile JSONB
+              ├── message.py         ← chat messages with citations JSONB
+              ├── quiz.py            ← quizzes + student_answers JSONB
+              ├── api_key.py         ← hashed API keys for /v1 access
+              ├── audit_log.py       ← immutable action log for enterprise
+              ├── user_stats.py      ← XP, streaks, level for gamification
+              ├── user_badge.py      ← earned badges per user
+              └── usage_log.py       ← event log for quota metering
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🛣️  apps/api/app/routers                                   │
+        │  Type: ROUTERS                                              │
+        └────────────────────────────────────────────────────────────┘
+          All API route definitions. Each file groups related endpoints. All
+          routes require auth via Depends(get_current_user) unless noted.
+          Structure / Example:
+              routers/
+              ├── health.py           ← GET /health (public)
+              ├── auth.py             ← POST /auth/sync, /webhooks/clerk (public)
+              ├── users.py            ← GET /users/me, PUT /users/me
+              ├── organizations.py    ← CRUD + member management
+              ├── teacher_profiles.py ← CRUD + style profile endpoint
+              ├── media.py            ← YouTube + file upload + status SSE
+              ├── sessions.py         ← create/list/delete sessions
+              ├── chat.py             ← POST /chat/{id}/message (streaming SSE)
+              ├── quizzes.py          ← generate + submit + results
+              ├── billing.py          ← checkout, portal, status + Stripe webhook
+              ├── voice.py            ← POST /voice/transcribe, /chat/{id}/speak
+              ├── export.py           ← POST /sessions/{id}/export (PDF/MD)
+              ├── webhooks.py         ← Clerk + Stripe webhook handlers
+              └── v1/                 ← Public API (API-key auth)
+                  ├── profiles.py
+                  ├── sessions.py
+                  └── chat.py
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  ⚡  apps/api/app/services                                  │
+        │  Type: SERVICES                                             │
+        └────────────────────────────────────────────────────────────┘
+          Business logic layer. Pure Python classes/functions. No FastAPI
+          dependencies — fully testable in isolation.
+          Structure / Example:
+              services/
+              ├── storage.py           ← Cloudflare R2 (presign, upload, delete)
+              ├── audio_extractor.py   ← yt-dlp + FFmpeg → .wav file
+              ├── transcriber.py       ← faster-whisper → timestamped chunks
+              ├── frame_sampler.py     ← FFmpeg frame extraction + dedup
+              ├── vision_analyzer.py   ← GPT-4o Vision → visual descriptions
+              ├── style_extractor.py   ← analyze transcript → StyleProfile JSON
+              ├── embedder.py          ← OpenAI text-embedding-3-large (batched)
+              ├── vector_store.py      ← Qdrant client (upsert, hybrid search, delete)
+              ├── retrieval.py         ← full hybrid retrieval pipeline
+              ├── prompt_builder.py    ← build_system_prompt(teacher, student, context)
+              ├── quiz_generator.py    ← generate + grade quizzes via Claude
+              ├── session_summarizer.py← summarize session → SessionSummary
+              ├── export_service.py    ← PDF (ReportLab) + Markdown export
+              ├── tts_service.py       ← OpenAI TTS → MP3 bytes (with R2 cache)
+              ├── billing.py           ← Stripe checkout, portal, quota checks
+              ├── gamification.py      ← award_xp(), check_badges(), streak logic
+              ├── api_keys.py          ← generate, hash, verify API keys
+              └── email.py             ← Resend SDK for invitation emails
+
+          ┌────────────────────────────────────────────────────────────┐
+          │  🧠  apps/api/app/services/prompt_builder.py                │
+          │  Type: PY FILE                                              │
+          └────────────────────────────────────────────────────────────┘
+            The most critical file in the codebase. Dynamically builds the LLM
+            system prompt by combining teacher style, student profile, and
+            retrieved content.
+            Key points:
+              •  build_system_prompt(teacher_profile, student_session, context_chunks) → str
+              •  LEVEL_INSTRUCTIONS dict: per-level vocabulary guidance (k5 → professional)
+              •  STYLE_INSTRUCTIONS dict: per-learning-style explanation ordering
+              •  format_context_chunks(): formats RAG results as numbered knowledge entries
+              •  Re-evaluated on every chat turn — never cached
+            Structure / Example:
+                def build_system_prompt(teacher, session, chunks) -> str:
+                  style = teacher.style_profile
+                  student = session.student_profile
+                  level = session.current_effective_level
+                  return f"""You are an AI version of {teacher.name}...
+                  TEACHER STYLE: {style.tone_type}, {style.explanation_pattern}
+                  STUDENT LEVEL: {level} — {LEVEL_INSTRUCTIONS[level]}
+                  KNOWLEDGE BASE:
+                  {format_context_chunks(chunks)}
+                  RULES: ..."""
+
+          ┌────────────────────────────────────────────────────────────┐
+          │  🎭  apps/api/app/services/style_extractor.py               │
+          │  Type: PY FILE                                              │
+          └────────────────────────────────────────────────────────────┘
+            Extracts a structured StyleProfile from transcript chunks. Combines
+            statistical NLP analysis with LLM classification.
+            Key points:
+              •  Flesch-Kincaid grade level via textstat library
+              •  Analogy density: regex search for "like","imagine","think of","similar to"
+              •  Signature phrase extraction: Counter on 3-5 word n-grams
+              •  LLM analysis via Claude: tone_type, explanation_pattern, pacing
+              •  Averaging: if teacher has multiple videos, profiles are averaged
+            Structure / Example:
+                class StyleExtractor:
+                  async def extract(self, chunks) -> StyleProfile:
+                    text = join(chunks)
+                    stats = {
+                      vocabulary_score: flesch_kincaid(text),    # textstat
+                      avg_sentence_length: nltk.sent_tokenize(),
+                      analogy_density: regex_count(ANALOGY_WORDS),
+                      signature_phrases: top_ngrams(text, n=3-5)
+                    }
+                    llm = await self._llm_analyze(chunks[:15])   # Claude
+                    return StyleProfile(**stats, **llm)
+
+          ┌────────────────────────────────────────────────────────────┐
+          │  🔍  apps/api/app/services/vector_store.py                  │
+          │  Type: PY FILE                                              │
+          └────────────────────────────────────────────────────────────┘
+            Qdrant vector database client. Manages the collection, upserts
+            embeddings, and performs hybrid search.
+            Key points:
+              •  Collection: "teachclone_chunks" with 3072-dim dense + sparse vectors
+              •  Hybrid search: dense (semantic) + BM25 sparse, merged with RRF
+              •  Namespace isolation: filter by teacher_profile_id on every search
+              •  Metadata stored in payload: text, timestamps, media_source_id, content_type
+            Structure / Example:
+                async def hybrid_search(query_dense, query_sparse, teacher_profile_id, top_k=8):
+                  dense_results = await client.search(
+                    collection_name=COLLECTION,
+                    query_vector=query_dense,
+                    query_filter=Filter(must=[FieldCondition(key="teacher_profile_id"...)])
+                  )
+                  sparse_results = await client.search(using="sparse", ...)
+                  return rrf_merge(dense_results, sparse_results, k=60)[:top_k]
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  ⚙️  apps/api/app/tasks                                     │
+        │  Type: CELERY TASKS                                         │
+        └────────────────────────────────────────────────────────────┘
+          Celery background task modules. These handle all long-running AI
+          processing that can\
+          Structure / Example:
+              tasks/
+              ├── media_tasks.py      ← process_youtube, process_uploaded_file
+              │                          (download audio, run transcription, save chunks)
+              ├── embedding_tasks.py  ← embed_and_store
+              │                          (batch embed chunks, upsert to Qdrant)
+              ├── style_tasks.py      ← extract_style
+              │                          (analyze full transcript → StyleProfile JSON)
+              └── vision_tasks.py     ← analyze_frames
+              │                          (sample frames, GPT-4o vision, save visual chunks)
+              │
+              │   TASK CHAIN (triggered after media upload):
+              │   process_youtube → embed_and_store ┐
+              │                                      ├─ chord → extract_style
+              │                     analyze_frames  ┘
+
+  ┌────────────────────────────────────────────────────────────┐
+  │    media.*                                                │
+  │  Type:                                                      │
+  └────────────────────────────────────────────────────────────┘
+
+  ┌────────────────────────────────────────────────────────────┐
+  │    ai.*                                                   │
+  │  Type:                                                      │
+  └────────────────────────────────────────────────────────────┘
+
+        ┌────────────────────────────────────────────────────────────┐
+        │  🗄️  apps/api/app/db                                        │
+        │  Type: DATABASE                                             │
+        └────────────────────────────────────────────────────────────┘
+          Database connection and Alembic migration setup.
+          Structure / Example:
+              db/
+              ├── session.py      ← async engine + AsyncSessionLocal factory
+              ├── base.py         ← imports ALL models (required for Alembic autogenerate)
+              └── migrations/     ← Alembic migration files
+                  ├── env.py
+                  ├── script.py.mako
+                  └── versions/
+                      ├── 001_initial_schema.py
+                      ├── 002_add_gamification.py
+                      └── 003_add_audit_logs.py
+
+  ──────────────────────────────────────────────────────────────────────────
+  📦  SHARED PACKAGES
+  ──────────────────────────────────────────────────────────────────────────
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  📦  packages                                               │
+  │  Type: PACKAGES                                             │
+  └────────────────────────────────────────────────────────────┘
+    Shared packages used by both apps. Published as internal workspace
+    packages via pnpm workspaces.
+    Structure / Example:
+        packages/
+        ├── types/    ← @teachclone/types — TypeScript interfaces
+        └── config/   ← @teachclone/config — ESLint, tsconfig, Prettier
+
+    ┌────────────────────────────────────────────────────────────┐
+    │  📐  packages/types                                         │
+    │  Type: TS PACKAGE                                           │
+    └────────────────────────────────────────────────────────────┘
+      Shared TypeScript type definitions. Used by both the Next.js frontend
+      and any other TypeScript consumers.
+      Structure / Example:
+          types/src/index.ts exports:
+          
+          interface User { id, clerkId, email, fullName, plan, ... }
+          interface TeacherProfile { id, name, styleProfile, ... }
+          interface StyleProfile { vocabularyLevel, toneType, explanationPattern,
+                                    analogyDensity, signaturePhrases, ... }
+          interface StudentProfile { level, goal, learningStyle, priorKnowledge }
+          interface Message { id, role, content, citations: Citation[], ... }
+          interface Citation { mediaSourceId, startTime, endTime, chunkText }
+          interface QuizData { title, questions: Question[], ... }
+          interface GamificationResult { xpEarned, newTotal, levelUp, newBadges, streak }
+          
+          type StudentLevel = 'k5'|'middle'|'highschool'|'undergrad'|'masters'|'professional'
+          type LearningStyle = 'examples'|'theory'|'qa'|'storytelling'
+          type Plan          = 'free'|'pro'|'creator'|'institution'
+
+  ──────────────────────────────────────────────────────────────────────────
+  🐳  DOCKER & INFRA
+  ──────────────────────────────────────────────────────────────────────────
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  🐳  docker                                                 │
+  │  Type: DOCKER                                               │
+  └────────────────────────────────────────────────────────────┘
+    All Docker configuration. Docker Compose orchestrates the full local
+    development environment.
+    Structure / Example:
+        docker/
+        ├── docker-compose.yml       ← local dev (all 6 services)
+        ├── docker-compose.prod.yml  ← production overrides (no web service)
+        ├── Dockerfile.api           ← FastAPI app container
+        └── Dockerfile.worker        ← Celery worker (heavier: includes ML deps)
+
+    ┌────────────────────────────────────────────────────────────┐
+    │  🐳  docker/docker-compose.yml                              │
+    │  Type: YAML                                                 │
+    └────────────────────────────────────────────────────────────┘
+      Local development Docker Compose. Starts 6 services: postgres, redis,
+      qdrant, api, worker, web.
+      Structure / Example:
+          services:
+            postgres:
+              image: postgres:16-alpine
+              environment: { POSTGRES_DB: teachclone, POSTGRES_PASSWORD: password }
+              volumes: [pgdata:/var/lib/postgresql/data]
+              ports: ["5432:5432"]
+          
+            redis:
+              image: redis:7-alpine
+              ports: ["6379:6379"]
+          
+            qdrant:
+              image: qdrant/qdrant:latest
+              volumes: [qdrantdata:/qdrant/storage]
+              ports: ["6333:6333", "6334:6334"]
+          
+            api:
+              build: { context: .., dockerfile: docker/Dockerfile.api }
+              volumes: [../apps/api:/app]    # hot reload
+              command: uvicorn app.main:app --reload --host 0.0.0.0
+              ports: ["8000:8000"]
+              depends_on: [postgres, redis, qdrant]
+          
+            worker:
+              build: { context: .., dockerfile: docker/Dockerfile.worker }
+              command: celery -A app.worker worker --loglevel=info -Q media,ai
+              depends_on: [redis, postgres]
+          
+            web:
+              build: { context: ../apps/web }
+              ports: ["3000:3000"]
+              depends_on: [api]
+
+    ┌────────────────────────────────────────────────────────────┐
+    │  🐳  docker/Dockerfile.worker                               │
+    │  Type: DOCKERFILE                                           │
+    └────────────────────────────────────────────────────────────┘
+      Celery worker image. Heavier than the API image — includes ML
+      libraries (faster-whisper, torch, ffmpeg).
+      Structure / Example:
+          FROM python:3.11-slim
+          
+          # System deps: ffmpeg for audio/video processing
+          RUN apt-get update && apt-get install -y ffmpeg yt-dlp
+          
+          # Python deps (includes ML libs)
+          COPY requirements.txt .
+          RUN pip install -r requirements.txt
+          
+          # faster-whisper model (downloaded at build time)
+          RUN python -c "from faster_whisper import WhisperModel; WhisperModel('large-v3')"
+          
+          WORKDIR /app
+          COPY . .
+          CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info"]
+
+    ┌────────────────────────────────────────────────────────────┐
+    │  🤖  .github/workflows                                      │
+    │  Type: CI/CD                                                │
+    └────────────────────────────────────────────────────────────┘
+      GitHub Actions workflows for automated testing and deployment.
+      Structure / Example:
+          workflows/
+          ├── ci.yml      ← runs on every PR + push to main
+          │   jobs:
+          │   ├── lint-frontend: pnpm lint + tsc --noEmit
+          │   ├── lint-backend:  ruff check + mypy
+          │   └── test-backend:  pytest apps/api/tests/
+          │
+          └── deploy.yml  ← runs on merge to main
+              jobs:
+              ├── deploy-web:    vercel --prod (via Vercel CLI)
+              └── deploy-api:    railway up --service api
+                                 railway up --service worker
+
+  ──────────────────────────────────────────────────────────────────────────
+  📜  SCRIPTS & DOCS
+  ──────────────────────────────────────────────────────────────────────────
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  📜  scripts                                                │
+  │  Type: SCRIPTS                                              │
+  └────────────────────────────────────────────────────────────┘
+    Developer utility scripts. Run these manually during setup or for
+    maintenance tasks.
+    Structure / Example:
+        scripts/
+        ├── seed_dev.py                ← creates test user + teacher profile + sample session
+        ├── create_qdrant_collection.py← ensures Qdrant collection exists with correct schema
+        └── migrate.sh                 ← shortcut: alembic upgrade head (with env check)
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  📚  docs                                                   │
+  │  Type: DOCS                                                 │
+  └────────────────────────────────────────────────────────────┘
+    Technical documentation kept close to the code.
+    Structure / Example:
+        docs/
+        ├── architecture.md   ← system design, data flow diagrams, ADRs
+        ├── api-reference.md  ← supplement to auto-generated Swagger docs
+        └── deployment.md     ← step-by-step production deploy guide
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  🔑  .env.example                                           │
+  │  Type: ENV                                                  │
+  └────────────────────────────────────────────────────────────┘
+    Template for required environment variables. Copy to .env and fill in
+    real values. Never commit .env to git.
+    Structure / Example:
+        # Database
+        DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/teachclone
+        
+        # Cache + Queue
+        REDIS_URL=redis://localhost:6379/0
+        
+        # Vector DB
+        QDRANT_URL=http://localhost:6333
+        
+        # AI APIs
+        OPENAI_API_KEY=sk-...
+        ANTHROPIC_API_KEY=sk-ant-...
+        
+        # Auth (Clerk)
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+        CLERK_SECRET_KEY=sk_test_...
+        CLERK_WEBHOOK_SECRET=whsec_...
+        
+        # Payments (Stripe)
+        STRIPE_SECRET_KEY=sk_test_...
+        STRIPE_WEBHOOK_SECRET=whsec_...
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+        STRIPE_PRO_PRICE_ID=price_...
+        STRIPE_CREATOR_PRICE_ID=price_...
+        STRIPE_INSTITUTION_PRICE_ID=price_...
+        
+        # Storage (Cloudflare R2)
+        R2_ACCOUNT_ID=...
+        R2_ACCESS_KEY_ID=...
+        R2_SECRET_ACCESS_KEY=...
+        R2_BUCKET_NAME=teachclone-media
+        R2_PUBLIC_URL=https://pub-xxx.r2.dev
+        
+        # Email (Resend)
+        RESEND_API_KEY=re_...
+        
+        # App
+        NEXT_PUBLIC_APP_URL=http://localhost:3000
+        NEXT_PUBLIC_API_URL=http://localhost:8000
+
+  ┌────────────────────────────────────────────────────────────┐
+  │  📦  pnpm-workspace.yaml                                    │
+  │  Type: YAML                                                 │
+  └────────────────────────────────────────────────────────────┘
+    pnpm workspace configuration. Tells pnpm which directories are
+    workspace packages.
+    Structure / Example:
+        packages:
+          - 'apps/*'
+          - 'packages/*'
+
+      ┌────────────────────────────────────────────────────────────┐
+      │  📋  apps/api/requirements.txt                              │
+      │  Type: PY DEPS                                              │
+      └────────────────────────────────────────────────────────────┘
+        All Python dependencies for the API and Celery worker.
+        Structure / Example:
+            # API Framework
+            fastapi==0.111.0
+            uvicorn[standard]==0.29.0
+            pydantic[email]==2.7.0
+            python-dotenv==1.0.1
+            
+            # Database
+            sqlalchemy[asyncio]==2.0.30
+            asyncpg==0.29.0
+            alembic==1.13.1
+            
+            # AI / ML
+            openai==1.30.0
+            anthropic==0.28.0
+            faster-whisper==1.0.0
+            qdrant-client==1.9.1
+            
+            # Media Processing
+            yt-dlp==2024.8.6
+            ffmpeg-python==0.2.0
+            
+            # NLP (for style extraction)
+            textstat==0.7.3
+            nltk==3.8.1
+            
+            # Background Jobs
+            celery[redis]==5.4.0
+            redis==5.0.4
+            
+            # Storage
+            boto3==1.34.0          # R2 (S3-compatible)
+            
+            # Payments
+            stripe==9.9.0
+            
+            # Auth
+            pyjwt[crypto]==2.8.0   # Clerk JWT verification
+            svix==1.21.0           # Clerk webhook signature
+            
+            # Export
+            reportlab==4.2.0       # PDF generation
+            weasyprint==61.0       # HTML → PDF alternative
+            
+            # Email
+            resend==2.0.0
+            
+            # Monitoring
+            sentry-sdk[fastapi]==2.5.0
+            
+            # Dev only
+            pytest==8.2.0
+            pytest-asyncio==0.23.7
+            httpx==0.27.0          # test client
+
+==============================================================================
+  END — TeachClone Project Structure
+  45 annotated entries  |  239 tree nodes
+==============================================================================

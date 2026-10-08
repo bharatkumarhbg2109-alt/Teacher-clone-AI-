@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f1a;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-app-region: drag;
+    }
+    .logo {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 40px;
+    }
+    .status-box {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4e;
+      border-radius: 12px;
+      padding: 20px 30px;
+      width: 380px;
+    }
+    .service {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #2a2a3e;
+      font-size: 14px;
+    }
+    .service:last-child { border-bottom: none; }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #333;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .dot.checking { background: #f39c12; animation: pulse 1s infinite; }
+    .dot.ok { background: #2ecc71; }
+    .dot.error { background: #e74c3c; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    .service-name { flex: 1; color: #ccc; }
+    .service-status { font-size: 12px; color: #666; }
+    .progress-bar {
+      margin-top: 24px;
+      background: #1a1a2e;
+      border-radius: 4px;
+      height: 4px;
+      width: 380px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 4px;
+    }
+    .bottom-msg {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #444;
+    }
+    .version {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      font-size: 11px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">🧠</div>
+  <div class="title">AI Teacher Clone</div>
+  <div class="subtitle">Fully Local · Zero Cost · Always Private</div>
+
+  <div class="status-box">
+    <div class="service">
+      <div class="dot checking" id="dot-ollama"></div>
+      <div class="service-name">🤖 Ollama LLM Engine</div>
+      <div class="service-status" id="status-ollama">Starting...</div>
+    </div>
+    <div class="service">
+      <div class="dot" id="dot-backend"></div>
+      <div class="service-name">⚡ FastAPI Backend</div>
+      <div class="service-status" id="status-backend">Waiting...</div>
+    </div>
+    <div class="service">
+      <div class="dot" id="dot-frontend"></div>
+      <div class="service-name">🎨 Frontend Server</div>
+      <div class="service-status" id="status-frontend">Waiting...</div>
+    </div>
+    <div class="service">
+      <div class="dot" id="dot-db"></div>
+      <div class="service-name">🗄️ ChromaDB & SQLite</div>
+      <div class="service-status" id="status-db">Waiting...</div>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress"></div>
+  </div>
+  <div class="bottom-msg" id="bottom-msg">Initializing services...</div>
+  <div class="version">v1.0.0</div>
+
+  <script>
+    // Called from main process via IPC
+    window.updateStatus = function(service, state, msg) {
+      const dot = document.getElementById('dot-' + service);
+      const status = document.getElementById('status-' + service);
+      if (dot) { dot.className = 'dot ' + state; }
+      if (status) { status.textContent = msg; }
+    };
+    window.updateProgress = function(pct, msg) {
+      document.getElementById('progress').style.width = pct + '%';
+      document.getElementById('bottom-msg').textContent = msg;
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,2892 @@
+================================================================================
+TEACHCLONE — COMPLETE CODING PROMPTS
+24 prompts covering every file in the project
+Run prompts IN ORDER within each section
+================================================================================
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚙️  PROJECT SETUP  (3 prompts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #1  [SETUP-1]
+  FILE: pnpm-workspace.yaml + root package.json
+────────────────────────────────────────────────────────────────────────────────
+
+Write the complete pnpm-workspace.yaml and root package.json for TeachClone monorepo.
+
+FILE 1: pnpm-workspace.yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+FILE 2: package.json (root)
+{
+  "name": "teachclone",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "type-check": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0",
+    "prettier": "^3.2.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": { "node": ">=20", "pnpm": ">=9" }
+}
+
+FILE 3: .gitignore
+Include ignores for:
+- Node: node_modules/, .next/, dist/, .turbo/, *.log, .pnpm-store/
+- Python: __pycache__/, *.pyc, .venv/, venv/, *.egg-info/, .pytest_cache/
+- Env: .env, .env.local (NOT .env.example)
+- IDE: .vscode/, .idea/, .DS_Store
+- ML: *.pt, *.bin, *.onnx
+- Temp: apps/api/tmp/, apps/api/uploads/
+- Coverage: coverage/, .coverage, htmlcov/
+- Build: *.tsbuildinfo
+
+FILE 4: .env.example
+Write all env vars from config.py with placeholder values.
+Group them by: App, Database, Redis, Qdrant, OpenAI, Anthropic, Clerk, Stripe, R2, Email, Whisper.
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #2  [SETUP-2]
+  FILE: docker/docker-compose.yml
+────────────────────────────────────────────────────────────────────────────────
+
+Write the complete docker-compose.yml for local TeachClone development.
+
+FILE: docker/docker-compose.yml
+
+Services:
+
+postgres:
+  image: postgres:16-alpine
+  environment: POSTGRES_DB=teachclone, POSTGRES_USER=postgres, POSTGRES_PASSWORD=password
+  ports: ["5432:5432"]
+  volumes: [pgdata:/var/lib/postgresql/data]
+  healthcheck: {test: ["CMD","pg_isready","-U","postgres"], interval: 5s, retries: 5}
+
+redis:
+  image: redis:7-alpine
+  ports: ["6379:6379"]
+  command: redis-server --appendonly yes
+  volumes: [redisdata:/data]
+
+qdrant:
+  image: qdrant/qdrant:v1.9.1
+  ports: ["6333:6333","6334:6334"]
+  volumes: [qdrantdata:/qdrant/storage]
+  environment: QDRANT__TELEMETRY_DISABLED=true
+
+api:
+  build: {context: .., dockerfile: docker/Dockerfile.api}
+  volumes: [../apps/api:/app]
+  working_dir: /app
+  command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  ports: ["8000:8000"]
+  env_file: ../.env
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/teachclone
+    REDIS_URL: redis://redis:6379/0
+    QDRANT_URL: http://qdrant:6333
+  depends_on: {postgres: {condition: service_healthy}, redis: {condition: service_started}, qdrant: {condition: service_started}}
+
+worker:
+  build: {context: .., dockerfile: docker/Dockerfile.worker}
+  volumes: [../apps/api:/app]
+  working_dir: /app
+  command: celery -A app.worker worker --loglevel=info -Q media,ai -c 2
+  env_file: ../.env
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/teachclone
+    REDIS_URL: redis://redis:6379/0
+    QDRANT_URL: http://qdrant:6333
+  depends_on: [redis, postgres]
+
+volumes: pgdata, redisdata, qdrantdata
+
+Also write docker/Dockerfile.api:
+FROM python:3.11-slim
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev curl && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY apps/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY apps/api/ .
+EXPOSE 8000
+CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000"]
+
+Also write docker/Dockerfile.worker:
+FROM python:3.11-slim
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev ffmpeg git curl && rm -rf /var/lib/apt/lists/*
+RUN pip install yt-dlp
+WORKDIR /app
+COPY apps/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')"
+COPY apps/api/ .
+ENV WHISPER_MODEL=base TORCH_NUM_THREADS=2
+CMD ["celery","-A","app.worker","worker","--loglevel=info","-Q","media,ai","-c","2"]
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #3  [SETUP-3]
+  FILE: .github/workflows/ci.yml + deploy.yml
+────────────────────────────────────────────────────────────────────────────────
+
+Write the GitHub Actions CI/CD workflows.
+
+FILE: .github/workflows/ci.yml
+name: CI
+on:
+  push: {branches: [main]}
+  pull_request: {branches: [main]}
+
+jobs:
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: {version: 9}
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: pnpm}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r lint
+      - run: pnpm -r type-check
+
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install ruff mypy
+      - run: ruff check apps/api/
+      - run: mypy apps/api/app/ --ignore-missing-imports
+
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: {POSTGRES_DB: teachclone_test, POSTGRES_USER: postgres, POSTGRES_PASSWORD: password}
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -r apps/api/requirements.txt
+      - run: alembic upgrade head
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/teachclone_test
+      - run: pytest apps/api/tests/ -v --tb=short
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/teachclone_test
+          REDIS_URL: redis://localhost:6379/0
+          OPENAI_API_KEY: sk-test
+          ANTHROPIC_API_KEY: sk-ant-test
+          CLERK_SECRET_KEY: sk_test
+          CLERK_WEBHOOK_SECRET: whsec_test
+          STRIPE_SECRET_KEY: sk_test
+          STRIPE_WEBHOOK_SECRET: whsec_test
+
+FILE: .github/workflows/deploy.yml
+name: Deploy
+on:
+  push: {branches: [main]}
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r build
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: --prod
+  deploy-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: railway up --service api
+        env: {RAILWAY_TOKEN: "${{ secrets.RAILWAY_TOKEN }}"}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦  SHARED PACKAGES  (1 prompt)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #4  [PACKAGES-1]
+  FILE: packages/types/src/index.ts
+────────────────────────────────────────────────────────────────────────────────
+
+Write ALL shared TypeScript types for TeachClone.
+
+FILE: packages/types/src/index.ts
+
+Export every type with JSDoc. Include:
+
+// Enums as string literal unions
+export type Plan = 'free' | 'pro' | 'creator' | 'institution'
+export type StudentLevel = 'k5' | 'middle' | 'highschool' | 'undergrad' | 'masters' | 'professional'
+export type LearningStyle = 'examples' | 'theory' | 'qa' | 'storytelling'
+export type MediaStatus = 'pending' | 'processing' | 'completed' | 'failed'
+export type MessageRole = 'user' | 'assistant'
+export type OrgRole = 'admin' | 'teacher' | 'student'
+export type SourceType = 'youtube_url' | 'file_upload' | 'audio_upload'
+export type ToneType = 'strict' | 'friendly' | 'socratic' | 'storytelling' | 'energetic' | 'calm'
+export type ExplanationPattern = 'analogy_first' | 'example_first' | 'theory_first' | 'problem_first' | 'narrative'
+export type VocabLevel = 'elementary' | 'intermediate' | 'advanced' | 'technical'
+
+// StyleProfile: teacher style analysis result
+export interface StyleProfile {
+  vocabularyLevel: VocabLevel
+  vocabularyScore: number
+  toneType: ToneType
+  toneConfidence: number
+  explanationPattern: ExplanationPattern
+  analogyDensity: number
+  avgSentenceLength: number
+  useOfHumor: number
+  useOfQuestions: number
+  signaturePhrases: string[]
+  vocabularySamples: string[]
+  pacing: 'slow' | 'moderate' | 'fast'
+  explanationDepth: 'surface' | 'moderate' | 'deep'
+  rawAnalysis: string
+}
+
+// StudentProfile: stored per session
+export interface StudentProfile {
+  level: StudentLevel
+  goal: string
+  learningStyle: LearningStyle
+  priorKnowledge: string
+}
+
+// Core DB entities
+export interface User {
+  id: string; clerkId: string; email: string; fullName: string
+  avatarUrl?: string; plan: Plan; stripeCustomerId?: string
+  createdAt: string; updatedAt: string
+}
+export interface Organization {
+  id: string; name: string; slug: string; ownerId: string
+  plan: Plan; seatLimit: number; logoUrl?: string; ssoEnabled: boolean
+  createdAt: string; updatedAt: string
+}
+export interface OrgMember {
+  id: string; orgId: string; userId: string; role: OrgRole
+  user?: User; createdAt: string
+}
+export interface TeacherProfile {
+  id: string; userId?: string; orgId?: string; name: string
+  description?: string; isPublic: boolean; styleProfile?: StyleProfile
+  totalVideos: number; ttsVoice: string; createdAt: string; updatedAt: string
+}
+export interface MediaSource {
+  id: string; teacherProfileId: string; uploadedBy: string
+  sourceType: SourceType; originalUrl?: string; storageKey?: string
+  fileName?: string; durationSeconds?: number; status: MediaStatus
+  errorMessage?: string; transcriptChunks?: number; createdAt: string
+}
+export interface StudentSession {
+  id: string; studentId: string; teacherProfileId: string
+  studentProfile: StudentProfile; currentEffectiveLevel?: StudentLevel
+  messageCount: number; lastActivityAt: string
+  sessionNotes?: SessionSummary; createdAt: string; updatedAt: string
+  teacherProfile?: TeacherProfile; messages?: Message[]
+}
+export interface Citation {
+  mediaSourceId: string; startTime: number; endTime: number; chunkText: string
+}
+export interface Message {
+  id: string; sessionId: string; role: MessageRole; content: string
+  citations: Citation[]; tokensUsed?: number; modelUsed?: string; createdAt: string
+}
+
+// Quiz types
+export interface MCQQuestion {
+  id: string; type: 'mcq'; question: string
+  options: Record<'A'|'B'|'C'|'D', string>
+  correctAnswer: 'A'|'B'|'C'|'D'; explanation: string
+  sourceTimestamp?: number; difficulty: 'easy'|'medium'|'hard'
+}
+export interface TrueFalseQuestion {
+  id: string; type: 'true_false'; question: string
+  correctAnswer: boolean; explanation: string; sourceTimestamp?: number
+}
+export interface ShortAnswerQuestion {
+  id: string; type: 'short_answer'; question: string
+  sampleAnswer: string; keyConcepts: string[]; sourceTimestamp?: number
+}
+export type Question = MCQQuestion | TrueFalseQuestion | ShortAnswerQuestion
+export interface QuizData { title: string; questions: Question[] }
+export interface Quiz {
+  id: string; sessionId: string; teacherProfileId: string
+  questions: Question[]; studentAnswers?: Record<string, string|boolean>
+  gradingResults?: Record<string, GradingResult>
+  score?: number; completedAt?: string; createdAt: string
+}
+export interface GradingResult {
+  isCorrect: boolean; score: number; feedback: string; correctAnswer?: string|boolean
+}
+
+// Session export
+export interface SessionSummary {
+  overview: string; keyConcepts: string[]
+  definitions: Array<{term: string; definition: string}>
+  takeaways: string[]; questionsToExplore: string[]
+  quizScore?: number; topicsToReview: string[]
+}
+
+// Gamification
+export interface UserStats {
+  userId: string; xpTotal: number; level: number; streakDays: number
+  longestStreak: number; lastSessionDate?: string
+  sessionsCompleted: number; quizzesCompleted: number
+  perfectQuizzes: number; videosProcessed: number
+}
+export interface BadgeDef { id: string; name: string; icon: string; xp: number; description: string }
+export interface UserBadge { userId: string; badgeId: string; earnedAt: string }
+export interface GamificationResult {
+  xpEarned: number; newTotal: number; oldLevel: number; newLevel: number
+  levelUp: boolean; newBadges: BadgeDef[]; streak: number
+}
+
+// Billing
+export interface PlanLimits {
+  videosPerMonth: number; messagesPerDay: number
+  sessions: number; exportsPerMonth: number; quizzesPerMonth: number
+}
+export interface MonthlyUsage {
+  videos: number; messages: number; exports: number; quizzes: number
+}
+export interface BillingStatus { plan: Plan; limits: PlanLimits; usage: MonthlyUsage }
+
+// API helpers
+export interface PaginatedResponse<T> {
+  items: T[]; total: number; page: number; perPage: number; hasMore: boolean
+}
+export interface ApiError { message: string; code: string; status: number }
+
+// Upload flow
+export interface UploadInitiateResponse {
+  mediaSourceId: string; uploadUrl: string; uploadKey: string; expiresAt: string
+}
+export interface ProcessingProgress { status: MediaStatus; transcriptChunks?: number; stage?: string }
+
+Also write packages/types/package.json:
+{ "name": "@teachclone/types", "version": "1.0.0", "main": "dist/index.js", "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc", "dev": "tsc --watch" } }
+And packages/types/tsconfig.json pointing to src/index.ts, outputting to dist/.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🐍  BACKEND FOUNDATION  (6 prompts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #5  [BACKEND-1]
+  FILE: apps/api/app/config.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the Pydantic Settings config for FastAPI.
+
+FILE: apps/api/app/config.py
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
+
+    APP_NAME: str = "TeachClone API"
+    VERSION: str = "1.0.0"
+    DEBUG: bool = False
+    APP_URL: str = "http://localhost:3000"
+    API_URL: str = "http://localhost:8000"
+
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/teachclone"
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    QDRANT_URL: str = "http://localhost:6333"
+    QDRANT_COLLECTION: str = "teachclone_chunks"
+
+    OPENAI_API_KEY: str = ""
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-large"
+    OPENAI_EMBEDDING_DIM: int = 3072
+    OPENAI_TTS_MODEL: str = "tts-1"
+    OPENAI_VISION_MODEL: str = "gpt-4o"
+
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
+    ANTHROPIC_MAX_TOKENS: int = 1500
+
+    CLERK_SECRET_KEY: str = ""
+    CLERK_WEBHOOK_SECRET: str = ""
+    CLERK_JWKS_URL: str = "https://api.clerk.com/v1/jwks"
+
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PRO_PRICE_ID: str = ""
+    STRIPE_CREATOR_PRICE_ID: str = ""
+    STRIPE_INSTITUTION_PRICE_ID: str = ""
+
+    R2_ACCOUNT_ID: str = ""
+    R2_ACCESS_KEY_ID: str = ""
+    R2_SECRET_ACCESS_KEY: str = ""
+    R2_BUCKET_NAME: str = "teachclone-media"
+    R2_PUBLIC_URL: str = ""
+
+    RESEND_API_KEY: str = ""
+    FROM_EMAIL: str = "noreply@teachclone.app"
+
+    WHISPER_MODEL: str = "base"
+    WHISPER_DEVICE: str = "cpu"
+    WHISPER_COMPUTE_TYPE: str = "int8"
+
+    SENTRY_DSN: str = ""
+
+    FREE_VIDEOS_PER_MONTH: int = 3
+    FREE_MESSAGES_PER_DAY: int = 50
+    FREE_QUIZZES_PER_MONTH: int = 5
+    FREE_EXPORTS_PER_MONTH: int = 2
+
+    @property
+    def r2_endpoint(self) -> str:
+        return f"https://{self.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+    @property
+    def price_to_plan(self) -> dict[str, str]:
+        return {
+            self.STRIPE_PRO_PRICE_ID: "pro",
+            self.STRIPE_CREATOR_PRICE_ID: "creator",
+            self.STRIPE_INSTITUTION_PRICE_ID: "institution",
+        }
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+
+settings = get_settings()
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #6  [BACKEND-2]
+  FILE: apps/api/app/db/session.py + base.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the async SQLAlchemy session and base.
+
+FILE: apps/api/app/db/session.py
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from typing import AsyncGenerator
+from app.config import settings
+
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_pre_ping=True,
+    echo=settings.DEBUG,
+)
+
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+)
+
+class Base(DeclarativeBase):
+    pass
+
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+FILE: apps/api/app/db/base.py
+Import ALL models here so Alembic detects them for autogenerate:
+from app.db.session import Base  # noqa
+from app.models.user import User  # noqa
+from app.models.organization import Organization  # noqa
+from app.models.org_member import OrgMember  # noqa
+from app.models.teacher_profile import TeacherProfile  # noqa
+from app.models.media_source import MediaSource  # noqa
+from app.models.transcript_chunk import TranscriptChunk  # noqa
+from app.models.processing_job import ProcessingJob  # noqa
+from app.models.student_session import StudentSession  # noqa
+from app.models.message import Message  # noqa
+from app.models.quiz import Quiz  # noqa
+from app.models.api_key import ApiKey  # noqa
+from app.models.audit_log import AuditLog  # noqa
+from app.models.user_stats import UserStats  # noqa
+from app.models.user_badge import UserBadge  # noqa
+from app.models.usage_log import UsageLog  # noqa
+
+FILE: apps/api/alembic.ini
+Standard alembic.ini with script_location = app/db/migrations
+
+FILE: apps/api/app/db/migrations/env.py
+Async alembic env.py for SQLAlchemy 2.0. Import Base from app.db.base.
+Use run_async_migrations() pattern with asyncio.run().
+Set target_metadata = Base.metadata.
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #7  [BACKEND-3]
+  FILE: apps/api/app/models/ (all 15 files)
+────────────────────────────────────────────────────────────────────────────────
+
+Write all 15 SQLAlchemy models.
+
+Write each as a separate file. All use mapped_column / Mapped syntax (SQLAlchemy 2.0).
+All include created_at with server_default=func.now() and updated_at with onupdate=func.now() where applicable.
+All use UUID(as_uuid=True) primary keys with default=uuid.uuid4.
+Import Base from app.db.session.
+
+FILE: apps/api/app/models/user.py
+Table: users
+Columns: id(UUID PK), clerk_id(str unique indexed), email(str unique indexed), full_name(str),
+avatar_url(str nullable), plan(Enum free/pro/creator/institution default free),
+stripe_customer_id(str unique nullable), stripe_subscription_id(str nullable),
+is_active(bool default True), created_at, updated_at
+Relationships: teacher_profiles, sessions(StudentSession), org_memberships(OrgMember),
+stats(UserStats one-to-one), api_keys(ApiKey)
+
+FILE: apps/api/app/models/organization.py
+Table: organizations
+Columns: id, name(str), slug(str unique indexed), owner_id(FK users indexed),
+plan(Enum), seat_limit(int default 50), sso_enabled(bool default False),
+sso_config(JSONB nullable), logo_url(str nullable),
+stripe_subscription_id(str nullable), created_at, updated_at
+Relationships: members(OrgMember), teacher_profiles(TeacherProfile), owner(User)
+
+FILE: apps/api/app/models/org_member.py
+Table: org_members
+Columns: id, org_id(FK organizations indexed), user_id(FK users indexed),
+role(Enum admin/teacher/student), created_at
+UniqueConstraint(org_id, user_id)
+Relationships: organization, user
+
+FILE: apps/api/app/models/teacher_profile.py
+Table: teacher_profiles
+Columns: id, user_id(FK users nullable indexed), org_id(FK organizations nullable indexed),
+name(str), description(Text nullable), is_public(bool default False),
+style_profile(JSONB nullable), total_videos(int default 0),
+tts_voice(str default 'nova'), created_at, updated_at
+Relationships: user, organization, media_sources, sessions
+
+FILE: apps/api/app/models/media_source.py
+Table: media_sources
+Columns: id, teacher_profile_id(FK indexed), uploaded_by(FK users indexed),
+source_type(Enum youtube_url/file_upload/audio_upload),
+original_url(str nullable), storage_key(str nullable), file_name(str nullable),
+duration_seconds(int nullable), status(Enum pending/processing/completed/failed indexed),
+error_message(Text nullable), transcript_chunks(int nullable),
+processing_started_at(datetime nullable), processing_completed_at(datetime nullable),
+created_at, updated_at
+Relationships: teacher_profile, uploader(User), transcript_chunks_rel, processing_jobs
+
+FILE: apps/api/app/models/transcript_chunk.py
+Table: transcript_chunks
+Columns: id, media_source_id(FK indexed), chunk_index(int),
+text(Text), start_time(Float), end_time(Float),
+speaker_label(str nullable), token_count(int),
+embedding_id(str nullable), content_type(str default 'audio'),
+created_at
+CompositeIndex on (media_source_id, chunk_index)
+Relationship: media_source
+
+FILE: apps/api/app/models/processing_job.py
+Table: processing_jobs
+Columns: id, media_source_id(FK indexed),
+job_type(Enum transcription/embedding/style_extraction/frame_analysis),
+celery_task_id(str nullable), status(Enum queued/running/completed/failed indexed),
+progress(int default 0), result_metadata(JSONB nullable), error(Text nullable),
+started_at(datetime nullable), completed_at(datetime nullable), created_at
+
+FILE: apps/api/app/models/student_session.py
+Table: student_sessions
+Columns: id, student_id(FK users indexed), teacher_profile_id(FK indexed),
+student_profile(JSONB not null), current_effective_level(str nullable),
+message_count(int default 0), last_activity_at(datetime server_default=now()),
+session_notes(JSONB nullable), created_at, updated_at
+Relationships: student(User), teacher_profile, messages(ordered by created_at), quizzes
+
+FILE: apps/api/app/models/message.py
+Table: messages
+Columns: id, session_id(FK indexed), role(Enum user/assistant),
+content(Text), citations(JSONB default []),
+tokens_used(int nullable), model_used(str nullable), created_at
+CompositeIndex on (session_id, created_at)
+
+FILE: apps/api/app/models/quiz.py
+Table: quizzes
+Columns: id, session_id(FK indexed), teacher_profile_id(FK indexed),
+questions(JSONB not null), student_answers(JSONB nullable),
+grading_results(JSONB nullable), score(Float nullable),
+completed_at(datetime nullable), created_at
+
+FILE: apps/api/app/models/api_key.py
+Table: api_keys
+Columns: id, user_id(FK indexed), key_hash(str(64) unique),
+key_prefix(str(16)), name(str), is_active(bool default True),
+last_used_at(datetime nullable), requests_today(int default 0), created_at
+
+FILE: apps/api/app/models/audit_log.py
+Table: audit_logs (immutable - no updated_at)
+Columns: id, org_id(FK nullable), actor_id(FK users), actor_email(str),
+action(str indexed), resource_type(str), resource_id(str),
+metadata(JSONB), ip_address(str nullable), user_agent(str nullable), created_at
+
+FILE: apps/api/app/models/user_stats.py
+Table: user_stats (one-to-one with users)
+Columns: user_id(UUID PK FK users), xp_total(int default 0),
+level(int default 1), streak_days(int default 0), longest_streak(int default 0),
+last_session_date(Date nullable), sessions_completed(int default 0),
+quizzes_completed(int default 0), perfect_quizzes(int default 0),
+videos_processed(int default 0)
+
+FILE: apps/api/app/models/user_badge.py
+Table: user_badges
+Columns: id, user_id(FK indexed), badge_id(str), earned_at(datetime server_default)
+UniqueConstraint(user_id, badge_id)
+
+FILE: apps/api/app/models/usage_log.py
+Table: usage_logs
+Columns: id, user_id(FK indexed),
+event_type(Enum video_processed/session_started/message_sent/quiz_generated/export_created),
+metadata(JSONB default {}), billing_period(str indexed e.g. "2024-01"), created_at
+CompositeIndex on (user_id, event_type, billing_period) for fast quota queries
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #8  [BACKEND-4]
+  FILE: apps/api/app/schemas/ (all 8 files)
+────────────────────────────────────────────────────────────────────────────────
+
+Write all Pydantic v2 request/response schemas.
+
+These are NOT the ORM models. These are Pydantic schemas for API input/output.
+All use model_config = ConfigDict(from_attributes=True) for ORM compatibility.
+
+FILE: apps/api/app/schemas/common.py
+class PaginatedResponse(BaseModel, Generic[T]): items, total, page, per_page, has_more
+class ErrorResponse(BaseModel): error, message, details (optional)
+class SuccessResponse(BaseModel): success=True, message
+
+FILE: apps/api/app/schemas/user.py
+class UserResponse: id, clerk_id, email, full_name, avatar_url, plan, created_at
+class UserUpdate: full_name(optional), avatar_url(optional)
+class UserStatsResponse: all UserStats fields + badges: list[BadgeResponse]
+class BadgeResponse: badge_id, name, icon, xp, earned_at
+
+FILE: apps/api/app/schemas/teacher_profile.py
+class TeacherProfileCreate: name(required), description, is_public=False, org_id(optional)
+class TeacherProfileUpdate: name, description, is_public, tts_voice (all optional)
+class TeacherProfileResponse: all fields including style_profile: dict|None, total_videos
+class StyleProfileResponse: all StyleProfile fields
+
+FILE: apps/api/app/schemas/media.py
+class YouTubeIngestRequest: teacher_profile_id(str), youtube_url(str, validated)
+class UploadInitiateRequest: teacher_profile_id, file_name, file_size(int), content_type(str)
+class UploadCompleteRequest: media_source_id, storage_key
+class MediaSourceResponse: all MediaSource fields
+class ProcessingProgressResponse: status, transcript_chunks, stage(optional)
+
+FILE: apps/api/app/schemas/session.py
+class StudentProfileInput: level(StudentLevel), goal(str), learning_style(LearningStyle), prior_knowledge(str)
+class SessionCreate: teacher_profile_id(str), student_profile(StudentProfileInput)
+class SessionResponse: all session fields + teacher_profile(TeacherProfileResponse optional) + messages(list optional)
+class AdjustLevelRequest: direction(Literal['simpler','deeper'])
+
+FILE: apps/api/app/schemas/chat.py
+class ChatMessageRequest: content(str, min_length=1, max_length=4000)
+class CitationResponse: media_source_id, start_time, end_time, chunk_text
+class MessageResponse: id, session_id, role, content, citations(list[CitationResponse]), created_at
+class ChatDoneEvent: type='done', message_id, citations(list)
+class AdjustLevelResponse: level(str)
+
+FILE: apps/api/app/schemas/quiz.py
+class QuizGenerateRequest: topic(str optional), num_questions(int=5, ge=1, le=20)
+class QuizSubmitRequest: answers(dict[str, Any])  # question_id -> answer
+class GradingResultResponse: is_correct, score, feedback, correct_answer(optional)
+class QuizSubmitResponse: score(float), results(dict[str, GradingResultResponse]), completed_at
+class QuizResponse: id, questions(list, correct_answer EXCLUDED for incomplete quizzes), score, completed_at
+
+FILE: apps/api/app/schemas/billing.py
+class CheckoutRequest: plan(Literal['pro','creator','institution'])
+class CheckoutResponse: checkout_url(str)
+class PortalResponse: portal_url(str)
+class PlanLimitsResponse: videos_per_month, messages_per_day, sessions, exports_per_month, quizzes_per_month
+class BillingStatusResponse: plan, limits(PlanLimitsResponse), usage(dict)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #9  [BACKEND-5]
+  FILE: apps/api/app/dependencies.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the FastAPI dependency injection functions.
+
+FILE: apps/api/app/dependencies.py
+
+from fastapi import Depends, Header, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import AsyncGenerator
+from cachetools import TTLCache
+import jwt, httpx, hashlib
+
+from app.db.session import AsyncSessionLocal
+from app.models.user import User
+from app.models.api_key import ApiKey
+from app.config import settings
+
+# 1. DB Session dependency
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+
+# 2. JWKS cache (refresh every hour)
+_jwks_cache: TTLCache = TTLCache(maxsize=1, ttl=3600)
+
+async def _get_jwks() -> dict:
+    if "jwks" not in _jwks_cache:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(settings.CLERK_JWKS_URL)
+            resp.raise_for_status()
+            _jwks_cache["jwks"] = resp.json()
+    return _jwks_cache["jwks"]
+
+# 3. Verify Clerk JWT
+async def verify_clerk_token(authorization: str = Header(...)) -> str:
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid authorization header")
+    token = authorization.split(" ", 1)[1]
+    try:
+        jwks = await _get_jwks()
+        header = jwt.get_unverified_header(token)
+        # Find matching key by kid
+        key_data = next((k for k in jwks["keys"] if k["kid"] == header.get("kid")), None)
+        if not key_data:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Unknown signing key")
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(key_data)
+        payload = jwt.decode(token, public_key, algorithms=["RS256"],
+                             options={"verify_aud": False})
+        return payload["sub"]  # clerk_id
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token expired")
+    except Exception:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
+
+# 4. Get current user from DB
+async def get_current_user(
+    db: AsyncSession = Depends(get_db),
+    clerk_id: str = Depends(verify_clerk_token),
+) -> User:
+    result = await db.execute(select(User).where(User.clerk_id == clerk_id, User.is_active == True))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found. Please re-authenticate.")
+    return user
+
+# 5. Optional auth (for public pages)
+async def get_current_user_optional(
+    db: AsyncSession = Depends(get_db),
+    authorization: str = Header(default=""),
+) -> User | None:
+    if not authorization.startswith("Bearer "):
+        return None
+    try:
+        clerk_id = await verify_clerk_token(authorization)
+        result = await db.execute(select(User).where(User.clerk_id == clerk_id))
+        return result.scalar_one_or_none()
+    except Exception:
+        return None
+
+# 6. Plan rank enforcer
+PLAN_RANK = {"free": 0, "pro": 1, "creator": 2, "institution": 3}
+
+def require_plan(required: str):
+    async def check(user: User = Depends(get_current_user)):
+        if PLAN_RANK.get(user.plan, 0) < PLAN_RANK.get(required, 0):
+            raise HTTPException(
+                status.HTTP_402_PAYMENT_REQUIRED,
+                detail={"error": "upgrade_required", "required_plan": required, "upgrade_url": "/pricing"}
+            )
+        return user
+    return check
+
+# 7. API key auth for /v1/* routes
+async def check_api_key(
+    db: AsyncSession = Depends(get_db),
+    authorization: str = Header(...),
+) -> User:
+    if not authorization.startswith("Bearer tc_live_"):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid API key format")
+    raw_key = authorization.split(" ", 1)[1]
+    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+    result = await db.execute(
+        select(ApiKey).where(ApiKey.key_hash == key_hash, ApiKey.is_active == True)
+    )
+    api_key = result.scalar_one_or_none()
+    if not api_key:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or revoked API key")
+    from sqlalchemy import update
+    from datetime import datetime
+    await db.execute(
+        update(ApiKey).where(ApiKey.id == api_key.user_id)
+        .values(last_used_at=datetime.utcnow(), requests_today=ApiKey.requests_today + 1)
+    )
+    user_result = await db.execute(select(User).where(User.id == api_key.user_id))
+    user = user_result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
+    return user
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #10  [BACKEND-6]
+  FILE: apps/api/app/worker/__init__.py + requirements.txt
+────────────────────────────────────────────────────────────────────────────────
+
+Write the Celery app and requirements.
+
+FILE: apps/api/app/worker/__init__.py
+
+from celery import Celery
+from app.config import settings
+
+celery_app = Celery(
+    "teachclone",
+    broker=settings.REDIS_URL,
+    backend=settings.REDIS_URL,
+    include=[
+        "app.tasks.media_tasks",
+        "app.tasks.embedding_tasks",
+        "app.tasks.style_tasks",
+        "app.tasks.vision_tasks",
+    ],
+)
+
+celery_app.conf.update(
+    task_serializer="json",
+    accept_content=["json"],
+    result_serializer="json",
+    timezone="UTC",
+    enable_utc=True,
+    task_track_started=True,
+    task_acks_late=True,
+    worker_prefetch_multiplier=1,
+    task_routes={
+        "media.*": {"queue": "media"},
+        "ai.*": {"queue": "ai"},
+    },
+    task_default_queue="default",
+    task_soft_time_limit=1800,  # 30 min soft limit
+    task_time_limit=2400,       # 40 min hard limit
+)
+
+FILE: apps/api/requirements.txt
+Write the complete requirements.txt with pinned versions:
+
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# Data validation
+pydantic==2.7.1
+pydantic-settings==2.2.1
+email-validator==2.1.1
+
+# Database
+sqlalchemy[asyncio]==2.0.30
+asyncpg==0.29.0
+alembic==1.13.1
+
+# Cache / Queue
+celery[redis]==5.4.0
+redis==5.0.4
+cachetools==5.3.3
+
+# AI - LLM
+anthropic==0.28.0
+openai==1.30.0
+
+# AI - Transcription
+faster-whisper==1.0.0
+
+# AI - Vector DB
+qdrant-client==1.9.1
+
+# Media processing
+yt-dlp==2024.8.6
+ffmpeg-python==0.2.0
+
+# NLP
+textstat==0.7.3
+nltk==3.8.1
+
+# Storage (R2/S3)
+boto3==1.34.0
+
+# Auth
+PyJWT[crypto]==2.8.0
+cryptography==42.0.5
+svix==1.21.0
+
+# Payments
+stripe==9.9.0
+
+# PDF export
+reportlab==4.2.0
+
+# Email
+resend==2.0.0
+
+# Monitoring
+sentry-sdk[fastapi]==2.5.0
+structlog==24.1.0
+
+# HTTP client
+httpx==0.27.0
+
+# Dev / Test
+pytest==8.2.0
+pytest-asyncio==0.23.7
+ruff==0.4.4
+mypy==1.10.0
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚡  API SERVICES  (7 prompts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #11  [SERVICES-1]
+  FILE: apps/api/app/services/storage.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the Cloudflare R2 storage service.
+
+FILE: apps/api/app/services/storage.py
+
+import boto3, uuid
+from botocore.config import Config
+from app.config import settings
+
+class StorageService:
+    def __init__(self):
+        self.client = boto3.client(
+            "s3",
+            endpoint_url=settings.r2_endpoint,
+            aws_access_key_id=settings.R2_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
+            config=Config(signature_version="s3v4"),
+            region_name="auto",
+        )
+        self.bucket = settings.R2_BUCKET_NAME
+
+    def generate_key(self, user_id: str, profile_id: str, filename: str) -> str:
+        ext = filename.rsplit(".", 1)[-1] if "." in filename else "bin"
+        return f"media/{user_id}/{profile_id}/{uuid.uuid4()}.{ext}"
+
+    def generate_presigned_upload_url(self, key: str, content_type: str, expires: int = 900) -> str:
+        return self.client.generate_presigned_url(
+            "put_object",
+            Params={"Bucket": self.bucket, "Key": key, "ContentType": content_type},
+            ExpiresIn=expires, HttpMethod="PUT",
+        )
+
+    def generate_presigned_download_url(self, key: str, expires: int = 86400) -> str:
+        return self.client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.bucket, "Key": key},
+            ExpiresIn=expires,
+        )
+
+    def object_exists(self, key: str) -> bool:
+        try:
+            self.client.head_object(Bucket=self.bucket, Key=key)
+            return True
+        except Exception:
+            return False
+
+    def delete_object(self, key: str) -> bool:
+        try:
+            self.client.delete_object(Bucket=self.bucket, Key=key)
+            return True
+        except Exception:
+            return False
+
+    def download_to_path(self, key: str, local_path: str) -> None:
+        self.client.download_file(self.bucket, key, local_path)
+
+    def upload_bytes(self, key: str, data: bytes, content_type: str) -> str:
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, ContentType=content_type)
+        return f"{settings.R2_PUBLIC_URL}/{key}"
+
+storage_service = StorageService()
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #12  [SERVICES-2]
+  FILE: apps/api/app/services/audio_extractor.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the audio extraction service using yt-dlp and FFmpeg.
+
+FILE: apps/api/app/services/audio_extractor.py
+
+import asyncio, os, json
+from pathlib import Path
+
+class AudioExtractor:
+    async def from_youtube_url(self, url: str, output_dir: str) -> str:
+        """Download YouTube audio as WAV. Returns path to .wav file."""
+        template = os.path.join(output_dir, "%(id)s.%(ext)s")
+        cmd = [
+            "yt-dlp", "--format", "bestaudio/best",
+            "--extract-audio", "--audio-format", "wav", "--audio-quality", "0",
+            "--no-playlist", "--quiet", "--no-warnings",
+            "--output", template, url,
+        ]
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        _, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(f"yt-dlp failed: {stderr.decode()[:500]}")
+        wavs = list(Path(output_dir).glob("*.wav"))
+        if not wavs:
+            raise RuntimeError("No WAV output from yt-dlp")
+        return str(wavs[0])
+
+    async def from_video_file(self, input_path: str, output_dir: str) -> str:
+        """Extract mono 16kHz WAV from video file using ffmpeg."""
+        output_path = os.path.join(output_dir, "audio.wav")
+        cmd = [
+            "ffmpeg", "-i", input_path, "-vn",
+            "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", "-y", output_path,
+        ]
+        proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE)
+        _, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(f"ffmpeg failed: {stderr.decode()[:500]}")
+        return output_path
+
+    async def get_duration(self, file_path: str) -> float:
+        """Get media duration in seconds via ffprobe."""
+        cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
+        proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, _ = await proc.communicate()
+        try:
+            data = json.loads(stdout)
+            for stream in data.get("streams", []):
+                if "duration" in stream:
+                    return float(stream["duration"])
+        except Exception:
+            pass
+        return 0.0
+
+audio_extractor = AudioExtractor()
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #13  [SERVICES-3]
+  FILE: apps/api/app/services/transcriber.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the faster-whisper transcription service.
+
+FILE: apps/api/app/services/transcriber.py
+
+import threading
+from dataclasses import dataclass
+from faster_whisper import WhisperModel
+from app.config import settings
+
+@dataclass
+class TranscriptChunkData:
+    text: str
+    start_time: float
+    end_time: float
+    speaker_label: str | None
+    chunk_index: int
+    token_count: int
+
+_model: WhisperModel | None = None
+_lock = threading.Lock()
+
+def get_model() -> WhisperModel:
+    global _model
+    if _model is None:
+        with _lock:
+            if _model is None:
+                _model = WhisperModel(
+                    settings.WHISPER_MODEL,
+                    device=settings.WHISPER_DEVICE,
+                    compute_type=settings.WHISPER_COMPUTE_TYPE,
+                )
+    return _model
+
+class Transcriber:
+    MAX_TOKENS = 400
+    OVERLAP_WORDS = 12
+    WORDS_PER_TOKEN = 0.75  # conservative estimate
+
+    def transcribe(self, audio_path: str) -> list[TranscriptChunkData]:
+        model = get_model()
+        segments, _ = model.transcribe(
+            audio_path, beam_size=5, language=None,
+            word_timestamps=False, vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 500},
+        )
+        return self._segments_to_chunks(list(segments))
+
+    def _segments_to_chunks(self, segments) -> list[TranscriptChunkData]:
+        chunks = []
+        current_words: list[str] = []
+        current_start = 0.0
+        current_end = 0.0
+        idx = 0
+
+        for seg in segments:
+            words = seg.text.strip().split()
+            if not words:
+                continue
+            if not current_words:
+                current_start = seg.start
+
+            est_tokens = len(current_words) / self.WORDS_PER_TOKEN
+            seg_tokens = len(words) / self.WORDS_PER_TOKEN
+
+            if est_tokens + seg_tokens > self.MAX_TOKENS and current_words:
+                # Save chunk
+                chunks.append(TranscriptChunkData(
+                    text=" ".join(current_words), start_time=current_start,
+                    end_time=seg.start, speaker_label=None, chunk_index=idx,
+                    token_count=int(est_tokens),
+                ))
+                idx += 1
+                # Overlap
+                overlap = current_words[-self.OVERLAP_WORDS:]
+                current_words = overlap + words
+                current_start = seg.start
+            else:
+                current_words.extend(words)
+            current_end = seg.end
+
+        if current_words:
+            chunks.append(TranscriptChunkData(
+                text=" ".join(current_words), start_time=current_start,
+                end_time=current_end, speaker_label=None, chunk_index=idx,
+                token_count=int(len(current_words) / self.WORDS_PER_TOKEN),
+            ))
+        return chunks
+
+transcriber = Transcriber()
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #14  [SERVICES-4]
+  FILE: apps/api/app/services/embedder.py + vector_store.py + retrieval.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the embedding and vector search services.
+
+FILE: apps/api/app/services/embedder.py
+
+import numpy as np
+from openai import AsyncOpenAI
+from app.config import settings
+
+class Embedder:
+    BATCH = 100
+
+    def __init__(self):
+        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+
+    async def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        results = []
+        for i in range(0, len(texts), self.BATCH):
+            batch = [t.replace("\n", " ").strip() for t in texts[i:i+self.BATCH]]
+            resp = await self.client.embeddings.create(
+                model=settings.OPENAI_EMBEDDING_MODEL,
+                input=batch,
+                dimensions=settings.OPENAI_EMBEDDING_DIM,
+            )
+            results.extend(item.embedding for item in resp.data)
+        return results
+
+    async def embed_single(self, text: str) -> list[float]:
+        return (await self.embed_texts([text]))[0]
+
+    def compute_sparse_vector(self, text: str) -> dict[int, float]:
+        words = text.lower().split()
+        freq: dict[str, int] = {}
+        for w in words:
+            w = w.strip(".,!?;:\"'()[]{}")
+            if len(w) > 2:
+                freq[w] = freq.get(w, 0) + 1
+        result = {}
+        total = max(len(words), 1)
+        for word, count in freq.items():
+            idx = abs(hash(word)) % 100_000
+            tf = count / total
+            result[idx] = round(tf * (1 + np.log(count + 1)), 4)
+        return result
+
+embedder = Embedder()
+
+FILE: apps/api/app/services/vector_store.py
+
+from dataclasses import dataclass
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.models import (
+    VectorParams, Distance, SparseVectorParams, PointStruct,
+    Filter, FieldCondition, MatchValue, SparseVector,
+    NamedVector, NamedSparseVector, HnswConfigDiff, OptimizersConfigDiff,
+)
+from app.config import settings
+
+@dataclass
+class ChunkPoint:
+    id: str
+    dense_vector: list[float]
+    sparse_vector: dict[int, float]
+    payload: dict
+
+@dataclass
+class SearchResult:
+    id: str
+    score: float
+    text: str
+    start_time: float
+    end_time: float
+    media_source_id: str
+    content_type: str
+
+class VectorStore:
+    COLLECTION = settings.QDRANT_COLLECTION
+    DIM = settings.OPENAI_EMBEDDING_DIM
+
+    def __init__(self):
+        self.client = AsyncQdrantClient(url=settings.QDRANT_URL)
+
+    async def ensure_collection(self):
+        existing = [c.name for c in (await self.client.get_collections()).collections]
+        if self.COLLECTION in existing:
+            return
+        await self.client.create_collection(
+            collection_name=self.COLLECTION,
+            vectors_config={"dense": VectorParams(size=self.DIM, distance=Distance.COSINE)},
+            sparse_vectors_config={"sparse": SparseVectorParams()},
+            hnsw_config=HnswConfigDiff(m=16, ef_construct=100),
+            optimizers_config=OptimizersConfigDiff(indexing_threshold=20000),
+        )
+        for field, schema in [("teacher_profile_id","keyword"),("media_source_id","keyword"),
+                               ("content_type","keyword"),("start_time","float")]:
+            await self.client.create_payload_index(self.COLLECTION, field, schema)
+
+    async def upsert_chunks(self, chunks: list[ChunkPoint]) -> int:
+        BATCH = 100
+        total = 0
+        for i in range(0, len(chunks), BATCH):
+            batch = chunks[i:i+BATCH]
+            points = []
+            for c in batch:
+                idxs = list(c.sparse_vector.keys())
+                vals = list(c.sparse_vector.values())
+                points.append(PointStruct(
+                    id=c.id,
+                    vector={"dense": c.dense_vector, "sparse": SparseVector(indices=idxs, values=vals)},
+                    payload=c.payload,
+                ))
+            await self.client.upsert(collection_name=self.COLLECTION, points=points)
+            total += len(points)
+        return total
+
+    async def hybrid_search(self, query_dense: list[float], query_sparse: dict[int,float],
+                             teacher_profile_id: str, top_k: int = 8) -> list[SearchResult]:
+        filt = Filter(must=[FieldCondition(key="teacher_profile_id", match=MatchValue(value=teacher_profile_id))])
+        dense_res = await self.client.search(self.COLLECTION,
+            query_vector=NamedVector(name="dense", vector=query_dense), query_filter=filt, limit=top_k*2)
+        sparse_res = await self.client.search(self.COLLECTION,
+            query_vector=NamedSparseVector(name="sparse",
+                vector=SparseVector(indices=list(query_sparse.keys()), values=list(query_sparse.values()))),
+            query_filter=filt, limit=top_k*2)
+        # RRF merge k=60
+        scores: dict[str, float] = {}
+        for rank, hit in enumerate(dense_res):
+            scores[str(hit.id)] = scores.get(str(hit.id), 0) + 1/(61+rank)
+        for rank, hit in enumerate(sparse_res):
+            scores[str(hit.id)] = scores.get(str(hit.id), 0) + 1/(61+rank)
+        all_hits = {str(h.id): h for h in dense_res + sparse_res}
+        top_ids = sorted(scores, key=scores.__getitem__, reverse=True)[:top_k]
+        results = []
+        for pid in top_ids:
+            h = all_hits.get(pid)
+            if h:
+                p = h.payload or {}
+                results.append(SearchResult(id=pid, score=scores[pid], text=p.get("text",""),
+                    start_time=p.get("start_time",0), end_time=p.get("end_time",0),
+                    media_source_id=p.get("media_source_id",""), content_type=p.get("content_type","audio")))
+        return results
+
+    async def delete_by_media_source(self, media_source_id: str):
+        await self.client.delete(self.COLLECTION,
+            points_selector=Filter(must=[FieldCondition(key="media_source_id", match=MatchValue(value=media_source_id))]))
+
+vector_store = VectorStore()
+
+FILE: apps/api/app/services/retrieval.py
+
+from app.services.embedder import embedder
+from app.services.vector_store import vector_store, SearchResult
+
+async def retrieve_context(query: str, teacher_profile_id: str, top_k: int = 8) -> list[SearchResult]:
+    dense = await embedder.embed_single(query)
+    sparse = embedder.compute_sparse_vector(query)
+    return await vector_store.hybrid_search(dense, sparse, teacher_profile_id, top_k)
+
+def format_context_chunks(results: list[SearchResult]) -> str:
+    if not results:
+        return "(No relevant content found in knowledge base)"
+    lines = []
+    for i, r in enumerate(results, 1):
+        m, s = int(r.start_time//60), int(r.start_time%60)
+        lines.append(f"[{i}] \u23f1{m}:{s:02d} \u2014 {r.text.strip()}")
+    return "\n".join(lines)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #15  [SERVICES-5]
+  FILE: apps/api/app/services/style_extractor.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the teacher style extraction service.
+
+FILE: apps/api/app/services/style_extractor.py
+
+import re, json
+from collections import Counter
+from anthropic import AsyncAnthropic
+from app.config import settings
+
+ANALOGY_PATTERN = re.compile(
+    r"\b(like|imagine|think of|similar to|just as|as if|picture this|consider|analogous|metaphor|kind of like)\b",
+    re.IGNORECASE
+)
+
+class StyleExtractor:
+    def __init__(self):
+        self.claude = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+    async def extract(self, chunks) -> dict:
+        full_text = " ".join(c.text for c in chunks)
+        words = full_text.split()
+        if not words:
+            return self._default_profile()
+
+        sentences = [s.strip() for s in re.split(r"[.!?]+", full_text) if len(s.strip()) > 10]
+        avg_sentence_length = len(words) / max(len(sentences), 1)
+        analogy_density = len(ANALOGY_PATTERN.findall(full_text)) / max(len(words)/1000, 0.1)
+        use_of_questions = full_text.count("?") / max(len(words)/1000, 0.1)
+
+        # Signature phrases (3-grams and 4-grams, filtered for meaningfulness)
+        tokens = [w.lower().strip(".,!?;:'\"") for w in words if len(w) > 1]
+        ngrams = [" ".join(tokens[i:i+3]) for i in range(len(tokens)-2)]
+        ngrams += [" ".join(tokens[i:i+4]) for i in range(len(tokens)-3)]
+        stop_starts = ("the ","and ","but ","so ","in ","of ","to ","a ","that ","this ","it ","we ","you ","i ")
+        counter = Counter(ngrams)
+        sig = [p for p,_ in counter.most_common(40)
+               if not any(p.startswith(s) for s in stop_starts) and counter[p] >= 2][:8]
+
+        # Vocabulary sample (distinctive non-stopword words)
+        STOP = {"the","a","an","and","or","but","in","on","at","to","for","of","with","by",
+                "from","is","was","are","were","be","been","have","has","had","do","does","did",
+                "will","would","could","should","may","might","this","that","these","those",
+                "i","you","he","she","it","we","they","what","how","why","when","where"}
+        word_freq = Counter(w.lower().strip(".,!?;:'\"()[]{}") for w in words if len(w) > 3)
+        vocab = [w for w,_ in word_freq.most_common(60) if w not in STOP][:10]
+
+        # Vocab complexity from average word length
+        avg_wl = sum(len(w) for w in words)/max(len(words),1)
+        vocab_score = round(max(1, min(18, avg_wl * 1.9 + avg_sentence_length * 0.06)), 1)
+
+        # LLM classification on first 5000 chars
+        llm = await self._llm_classify(full_text[:5000])
+
+        return {
+            "vocabulary_level": self._to_level(vocab_score),
+            "vocabulary_score": vocab_score,
+            "avg_sentence_length": round(avg_sentence_length, 1),
+            "analogy_density": round(analogy_density, 2),
+            "use_of_questions": round(use_of_questions, 2),
+            "signature_phrases": sig,
+            "vocabulary_samples": vocab,
+            **llm,
+        }
+
+    def _to_level(self, score: float) -> str:
+        if score < 6: return "elementary"
+        if score < 10: return "intermediate"
+        if score < 14: return "advanced"
+        return "technical"
+
+    async def _llm_classify(self, text: str) -> dict:
+        prompt = f"""Analyze this educational transcript and return ONLY a valid JSON object, no markdown.
+
+TRANSCRIPT:
+{text}
+
+Return exactly:
+{{
+  "tone_type": "friendly|strict|socratic|storytelling|energetic|calm",
+  "tone_confidence": 0.85,
+  "explanation_pattern": "analogy_first|example_first|theory_first|problem_first|narrative",
+  "use_of_humor": 0.2,
+  "pacing": "slow|moderate|fast",
+  "explanation_depth": "surface|moderate|deep",
+  "raw_analysis": "2-3 sentence description of this teacher unique style and what makes them effective"
+}}"""
+        try:
+            msg = await self.claude.messages.create(
+                model=settings.ANTHROPIC_MODEL, max_tokens=500,
+                messages=[{"role":"user","content":prompt}]
+            )
+            return json.loads(msg.content[0].text)
+        except Exception:
+            return self._default_llm()
+
+    def _default_profile(self) -> dict:
+        return {**{"vocabulary_level":"intermediate","vocabulary_score":8.0,
+                   "avg_sentence_length":15.0,"analogy_density":0.2,"use_of_questions":1.0,
+                   "signature_phrases":[],"vocabulary_samples":[]}, **self._default_llm()}
+
+    def _default_llm(self) -> dict:
+        return {"tone_type":"friendly","tone_confidence":0.5,"explanation_pattern":"example_first",
+                "use_of_humor":0.1,"pacing":"moderate","explanation_depth":"moderate",
+                "raw_analysis":"Teaching style analysis unavailable."}
+
+    def merge_profiles(self, existing: dict | None, new: dict) -> dict:
+        if not existing:
+            return new
+        merged = {**new}
+        for k in ["vocabulary_score","avg_sentence_length","analogy_density","use_of_questions","use_of_humor"]:
+            if k in existing and k in new:
+                merged[k] = round((existing[k] + new[k]) / 2, 2)
+        phrases = list(dict.fromkeys(existing.get("signature_phrases",[]) + new.get("signature_phrases",[])))
+        merged["signature_phrases"] = phrases[:10]
+        return merged
+
+style_extractor = StyleExtractor()
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #16  [SERVICES-6]
+  FILE: apps/api/app/services/prompt_builder.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the adaptive prompt builder — most critical service file.
+
+FILE: apps/api/app/services/prompt_builder.py
+
+LEVEL_INSTRUCTIONS: dict[str, str] = {
+    "k5":          "You are talking to a 10-year-old. Use extremely simple words. Very short sentences (under 10 words). Only everyday analogies (toys, sports, food). Zero jargon. Always show an example first.",
+    "middle":      "You are talking to a 13-year-old. Simple clear sentences. Relate to school subjects. Brief analogies. Explain every technical term you use immediately after using it.",
+    "highschool":  "Clear language for a 16-year-old. Technical terms are fine if briefly defined the first time. Use real-world examples relevant to young adults.",
+    "undergrad":   "University level. Assume basic domain knowledge. Use precise terminology but define specialized sub-field terms. Mention tradeoffs and caveats.",
+    "masters":     "Expert vocabulary assumed. Focus on nuance, edge cases, and depth. Compare approaches. Reference established work when relevant.",
+    "professional":"Peer-level communication. Dense and precise. Use jargon freely. Assume 5+ years hands-on experience. Be efficient.",
+}
+
+STYLE_INSTRUCTIONS: dict[str, str] = {
+    "examples":    "ALWAYS lead with a concrete real-world example before any theory. Make it specific and vivid.",
+    "theory":      "Lead with the underlying principle first. State the rule clearly. Then illustrate with examples.",
+    "qa":          "Engage Socratically. After every answer, ask one targeted follow-up question. Never give the full answer immediately.",
+    "storytelling":"Frame every explanation as a story. Setup (why it matters) -> Conflict (the problem) -> Resolution (the concept).",
+}
+
+TONE_STYLES: dict[str, str] = {
+    "friendly":    "Warm, encouraging, conversational. Use 'you' and 'we'. Celebrate progress.",
+    "strict":      "Precise and direct. No filler. Correct errors immediately. Hold high standards.",
+    "socratic":    "Never just give the answer. Ask guiding questions. Let the student discover.",
+    "storytelling":"Narrative voice. Use metaphors. Make the abstract feel alive.",
+    "energetic":   "High energy. Show genuine excitement. Use emphasis. Be contagious.",
+    "calm":        "Patient and measured. Never rush. Every question is valid.",
+}
+
+def build_system_prompt(teacher_profile, student_session, context_results, turn: int = 0) -> str:
+    style = teacher_profile.style_profile or {}
+    student = student_session.student_profile or {}
+    level = student_session.current_effective_level or student.get("level", "undergrad")
+    tone = style.get("tone_type", "friendly")
+    pattern = style.get("explanation_pattern", "example_first")
+    sig = style.get("signature_phrases", [])[:4]
+    analysis = style.get("raw_analysis", "A knowledgeable educator.")
+    analogy = style.get("analogy_density", 0.2)
+    humor = style.get("use_of_humor", 0.1)
+
+    context_text = _format_context(context_results)
+    turn_note = ""
+    if turn == 0:
+        turn_note = "\n[FIRST TURN: Be warm and brief. Acknowledge the student's goal before diving in.]"
+    elif turn >= 10:
+        turn_note = f"\n[TURN {turn}: Student is engaged and following well. Increase depth and nuance as appropriate.]"
+
+    phrase_note = f"Occasionally use phrases like: {', '.join(repr(p) for p in sig)}" if sig else ""
+    analogy_note = "Aim for at least one analogy per explanation." if analogy > 0.25 else "Use analogies only when they genuinely clarify."
+    humor_note = "Include light, natural humor." if humor > 0.35 else ""
+
+    return f"""You are an AI teaching assistant embodying the style of {teacher_profile.name}.
+
+=== YOUR TEACHING IDENTITY ===
+{analysis}
+Tone: {TONE_STYLES.get(tone, TONE_STYLES["friendly"])}
+Structure every explanation using: {STYLE_INSTRUCTIONS.get(pattern, STYLE_INSTRUCTIONS["examples"])}
+{analogy_note}
+{humor_note}
+{phrase_note}
+
+=== STUDENT CONTEXT ==={turn_note}
+Level: {level.upper()} — {LEVEL_INSTRUCTIONS.get(level, LEVEL_INSTRUCTIONS["undergrad"])}
+Learning preference: {STYLE_INSTRUCTIONS.get(student.get("learning_style","examples"), STYLE_INSTRUCTIONS["examples"])}
+Today's goal: {student.get("goal","Learn from this content")}
+Prior knowledge: {student.get("prior_knowledge","Not specified")}
+
+=== REFERENCE KNOWLEDGE BASE ===
+Use ONLY the content below. If question is not covered, say "The reference material doesn't cover this directly — from general knowledge..."
+{context_text}
+
+=== MANDATORY RULES ===
+1. Calibrate vocabulary to {level.upper()} level in every single sentence
+2. Follow the {pattern} structure every time
+3. Cite sources inline as [\u23f1 M:SS] when referencing specific content
+4. End with exactly ONE Socratic question (not a yes/no question)
+5. Max length: {"2-3 short paragraphs" if level in ("k5","middle") else "4-6 paragraphs"}
+6. Never break character or say "As an AI"
+7. Never answer from outside the knowledge base without flagging it"""
+
+def _format_context(results) -> str:
+    if not results:
+        return "(No content retrieved)"
+    lines = []
+    for i, r in enumerate(results, 1):
+        m, s = int(r.start_time//60), int(r.start_time%60)
+        lines.append(f"[{i}] \u23f1{m}:{s:02d} \u2014 {r.text.strip()}")
+    return "\n".join(lines)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #17  [SERVICES-7]
+  FILE: apps/api/app/services/quiz_generator.py + session_summarizer.py + export_service.py + tts_service.py + billing.py + gamification.py + api_keys.py + email.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write all remaining service files.
+
+FILE: apps/api/app/services/quiz_generator.py
+Implement QuizGenerator class with:
+- async generate(teacher_profile_id, student_profile, topic, num_questions, context_text) -> dict
+  Calls Claude with detailed prompt requesting JSON with MCQ/TF/ShortAnswer questions
+  Mix: 60% MCQ, 20% TF, 20% short_answer
+  Returns parsed JSON dict
+- async grade_short_answer(question, student_answer, level) -> dict
+  Returns {score: float, is_correct: bool, feedback: str}
+- grade_objective(question, student_answer) -> dict
+  Returns {score, is_correct, correct_answer, feedback}
+Singleton: quiz_generator = QuizGenerator()
+
+FILE: apps/api/app/services/session_summarizer.py
+Implement async summarize_session(db, session_id) -> dict:
+- Fetch all messages for session (ordered)
+- Fetch quiz results if any
+- Call Claude with structured prompt requesting JSON:
+  {overview, key_concepts[], definitions[{term,definition}], takeaways[], questions_to_explore[], quiz_score, topics_to_review[]}
+- Return dict matching SessionSummary type
+
+FILE: apps/api/app/services/export_service.py
+Implement:
+- async export_as_pdf(session, summary: dict) -> bytes
+  Use reportlab to build PDF:
+  - Header: TeachClone logo text + teacher name + date
+  - Section: Session Overview (summary.overview)
+  - Section: Key Concepts (bullet list)
+  - Section: Important Definitions (two-column table)
+  - Section: Key Takeaways (numbered list)
+  - Section: Follow-up Questions
+  - Footer with session_id and generation date
+  Returns PDF bytes
+
+- async export_as_markdown(session, summary: dict) -> str
+  Returns clean Markdown with YAML frontmatter:
+  ---
+  teacher: profile_name
+  date: ISO date
+  level: student level
+  session_id: uuid
+  ---
+  # Session Notes: [overview first sentence]
+  ... sections with ## headers
+
+FILE: apps/api/app/services/tts_service.py
+Implement:
+- async synthesize(text: str, voice: str = "nova") -> bytes
+  Strip markdown (**/*, #, [⏱...]) from text
+  Split into sentences (max 4096 chars per API call)
+  Call OpenAI TTS API for each chunk
+  Concatenate MP3 bytes and return
+
+FILE: apps/api/app/services/billing.py
+Implement BillingService with:
+- get_plan_limits(plan: str) -> dict
+  Returns limits dict for each plan:
+  free: {videos_per_month:3, messages_per_day:50, sessions:10, exports_per_month:2, quizzes_per_month:5}
+  pro: {videos_per_month:20, messages_per_day:500, sessions:999, exports_per_month:999, quizzes_per_month:999}
+  creator: {videos_per_month:999, ...all unlimited}
+  institution: same as creator
+- async create_checkout_session(user, price_id, success_url, cancel_url) -> str
+  Use stripe.checkout.Session.create() with mode="subscription"
+  Return checkout URL
+- async create_portal_session(user, return_url) -> str
+  Use stripe.billing_portal.Session.create()
+  Return portal URL
+- async check_quota(db, user, event_type) -> tuple[bool, str]
+  Check usage_logs for current billing_period
+  Return (allowed, reason)
+Singleton: billing_service = BillingService()
+
+FILE: apps/api/app/services/gamification.py
+Write the complete gamification service (already defined in previous session, reproduce in full):
+XP_EVENTS dict, BADGE_DEFINITIONS dict with lambda conditions,
+async award_xp(db, user_id, event_type, multiplier) -> GamificationResult
+All badge checking logic, streak calculation, level-up detection.
+from app.models.user_stats import UserStats
+from app.models.user_badge import UserBadge
+
+FILE: apps/api/app/services/api_keys.py
+Implement:
+- generate_api_key() -> tuple[str, str, str]
+  Returns (full_key, key_hash, key_prefix)
+  full_key format: "tc_live_{urlsafe_b64(32 random bytes)}"
+  key_hash: hashlib.sha256(full_key.encode()).hexdigest()
+  key_prefix: full_key[:16]
+- async create_api_key(db, user_id, name) -> tuple[ApiKey, str]
+  Creates DB record, returns (db_record, full_key_shown_once)
+- async revoke_api_key(db, key_id, user_id) -> bool
+
+FILE: apps/api/app/services/email.py
+Implement using resend Python SDK:
+- async send_invitation_email(to_email, inviter_name, org_name, role, invitation_url) -> bool
+  HTML email with org name, inviter, role, big CTA button, 7-day expiry notice
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔄  CELERY TASKS  (2 prompts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #18  [TASKS-1]
+  FILE: apps/api/app/tasks/media_tasks.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write the media processing Celery tasks.
+
+FILE: apps/api/app/tasks/media_tasks.py
+
+import os, asyncio, tempfile
+from celery import chord
+from app.worker import celery_app
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+@celery_app.task(name="media.process_youtube", bind=True, max_retries=3, default_retry_delay=60)
+def process_youtube(self, media_source_id: str):
+    """Download YouTube audio -> transcribe -> save chunks -> trigger embed + frame analysis."""
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.audio_extractor import audio_extractor
+    from app.services.transcriber import transcriber
+    from sqlalchemy import select
+    import datetime
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+            try:
+                source.status = "processing"
+                source.processing_started_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                with tempfile.TemporaryDirectory() as tmp:
+                    self.update_state(state="PROGRESS", meta={"progress":15,"stage":"downloading"})
+                    audio_path = await audio_extractor.from_youtube_url(source.original_url, tmp)
+                    source.duration_seconds = int(await audio_extractor.get_duration(audio_path))
+                    await db.commit()
+
+                    self.update_state(state="PROGRESS", meta={"progress":40,"stage":"transcribing"})
+                    chunks = transcriber.transcribe(audio_path)
+
+                self.update_state(state="PROGRESS", meta={"progress":75,"stage":"saving"})
+                db_chunks = [TranscriptChunk(
+                    media_source_id=source.id, chunk_index=c.chunk_index, text=c.text,
+                    start_time=c.start_time, end_time=c.end_time, token_count=c.token_count,
+                    content_type="audio",
+                ) for c in chunks]
+                db.add_all(db_chunks)
+                source.transcript_chunks = len(db_chunks)
+                source.status = "completed"
+                source.processing_completed_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                self.update_state(state="PROGRESS", meta={"progress":90,"stage":"queuing_ai"})
+                from app.tasks.embedding_tasks import embed_and_store
+                from app.tasks.vision_tasks import analyze_frames
+                from app.tasks.style_tasks import extract_style
+                chord([embed_and_store.s(media_source_id), analyze_frames.s(media_source_id)])(
+                    extract_style.s(media_source_id=media_source_id)
+                )
+
+            except Exception as exc:
+                source.status = "failed"
+                source.error_message = str(exc)[:500]
+                await db.commit()
+                raise self.retry(exc=exc)
+
+    _run(_impl())
+
+
+@celery_app.task(name="media.process_uploaded_file", bind=True, max_retries=3, default_retry_delay=60)
+def process_uploaded_file(self, media_source_id: str):
+    """Download from R2 -> extract audio -> transcribe -> save chunks -> trigger AI pipeline."""
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.audio_extractor import audio_extractor
+    from app.services.storage import storage_service
+    from app.services.transcriber import transcriber
+    from sqlalchemy import select
+    import datetime
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+            try:
+                source.status = "processing"
+                source.processing_started_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                with tempfile.TemporaryDirectory() as tmp:
+                    self.update_state(state="PROGRESS", meta={"progress":10,"stage":"downloading"})
+                    raw = os.path.join(tmp, source.file_name or "media.mp4")
+                    storage_service.download_to_path(source.storage_key, raw)
+
+                    if source.source_type == "audio_upload":
+                        audio_path = raw
+                    else:
+                        self.update_state(state="PROGRESS", meta={"progress":25,"stage":"extracting_audio"})
+                        audio_path = await audio_extractor.from_video_file(raw, tmp)
+
+                    source.duration_seconds = int(await audio_extractor.get_duration(audio_path))
+                    await db.commit()
+
+                    self.update_state(state="PROGRESS", meta={"progress":40,"stage":"transcribing"})
+                    chunks = transcriber.transcribe(audio_path)
+
+                self.update_state(state="PROGRESS", meta={"progress":75,"stage":"saving"})
+                db_chunks = [TranscriptChunk(
+                    media_source_id=source.id, chunk_index=c.chunk_index, text=c.text,
+                    start_time=c.start_time, end_time=c.end_time, token_count=c.token_count,
+                    content_type="audio",
+                ) for c in chunks]
+                db.add_all(db_chunks)
+                source.transcript_chunks = len(db_chunks)
+                source.status = "completed"
+                source.processing_completed_at = datetime.datetime.utcnow()
+                await db.commit()
+
+                from app.tasks.embedding_tasks import embed_and_store
+                from app.tasks.vision_tasks import analyze_frames
+                from app.tasks.style_tasks import extract_style
+                chord([embed_and_store.s(media_source_id), analyze_frames.s(media_source_id)])(
+                    extract_style.s(media_source_id=media_source_id)
+                )
+
+            except Exception as exc:
+                source.status = "failed"
+                source.error_message = str(exc)[:500]
+                await db.commit()
+                raise self.retry(exc=exc)
+
+    _run(_impl())
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #19  [TASKS-2]
+  FILE: apps/api/app/tasks/embedding_tasks.py + style_tasks.py + vision_tasks.py
+────────────────────────────────────────────────────────────────────────────────
+
+Write embedding, style, and vision Celery tasks.
+
+FILE: apps/api/app/tasks/embedding_tasks.py
+
+import asyncio
+from app.worker import celery_app
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+@celery_app.task(name="ai.embed_and_store", bind=True, max_retries=2)
+def embed_and_store(self, media_source_id: str):
+    """Embed audio transcript chunks from a media source and store in Qdrant."""
+    from app.db.session import AsyncSessionLocal
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.models.media_source import MediaSource
+    from app.services.embedder import embedder
+    from app.services.vector_store import vector_store, ChunkPoint
+    from sqlalchemy import select
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+            profile_id = str(source.teacher_profile_id)
+
+            chunks = (await db.execute(
+                select(TranscriptChunk)
+                .where(TranscriptChunk.media_source_id == media_source_id,
+                       TranscriptChunk.content_type == "audio")
+                .order_by(TranscriptChunk.chunk_index)
+            )).scalars().all()
+
+            if not chunks:
+                return
+
+            texts = [c.text for c in chunks]
+            self.update_state(state="PROGRESS", meta={"progress":20,"stage":"embedding"})
+            dense_vecs = await embedder.embed_texts(texts)
+
+            self.update_state(state="PROGRESS", meta={"progress":70,"stage":"building_points"})
+            points = []
+            for chunk, dense in zip(chunks, dense_vecs):
+                sparse = embedder.compute_sparse_vector(chunk.text)
+                points.append(ChunkPoint(
+                    id=str(chunk.id), dense_vector=dense, sparse_vector=sparse,
+                    payload={"text":chunk.text,"media_source_id":media_source_id,
+                             "teacher_profile_id":profile_id,"start_time":chunk.start_time,
+                             "end_time":chunk.end_time,"chunk_index":chunk.chunk_index,"content_type":"audio"}
+                ))
+
+            self.update_state(state="PROGRESS", meta={"progress":85,"stage":"storing"})
+            await vector_store.ensure_collection()
+            await vector_store.upsert_chunks(points)
+
+            for chunk, point in zip(chunks, points):
+                chunk.embedding_id = point.id
+            await db.commit()
+            self.update_state(state="PROGRESS", meta={"progress":100,"stage":"done"})
+
+    _run(_impl())
+    return {"status": "done", "media_source_id": media_source_id}
+
+
+FILE: apps/api/app/tasks/style_tasks.py
+
+import asyncio
+from app.worker import celery_app
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+@celery_app.task(name="ai.extract_style", bind=True)
+def extract_style(self, chord_results, media_source_id: str):
+    """Run after embed_and_store + analyze_frames chord. Analyzes ALL chunks for teacher profile."""
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.teacher_profile import TeacherProfile
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.style_extractor import style_extractor
+    from sqlalchemy import select
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+
+            # All audio chunks across ALL videos in this teacher profile
+            all_chunks = (await db.execute(
+                select(TranscriptChunk)
+                .join(MediaSource, TranscriptChunk.media_source_id == MediaSource.id)
+                .where(MediaSource.teacher_profile_id == source.teacher_profile_id,
+                       TranscriptChunk.content_type == "audio")
+                .order_by(TranscriptChunk.chunk_index)
+            )).scalars().all()
+
+            if not all_chunks:
+                return
+
+            new_profile = await style_extractor.extract(all_chunks)
+
+            teacher = (await db.execute(
+                select(TeacherProfile).where(TeacherProfile.id == source.teacher_profile_id)
+            )).scalar_one()
+
+            merged = style_extractor.merge_profiles(teacher.style_profile, new_profile)
+            teacher.style_profile = merged
+            await db.commit()
+
+    _run(_impl())
+
+
+FILE: apps/api/app/tasks/vision_tasks.py
+
+import asyncio, os, tempfile, json, base64, glob
+from app.worker import celery_app
+from app.config import settings
+
+def _run(coro):
+    loop = asyncio.new_event_loop()
+    try: return loop.run_until_complete(coro)
+    finally: loop.close()
+
+async def _extract_keyframes(video_path: str, frames_dir: str) -> list[dict]:
+    """Extract scene-change keyframes using ffmpeg scene detection."""
+    cmd = ["ffmpeg", "-i", video_path, "-vf", "select=gt(scene\\,0.35)",
+           "-vsync", "vfr", f"{frames_dir}/frame_%06d.jpg", "-loglevel", "quiet", "-y"]
+    proc = await asyncio.create_subprocess_exec(*cmd, stderr=asyncio.subprocess.PIPE)
+    await proc.communicate()
+    files = sorted(glob.glob(f"{frames_dir}/frame_*.jpg"))
+    # Estimate timestamps: assume 1 keyframe every ~3 seconds on average
+    return [{"path": f, "timestamp": i * 3.5, "index": i} for i, f in enumerate(files)]
+
+async def _analyze_frame_batch(frames: list[dict], client) -> list[dict]:
+    """Send batch of 4 frames to GPT-4o Vision."""
+    if not frames:
+        return []
+    content = []
+    for i, f in enumerate(frames):
+        with open(f["path"], "rb") as img:
+            b64 = base64.b64encode(img.read()).decode()
+        content.append({"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{b64}","detail":"low"}})
+        content.append({"type":"text","text":f"Frame {i} at ~{f['timestamp']:.0f}s:"})
+    content.append({"type":"text","text":
+        'For each frame return a JSON array. Each element: {"frame_idx":N,"content_type":"diagram|equation|code|text_slide|whiteboard|graph|talking_head","description":"...","extracted_text":"verbatim text or null"}\nReturn ONLY JSON array.'
+    })
+    try:
+        resp = await client.chat.completions.create(
+            model=settings.OPENAI_VISION_MODEL,
+            messages=[{"role":"user","content":content}],
+            max_tokens=1500,
+        )
+        return json.loads(resp.choices[0].message.content)
+    except Exception:
+        return []
+
+@celery_app.task(name="ai.analyze_frames", bind=True)
+def analyze_frames(self, media_source_id: str):
+    """Extract video frames, analyze with GPT-4o Vision, store as visual TranscriptChunks."""
+    from app.db.session import AsyncSessionLocal
+    from app.models.media_source import MediaSource
+    from app.models.transcript_chunk import TranscriptChunk
+    from app.services.storage import storage_service
+    from app.services.embedder import embedder
+    from app.services.vector_store import vector_store, ChunkPoint
+    from sqlalchemy import select
+    from openai import AsyncOpenAI
+
+    async def _impl():
+        async with AsyncSessionLocal() as db:
+            source = (await db.execute(select(MediaSource).where(MediaSource.id == media_source_id))).scalar_one()
+
+            # Only process uploaded video files (not audio, not YouTube — no stored video for YT)
+            if source.source_type != "file_upload" or not source.storage_key:
+                return
+
+            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            profile_id = str(source.teacher_profile_id)
+
+            with tempfile.TemporaryDirectory() as tmp:
+                video_path = os.path.join(tmp, "video.mp4")
+                storage_service.download_to_path(source.storage_key, video_path)
+
+                frames_dir = os.path.join(tmp, "frames")
+                os.makedirs(frames_dir)
+                frames = await _extract_keyframes(video_path, frames_dir)
+                if not frames:
+                    return
+
+                visual_data = []
+                BATCH = 4
+                for i in range(0, len(frames), BATCH):
+                    batch = frames[i:i+BATCH]
+                    results = await _analyze_frame_batch(batch, client)
+                    for item in results:
+                        if item.get("content_type") == "talking_head":
+                            continue
+                        frame = batch[item.get("frame_idx", 0) % len(batch)]
+                        parts = [f"[VISUAL at {frame['timestamp']:.0f}s] {item.get('description','')}"]
+                        if item.get("extracted_text"):
+                            parts.append(item["extracted_text"])
+                        visual_data.append({"text":" ".join(parts),"start_time":frame["timestamp"],"end_time":frame["timestamp"]+10})
+
+                if not visual_data:
+                    return
+
+                # Get last chunk index
+                from sqlalchemy import func
+                last_idx = (await db.execute(
+                    select(func.max(TranscriptChunk.chunk_index))
+                    .where(TranscriptChunk.media_source_id == media_source_id)
+                )).scalar() or 0
+
+                new_chunks = []
+                for i, vd in enumerate(visual_data):
+                    c = TranscriptChunk(
+                        media_source_id=media_source_id, chunk_index=last_idx+i+1,
+                        text=vd["text"], start_time=vd["start_time"], end_time=vd["end_time"],
+                        content_type="visual", token_count=len(vd["text"].split()),
+                    )
+                    db.add(c)
+                    new_chunks.append(c)
+                await db.flush()
+
+                texts = [c.text for c in new_chunks]
+                dense_vecs = await embedder.embed_texts(texts)
+                await vector_store.ensure_collection()
+                points = []
+                for chunk, dense in zip(new_chunks, dense_vecs):
+                    sparse = embedder.compute_sparse_vector(chunk.text)
+                    points.append(ChunkPoint(
+                        id=str(chunk.id), dense_vector=dense, sparse_vector=sparse,
+                        payload={"text":chunk.text,"media_source_id":media_source_id,
+                                 "teacher_profile_id":profile_id,"start_time":chunk.start_time,
+                                 "end_time":chunk.end_time,"chunk_index":chunk.chunk_index,"content_type":"visual"}
+                    ))
+                    chunk.embedding_id = str(chunk.id)
+                await vector_store.upsert_chunks(points)
+                await db.commit()
+
+    _run(_impl())
+    return {"status": "done", "media_source_id": media_source_id}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🛣️  API ROUTERS  (1 prompt)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #20  [ROUTERS-1]
+  FILE: apps/api/app/main.py + all routers
+────────────────────────────────────────────────────────────────────────────────
+
+Write the FastAPI main app and all routers.
+
+FILE: apps/api/app/main.py
+FastAPI app factory. Registers all routers. Sets up CORS, Sentry, lifespan (ensure Qdrant collection on startup).
+Includes all routers:
+- /health (health.py)
+- /auth (auth.py)
+- /webhooks (webhooks.py) - public, no auth
+- /users (users.py)
+- /organizations (organizations.py)
+- /profiles (teacher_profiles.py)
+- /media (media.py)
+- /sessions (sessions.py)
+- /chat (chat.py)
+- /quizzes (quizzes.py)
+- /billing (billing.py)
+- /voice (voice.py)
+- /export (export.py)
+- /v1 (v1/__init__.py)
+
+FILE: apps/api/app/routers/health.py
+GET /health -> {status:"ok", version, timestamp}
+GET /health/db -> test db select 1
+GET /health/qdrant -> test qdrant get_collections
+
+FILE: apps/api/app/routers/auth.py
+POST /auth/sync -> sync Clerk user to DB (called after sign-in from frontend)
+  - get user from clerk_id (from token)
+  - if user exists: return it
+  - if not: create user + UserStats record
+  - Return UserResponse
+
+FILE: apps/api/app/routers/webhooks.py
+POST /webhooks/clerk (no auth) -> verify Svix webhook signature
+  handle: user.created (create User + UserStats), user.updated (update name/email), user.deleted (is_active=False)
+POST /webhooks/stripe (no auth) -> verify Stripe webhook signature
+  handle: checkout.session.completed -> update user plan from metadata.price_id
+  handle: customer.subscription.updated -> update plan
+  handle: customer.subscription.deleted -> set plan='free'
+
+FILE: apps/api/app/routers/users.py
+GET /users/me -> return current user with stats
+PUT /users/me -> update full_name, avatar_url
+GET /users/me/stats -> return UserStats + earned badges
+
+FILE: apps/api/app/routers/teacher_profiles.py
+POST /profiles -> create TeacherProfile (user_id or org_id)
+GET /profiles -> list user's profiles (+ org profiles if org member)
+GET /profiles/{id} -> get single profile with style_profile
+PUT /profiles/{id} -> update (owner only)
+DELETE /profiles/{id} -> delete + cascade (vectors, media, sessions)
+GET /profiles/{id}/style -> return style_profile JSON or 404 if not yet extracted
+
+FILE: apps/api/app/routers/media.py
+POST /media/youtube -> validate URL, check quota, create MediaSource, enqueue process_youtube task
+POST /media/upload/initiate -> validate content_type/size, generate R2 presigned URL, create MediaSource
+POST /media/upload/complete -> verify R2 object exists, enqueue process_uploaded_file task
+GET /media/{id}/status -> return status + transcript_chunks count
+GET /media/{id}/progress -> SSE stream of {status, transcript_chunks, stage} every 2 seconds until done
+DELETE /media/{id} -> delete from R2 + Qdrant + DB (owner only)
+GET /media/profile/{teacher_profile_id} -> list media_sources for profile (paginated)
+
+FILE: apps/api/app/routers/sessions.py
+POST /sessions -> create session with teacher_profile_id + student_profile body
+GET /sessions -> list user sessions, newest first, paginated
+GET /sessions/{id} -> session with last 20 messages
+DELETE /sessions/{id} -> delete session + messages
+GET /sessions/{id}/summary -> return or generate SessionSummary (cache in session_notes)
+On session creation: log usage event 'session_started', award XP
+
+FILE: apps/api/app/routers/chat.py
+POST /chat/{session_id}/message -> SSE streaming response
+  1. Validate session ownership
+  2. Load teacher_profile with style_profile
+  3. Load last 10 messages as history
+  4. retrieve_context(user_message, teacher_profile_id)
+  5. build_system_prompt(teacher, session, context, turn=message_count)
+  6. Stream from Anthropic Claude API
+  7. On stream complete: save user+assistant messages, extract citations, update session.message_count
+  8. SSE events: {type:"token",token:"..."} then {type:"done",message_id,citations:[]}
+  9. Award XP every 5 messages
+POST /chat/{session_id}/adjust-level -> {direction: simpler|deeper} -> update current_effective_level
+
+FILE: apps/api/app/routers/quizzes.py
+POST /sessions/{session_id}/quiz -> generate quiz from context, save to DB, return without correct answers
+POST /quizzes/{quiz_id}/submit -> grade all answers, save results, award XP
+GET /quizzes/{quiz_id}/results -> return full results with explanations (only after completed)
+
+FILE: apps/api/app/routers/billing.py
+POST /billing/checkout -> create Stripe checkout session, return {checkout_url}
+POST /billing/portal -> create Stripe customer portal session, return {portal_url}
+GET /billing/status -> return {plan, limits, usage_this_month}
+
+FILE: apps/api/app/routers/voice.py
+POST /voice/transcribe -> accept audio file upload, transcribe with faster-whisper, return {text}
+POST /chat/{session_id}/speak -> get message by ID, synthesize TTS, stream audio/mpeg
+  Cache: store synthesized audio in R2 at voice/{message_id}.mp3, serve from cache on repeat
+
+FILE: apps/api/app/routers/export.py
+POST /sessions/{session_id}/export -> generate and return PDF or Markdown file
+  Body: {format: "pdf"|"markdown"}
+  Check export quota, generate via export_service, stream as file download
+GET /sessions/{session_id}/summary -> return SessionSummary JSON
+
+FILE: apps/api/app/routers/organizations.py
+POST /organizations -> create org (institution plan required)
+GET /organizations/{slug} -> get org details (member only)
+POST /organizations/{id}/members/invite -> send invite email, create OrgInvitation
+POST /organizations/invitations/{token}/accept -> add user to org
+GET /organizations/{id}/members -> list members (admin only)
+PUT /organizations/{id}/members/{user_id}/role -> change role (admin only)
+DELETE /organizations/{id}/members/{user_id} -> remove member (admin only)
+GET /organizations/{id}/leaderboard -> top 10 by XP this week
+
+FILE: apps/api/app/routers/v1/__init__.py and profile.py, sessions.py, chat.py
+Public API (API-key authenticated):
+GET /v1/profiles -> list user teacher profiles
+POST /v1/sessions -> create session
+POST /v1/sessions/{id}/chat -> synchronous (non-streaming) chat response
+POST /v1/sessions/{id}/quiz -> generate quiz
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🌐  FRONTEND  (4 prompts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #21  [FRONTEND-1]
+  FILE: apps/web/ config files
+────────────────────────────────────────────────────────────────────────────────
+
+Write all Next.js config and setup files.
+
+FILE: apps/web/package.json
+{
+  "name": "@teachclone/web",
+  "scripts": {"dev":"next dev","build":"next build","lint":"next lint","type-check":"tsc --noEmit"},
+  "dependencies": {
+    "next": "14.2.3", "react": "^18", "react-dom": "^18",
+    "@clerk/nextjs": "^5.1.0",
+    "ai": "^3.1.0",
+    "@tanstack/react-query": "^5.40.0",
+    "zustand": "^4.5.2",
+    "axios": "^1.7.0",
+    "react-markdown": "^9.0.1", "remark-gfm": "^4.0.0",
+    "@stripe/stripe-js": "^3.3.0",
+    "lucide-react": "^0.379.0",
+    "react-dropzone": "^14.2.3",
+    "recharts": "^2.12.7",
+    "sonner": "^1.4.41",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.3.0",
+    "@teachclone/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18", "@types/react-dom": "^18",
+    "typescript": "^5", "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10", "postcss": "^8",
+    "@teachclone/config": "workspace:*", "eslint": "^8",
+    "eslint-config-next": "14.2.3"
+  }
+}
+
+FILE: apps/web/next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ['img.clerk.com', 'images.clerk.dev', process.env.R2_PUBLIC_DOMAIN || 'pub.r2.dev'],
+  },
+  async headers() {
+    return [{
+      source: '/(.*)',
+      headers: [
+        {key:'X-Content-Type-Options',value:'nosniff'},
+        {key:'X-Frame-Options',value:'DENY'},
+        {key:'X-XSS-Protection',value:'1; mode=block'},
+        {key:'Referrer-Policy',value:'strict-origin-when-cross-origin'},
+      ]
+    }]
+  },
+  experimental: { serverActions: { allowedOrigins: ['localhost:3000'] } },
+}
+module.exports = nextConfig
+
+FILE: apps/web/tailwind.config.ts
+Full shadcn/ui compatible Tailwind config with:
+- content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}']
+- darkMode: 'class'
+- theme.extend: colors with CSS variable references (--background, --foreground, --primary, etc.)
+  All standard shadcn color variables
+- plugins: [require("tailwindcss-animate")]
+
+FILE: apps/web/app/globals.css
+CSS variables for both :root (light) and .dark themes.
+Standard shadcn/ui CSS variables (background, foreground, card, primary, muted, accent, destructive, border, input, ring, radius).
+Base body styles: bg-background text-foreground.
+
+FILE: apps/web/tsconfig.json
+Strict TypeScript config extending @teachclone/config/tsconfig-base.json.
+Paths: "@/*": ["./"], "@teachclone/types": ["../../packages/types/src"]
+
+FILE: apps/web/middleware.ts (already written above - reproduce here)
+Clerk authMiddleware with public routes list and afterAuth redirect logic.
+
+FILE: apps/web/lib/api-client.ts (already written above - reproduce here)
+Typed axios instance with Clerk auth interceptor.
+Also export getServerApiHeaders() for server components.
+
+FILE: apps/web/lib/utils/formatters.ts
+export function formatTimestamp(seconds: number): string - returns "M:SS" format
+export function formatDuration(seconds: number): string - returns "Xh Ym" or "X min"
+export function formatRelativeTime(date: string): string - "2 hours ago" etc
+export function formatPlan(plan: string): string - "Student Pro" etc
+export function formatLevel(level: string): string - "High School" etc
+
+FILE: apps/web/lib/utils/validators.ts
+export function isValidYouTubeUrl(url: string): boolean
+export function isValidEmail(email: string): boolean
+export function isValidOrgSlug(slug: string): boolean
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #22  [FRONTEND-2]
+  FILE: apps/web/lib/hooks/ and stores/
+────────────────────────────────────────────────────────────────────────────────
+
+Write all custom hooks and Zustand stores.
+
+FILE: apps/web/lib/hooks/useMediaUpload.ts
+Already defined above - reproduce in full with types.
+
+FILE: apps/web/lib/hooks/useVoiceInput.ts
+'use client'
+import { useState, useRef, useCallback } from 'react'
+
+type VoiceStatus = 'idle'|'listening'|'processing'|'error'
+
+export function useVoiceInput(onTranscript: (text: string) => void) {
+  const [status, setStatus] = useState<VoiceStatus>('idle')
+  const [error, setError] = useState<string|null>(null)
+  const recognitionRef = useRef<any>(null)
+
+  const isSupported = typeof window !== 'undefined' && 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+
+  const start = useCallback(() => {
+    if (!isSupported) { setError('Voice input not supported in this browser'); return }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-US'
+    recognition.onstart = () => setStatus('listening')
+    recognition.onresult = (e: any) => {
+      const text = e.results[0][0].transcript
+      setStatus('processing')
+      onTranscript(text)
+      setStatus('idle')
+    }
+    recognition.onerror = (e: any) => { setError(e.error); setStatus('error') }
+    recognition.onend = () => setStatus('idle')
+    recognitionRef.current = recognition
+    recognition.start()
+  }, [isSupported, onTranscript])
+
+  const stop = useCallback(() => {
+    recognitionRef.current?.stop()
+    setStatus('idle')
+  }, [])
+
+  return { start, stop, status, error, isSupported }
+}
+
+FILE: apps/web/lib/hooks/useQuota.ts
+'use client'
+import { useQuery } from '@tanstack/react-query'
+import api from '@/lib/api-client'
+import type { BillingStatus } from '@teachclone/types'
+
+export function useQuota() {
+  const { data, isLoading } = useQuery<BillingStatus>({
+    queryKey: ['billing-status'],
+    queryFn: () => api.get('/billing/status').then(r => r.data),
+    staleTime: 60_000,
+  })
+  return {
+    isLoading,
+    plan: data?.plan,
+    canUploadVideo: data ? data.usage.videos < (data.limits.videosPerMonth === 999 ? Infinity : data.limits.videosPerMonth) : true,
+    canSendMessage: data ? data.usage.messages < (data.limits.messagesPerDay === 999 ? Infinity : data.limits.messagesPerDay) : true,
+    usage: data?.usage,
+    limits: data?.limits,
+  }
+}
+
+FILE: apps/web/lib/stores/useSessionStore.ts
+'use client'
+import { create } from 'zustand'
+import type { StudentSession, StudentProfile, StudentLevel } from '@teachclone/types'
+
+interface SessionStore {
+  activeSession: StudentSession | null
+  defaultStudentProfile: StudentProfile | null
+  setActiveSession: (s: StudentSession | null) => void
+  setDefaultProfile: (p: StudentProfile) => void
+  clearSession: () => void
+}
+
+export const useSessionStore = create<SessionStore>((set) => ({
+  activeSession: null,
+  defaultStudentProfile: typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem('defaultStudentProfile') || 'null')
+    : null,
+  setActiveSession: (s) => set({ activeSession: s }),
+  setDefaultProfile: (p) => {
+    if (typeof window !== 'undefined') localStorage.setItem('defaultStudentProfile', JSON.stringify(p))
+    set({ defaultStudentProfile: p })
+  },
+  clearSession: () => set({ activeSession: null }),
+}))
+
+FILE: apps/web/lib/stores/useUserStore.ts
+'use client'
+import { create } from 'zustand'
+import type { User } from '@teachclone/types'
+
+interface UserStore {
+  user: User | null
+  setUser: (u: User | null) => void
+}
+export const useUserStore = create<UserStore>((set) => ({
+  user: null,
+  setUser: (u) => set({ user: u }),
+}))
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #23  [FRONTEND-3]
+  FILE: apps/web/components/ (all components)
+────────────────────────────────────────────────────────────────────────────────
+
+Write all React components.
+
+FILE: apps/web/components/chat/MessageBubble.tsx (already written above - reproduce with full imports)
+
+FILE: apps/web/components/chat/CitationChip.tsx (already written above - reproduce)
+
+FILE: apps/web/components/chat/StreamingIndicator.tsx
+'use client'
+export function StreamingIndicator() {
+  return (
+    <div className="flex gap-1.5 px-5 py-4">
+      {[0,1,2].map(i => (
+        <div key={i} className="h-2 w-2 rounded-full bg-primary/50 animate-bounce"
+             style={{animationDelay:`${i*0.15}s`,animationDuration:'0.8s'}} />
+      ))}
+    </div>
+  )
+}
+
+FILE: apps/web/components/chat/ChatInput.tsx (already written - reproduce with full code)
+
+FILE: apps/web/components/chat/VoiceButton.tsx
+'use client'
+import { Mic, MicOff, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useVoiceInput } from '@/lib/hooks/useVoiceInput'
+
+interface Props { onTranscript: (text: string) => void; disabled?: boolean }
+export function VoiceButton({ onTranscript, disabled }: Props) {
+  const { start, stop, status, isSupported } = useVoiceInput(onTranscript)
+  if (!isSupported) return null
+  return (
+    <Button type="button" variant="ghost" size="icon"
+            onClick={status === 'listening' ? stop : start}
+            disabled={disabled || status === 'processing'}
+            className={status === 'listening' ? 'text-red-400 animate-pulse' : 'text-muted-foreground'}>
+      {status === 'processing' ? <Loader2 className="h-4 w-4 animate-spin" /> :
+       status === 'listening' ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+    </Button>
+  )
+}
+
+FILE: apps/web/components/media/ProcessingProgress.tsx
+'use client'
+import { useEffect, useState } from 'react'
+import { Progress } from '@/components/ui/progress'
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+
+const STAGE_LABELS: Record<string,string> = {
+  downloading:'Downloading audio...', transcribing:'Transcribing speech...',
+  saving:'Saving transcript...', embedding:'Creating embeddings...',
+  storing:'Storing in knowledge base...', done:'Complete!',
+}
+
+export function ProcessingProgress({ mediaSourceId }: { mediaSourceId: string }) {
+  const [status, setStatus] = useState<string>('pending')
+  const [chunks, setChunks] = useState<number>(0)
+  const [stage, setStage] = useState<string>('queued')
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    const es = new EventSource(`${apiUrl}/media/${mediaSourceId}/progress`)
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data)
+        setStatus(data.status)
+        if (data.transcript_chunks) setChunks(data.transcript_chunks)
+        if (data.stage) setStage(data.stage)
+        if (data.status === 'completed' || data.status === 'failed') es.close()
+      } catch {}
+    }
+    es.onerror = () => es.close()
+    return () => es.close()
+  }, [mediaSourceId])
+
+  if (status === 'completed') return (
+    <div className="flex items-center gap-2 text-sm text-emerald-400">
+      <CheckCircle className="h-4 w-4" /> Processed {chunks} chunks. Ready to chat!
+    </div>
+  )
+  if (status === 'failed') return (
+    <div className="flex items-center gap-2 text-sm text-destructive">
+      <XCircle className="h-4 w-4" /> Processing failed. Please try again.
+    </div>
+  )
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        {STAGE_LABELS[stage] || 'Processing...'}
+      </div>
+      <Progress value={status === 'processing' ? 50 : 10} className="h-1 animate-pulse" />
+    </div>
+  )
+}
+
+FILE: apps/web/components/profile/TeacherProfileCard.tsx
+'use client'
+import Link from 'next/link'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Video, MessageSquare, ArrowRight } from 'lucide-react'
+import type { TeacherProfile } from '@teachclone/types'
+
+export function TeacherProfileCard({ profile }: { profile: TeacherProfile }) {
+  const style = profile.styleProfile
+  return (
+    <Card className="flex flex-col hover:border-primary/50 transition-colors">
+      <CardContent className="flex-1 pt-6">
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="font-semibold text-sm leading-tight">{profile.name}</h3>
+          {profile.isPublic && <Badge variant="outline" className="text-xs">Public</Badge>}
+        </div>
+        {profile.description && (
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{profile.description}</p>
+        )}
+        {style && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            <Badge variant="secondary" className="text-xs">{style.toneType}</Badge>
+            <Badge variant="secondary" className="text-xs">{style.vocabularyLevel}</Badge>
+          </div>
+        )}
+        <div className="flex gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1"><Video className="h-3 w-3"/>{profile.totalVideos} videos</span>
+        </div>
+      </CardContent>
+      <CardFooter className="pt-0 gap-2">
+        <Link href={`/profiles/${profile.id}`} className="flex-1">
+          <Button variant="outline" size="sm" className="w-full">Manage</Button>
+        </Link>
+        <Link href={`/profiles/${profile.id}?action=start`} className="flex-1">
+          <Button size="sm" className="w-full gap-1">Learn <ArrowRight className="h-3 w-3"/></Button>
+        </Link>
+      </CardFooter>
+    </Card>
+  )
+}
+
+FILE: apps/web/components/profile/LevelSelector.tsx
+'use client'
+import type { StudentLevel } from '@teachclone/types'
+
+const LEVELS: Array<{value: StudentLevel; label: string; desc: string; icon: string}> = [
+  {value:'k5',label:'K-5',desc:'Elementary school',icon:'🎒'},
+  {value:'middle',label:'Middle School',desc:'Grades 6-8',icon:'📐'},
+  {value:'highschool',label:'High School',desc:'Grades 9-12',icon:'🎓'},
+  {value:'undergrad',label:'Undergrad',desc:'College level',icon:'📚'},
+  {value:'masters',label:'Graduate',desc:'Masters / PhD',icon:'🔬'},
+  {value:'professional',label:'Professional',desc:'Industry expert',icon:'💼'},
+]
+
+interface Props { value: StudentLevel | null; onChange: (level: StudentLevel) => void }
+export function LevelSelector({ value, onChange }: Props) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {LEVELS.map(l => (
+        <button key={l.value} onClick={() => onChange(l.value)}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all
+                  ${value === l.value ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-primary/50'}`}>
+          <span className="text-2xl">{l.icon}</span>
+          <div>
+            <div className="font-medium text-sm">{l.label}</div>
+            <div className="text-xs text-muted-foreground">{l.desc}</div>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+FILE: apps/web/components/gamification/XPBar.tsx
+'use client'
+import { Progress } from '@/components/ui/progress'
+
+interface Props { xpTotal: number; level: number }
+export function XPBar({ xpTotal, level }: Props) {
+  const xpInLevel = xpTotal % 1000
+  const pct = (xpInLevel / 1000) * 100
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between text-xs">
+        <span className="font-medium">Level {level}</span>
+        <span className="text-muted-foreground">{xpInLevel} / 1000 XP</span>
+      </div>
+      <Progress value={pct} className="h-2" />
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>{xpTotal.toLocaleString()} total XP</span>
+        <span>Level {level+1} at {(level)*1000} XP</span>
+      </div>
+    </div>
+  )
+}
+
+FILE: apps/web/components/gamification/LevelUpModal.tsx
+'use client'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import type { GamificationResult } from '@teachclone/types'
+
+interface Props { result: GamificationResult | null; onClose: () => void }
+export function LevelUpModal({ result, onClose }: Props) {
+  if (!result?.levelUp && !result?.newBadges.length) return null
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="text-center max-w-sm">
+        <div className="text-6xl mb-4">{result.levelUp ? '🎉' : '🏆'}</div>
+        {result.levelUp && (
+          <><h2 className="text-2xl font-bold mb-1">Level Up!</h2>
+          <p className="text-muted-foreground mb-4">You reached Level {result.newLevel}</p></>
+        )}
+        {result.newBadges.length > 0 && (
+          <div className="space-y-2 mb-4">
+            <p className="font-medium">New badge{result.newBadges.length>1?'s':''}!</p>
+            {result.newBadges.map(b => (
+              <div key={b.id} className="flex items-center gap-2 bg-muted rounded-lg p-2">
+                <span className="text-2xl">{b.icon}</span>
+                <div className="text-left">
+                  <div className="font-medium text-sm">{b.name}</div>
+                  <div className="text-xs text-muted-foreground">+{b.xp} XP</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="text-sm text-muted-foreground mb-4">+{result.xpEarned} XP earned</div>
+        <Button onClick={onClose} className="w-full">Continue Learning</Button>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROMPT #24  [FRONTEND-4]
+  FILE: apps/web/app/ pages
+────────────────────────────────────────────────────────────────────────────────
+
+Write all page components.
+
+FILE: apps/web/app/(auth)/sign-in/[[...sign-in]]/page.tsx
+import { SignIn } from '@clerk/nextjs'
+Center the ClerkSignIn component on a full-height page with TeachClone branding above it.
+
+FILE: apps/web/app/(auth)/sign-up/[[...sign-up]]/page.tsx
+Same pattern with SignUp component.
+
+FILE: apps/web/app/(protected)/dashboard/page.tsx (already written above - reproduce)
+
+FILE: apps/web/app/(protected)/onboarding/page.tsx
+4-step client-side wizard:
+Step 1: LevelSelector component
+Step 2: Learning style selector (4 cards: examples/theory/qa/storytelling)
+Step 3: Goal input (textarea: "What do you want to learn?") + Prior knowledge (optional)
+Step 4: "You're all set!" with a "Go to Dashboard" button
+Save student_profile to localStorage via useSessionStore.setDefaultProfile()
+After step 4: router.push('/dashboard')
+Animate step transitions with simple CSS opacity/translate.
+
+FILE: apps/web/app/(protected)/profiles/new/page.tsx
+Client page. Form with:
+- Name field (required, min 2 chars)
+- Description textarea (optional)
+- "Make public" toggle (shadcn Switch component)
+On submit: POST /profiles, then router.push(`/profiles/${id}`)
+Show loading spinner on submit button.
+
+FILE: apps/web/app/(protected)/profiles/[id]/page.tsx
+Server component fetching profile by ID.
+Pass to client ProfilePageClient component.
+Tabs using shadcn Tabs:
+- "Add Content": side-by-side YouTubeInput and MediaDropzone
+- "Content Library": list of media_sources, status badges, ProcessingProgress for pending/processing ones
+- "Style Profile": StyleProfileDisplay (show vocabulary level, tone, explanation pattern, analogy density, signature phrases)
+- "Start Learning": show student level selector + goal input + button that creates session and redirects to /chat/{id}
+
+FILE: apps/web/app/(protected)/chat/[session_id]/page.tsx (already written above - reproduce in full)
+
+FILE: apps/web/app/(protected)/progress/page.tsx
+Client page. Fetch /users/me/stats.
+Show: XPBar, streak info ("🔥 7 day streak!"), stats grid (sessions/quizzes/perfect/videos).
+BadgeGrid showing all BADGE_DEFINITIONS — earned ones colored, locked ones dimmed with requirement hint.
+
+FILE: apps/web/app/(protected)/pricing/page.tsx
+Marketing page with 4 plan cards.
+Current plan badge if user is signed in.
+Upgrade buttons call POST /billing/checkout, redirect to checkout_url.
+"Manage subscription" links to POST /billing/portal.
+
+FILE: apps/web/app/(protected)/settings/api/page.tsx
+API key management:
+- List existing keys (GET /settings/api-keys): show prefix, name, last used
+- Create new key button → modal → POST /settings/api-keys → show full key ONCE with copy button + warning
+- Revoke button per key (DELETE /settings/api-keys/{id})
+
+FILE: apps/web/app/(protected)/admin/[org_slug]/dashboard/page.tsx
+Server component. Fetch org stats.
+Show: total members, active sessions today, most-used profiles, usage chart (last 30 days).
+Use recharts LineChart for daily active users.
+
+FILE: apps/web/app/(protected)/admin/[org_slug]/members/page.tsx
+Client page with searchable members table:
+Columns: avatar, name, email, role (editable dropdown), sessions, last active, remove button.
+"Invite Member" button → dialog with email + role selector → POST /organizations/{id}/members/invite.
+
+FILE: apps/web/app/page.tsx (landing page)
+Full marketing landing page with sections:
+1. Hero: gradient heading, subheading, 2 CTA buttons (Sign Up free / Watch Demo)
+2. How it works: 3 steps with icons (Upload → AI Processes → Learn at Your Level)
+3. Features: 6 cards grid
+4. Comparison table vs NotebookLM
+5. Pricing: 4 cards
+6. Footer: links to pricing/sign-in
+
+FILE: apps/web/app/api/webhooks/clerk/route.ts
+Next.js route handler for Clerk webhooks (mirror of backend Clerk webhook).
+This just forwards to the API backend — the real processing happens in FastAPI.
+Or: handle user sync here by calling POST /auth/sync after user.created event.
+
+FILE: apps/web/components/layout/Sidebar.tsx
+'use client'
+Left navigation sidebar for the protected app.
+Links: Dashboard, Sessions (recent), Settings, Progress, Pricing.
+User avatar + name at bottom (from Clerk useUser hook).
+Collapse to icon-only on mobile.
+
+FILE: apps/web/components/layout/Header.tsx  
+Top header for protected pages.
+Left: breadcrumb (page title).
+Right: notification bell (future), UserButton from Clerk.
+
+FILE: apps/web/components/admin/AnalyticsCharts.tsx
+'use client'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+Props: { data: Array<{date: string; sessions: number; messages: number}> }
+Show two lines: sessions (primary color) and messages (muted color).
+Custom tooltip showing date + values.
+
+FILE: apps/web/components/admin/MembersTable.tsx
+'use client'
+Searchable table of org members.
+Columns: name/email, role (Select dropdown for admin), sessions count, last active, Remove button.
+Filter input at top.
+Confirm dialog before removing a member.
+
+FILE: apps/web/components/quiz/QuizModal.tsx
+Full-screen dialog for taking a quiz.
+Shows progress: "Question 2 of 5"
+Renders QuizQuestion based on question type.
+After all questions submitted: shows QuizResults.
+'use client' with useState for answers and current question index.
+
+FILE: apps/web/components/quiz/QuizQuestion.tsx
+Renders one question. Switches on type:
+- mcq: 4 radio button cards
+- true_false: two large buttons (True / False)  
+- short_answer: textarea with 500 char limit and character counter
+
+FILE: apps/web/components/quiz/QuizResults.tsx
+Shows final score as large number (e.g. "4/5") with color coding.
+Lists each question with correct/incorrect icon + feedback text.
+Source timestamp chips for each question.
+"Back to Chat" button.
+
+SCRIPTS|scripts/ and docs/|Write utility scripts and documentation.
+
+FILE: scripts/seed_dev.py
+Python script to populate dev database with test data:
+1. Create test user: email=test@example.com, clerk_id=test_clerk_id, plan=pro
+2. Create teacher profile: name="3Blue1Brown Style", description="Math explanations with visual intuition"
+3. Create 1 sample media_source (status=completed)
+4. Create 10 sample transcript_chunks
+5. Create 1 student_session with undergrad level
+6. Create 5 sample messages alternating user/assistant
+7. Create UserStats for the test user
+Print "Seed complete!" with record counts.
+Use asyncio.run() with SQLAlchemy async session.
+
+FILE: scripts/create_qdrant_collection.py
+Standalone script to ensure Qdrant collection exists:
+import asyncio
+from app.services.vector_store import vector_store
+async def main():
+    await vector_store.ensure_collection()
+    print("Qdrant collection ready!")
+asyncio.run(main())
+
+FILE: scripts/migrate.sh
+#!/bin/bash
+Check DATABASE_URL is set, then run:
+cd apps/api && alembic upgrade head
+echo "Migrations complete!"
+
+FILE: docs/architecture.md
+Write a comprehensive architecture document:
+- System overview (3 paragraphs)
+- ASCII diagram of the 6-layer pipeline
+- Data flow description (step by step for a user session)
+- Technology choices and rationale (table: tech -> reason -> alternatives considered)
+- Database schema overview
+- Deployment architecture
+- Security model
+
+FILE: docs/deployment.md
+Step-by-step production deployment guide:
+1. Set up Cloudflare R2 bucket
+2. Configure Clerk application
+3. Set up Stripe products and webhooks
+4. Deploy PostgreSQL (Railway/Neon)
+5. Deploy Redis (Upstash)
+6. Deploy Qdrant (Qdrant Cloud or self-hosted)
+7. Deploy API to Railway (environment variables list)
+8. Deploy worker to Railway
+9. Deploy web to Vercel
+10. Run initial migrations
+11. Test end-to-end with seed data
+
+
+================================================================================
+END OF PROMPTS — TeachClone SaaS
+================================================================================

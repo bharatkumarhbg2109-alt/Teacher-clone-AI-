@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0a0e1a;
+  color: #f1f5f9;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+* {
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.prose-chat p {
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+.prose-chat ul,
+.prose-chat ol {
+  margin: 0.4rem 0 0.6rem 1.2rem;
+  list-style: disc;
+}
+.prose-chat ol {
+  list-style: decimal;
+}
+.prose-chat code {
+  background: rgba(99, 102, 241, 0.15);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+.prose-chat strong {
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 4px;
+}

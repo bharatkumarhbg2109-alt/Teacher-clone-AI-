@@ -1,0 +1,5 @@
+# Alembic migration versions live here.
+# Generate the initial migration once the DB is reachable:
+#   alembic revision --autogenerate -m "initial schema"
+#   alembic upgrade head
+# (In DEV_MODE the API also create_all's missing tables on startup.)

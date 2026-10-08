@@ -1,0 +1,13 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+.git/
+uploads/*
+!uploads/.gitkeep
+!uploads/pdfs/.gitkeep
+!uploads/sources/.gitkeep

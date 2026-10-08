@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeachClone — Project Structure</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080C14;--s1:#0E1523;--s2:#131E30;--s3:#1A2640;
+  --border:#1E2D45;--border2:#2A3F5F;
+  --text:#E2EAF4;--muted:#5B7A9D;--muted2:#7A98BA;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+  /* file type colors */
+  --c-ts:#4FC3F7;--c-py:#FFD54F;--c-css:#CE93D8;
+  --c-md:#80CBC4;--c-json:#A5D6A7;--c-yml:#FFCC02;
+  --c-dir:#7986CB;--c-docker:#29B6F6;--c-sh:#66BB6A;
+  --c-env:#FF8A65;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px}
+.logo-box{width:28px;height:28px;background:linear-gradient(135deg,#6366F1,#06B6D4);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.hdr-controls{display:flex;align-items:center;gap:8px}
+.ctrl-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.ctrl-btn:hover{border-color:var(--border2);color:var(--text)}
+.search-box{background:var(--s2);border:1px solid var(--border);color:var(--text);font-size:12px;padding:5px 12px;border-radius:6px;font-family:var(--sans);outline:none;width:180px}
+.search-box:focus{border-color:#6366F1}
+.search-box::placeholder{color:var(--muted)}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* TREE PANEL */
+.tree-panel{width:420px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:16px 0}
+.tree-panel::-webkit-scrollbar{width:4px}
+.tree-panel::-webkit-scrollbar-track{background:transparent}
+.tree-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* INFO PANEL */
+.info-panel{flex:1;overflow-y:auto;padding:28px 32px}
+.info-panel::-webkit-scrollbar{width:4px}
+.info-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* TREE NODES */
+.tree-root{font-family:var(--mono);font-size:12.5px}
+.node{user-select:none}
+.node-row{display:flex;align-items:center;gap:0;padding:2px 0 2px 0;cursor:pointer;border-radius:4px;transition:background .1s;position:relative}
+.node-row:hover{background:rgba(99,102,241,.07)}
+.node-row.selected{background:rgba(99,102,241,.14)!important}
+.node-indent{display:flex;align-items:stretch;flex-shrink:0}
+.indent-line{width:20px;border-left:1px solid var(--border);margin:0;flex-shrink:0}
+.indent-space{width:20px;flex-shrink:0}
+.toggle-icon{width:16px;height:18px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:9px;flex-shrink:0;transition:transform .15s}
+.toggle-icon.open{transform:rotate(90deg)}
+.toggle-icon.leaf{opacity:0;pointer-events:none}
+.node-icon{width:16px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.node-name{padding:0 4px;color:var(--text);white-space:nowrap}
+.node-name.dir{color:var(--c-dir);font-weight:500}
+.node-name.dim{color:var(--muted)}
+.node-tag{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:6px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
+.children{overflow:hidden}
+.children.collapsed{display:none}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--s1)}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;font-family:var(--mono);color:var(--muted2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* INFO PANEL CONTENT */
+.info-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);text-align:center;gap:12px;min-height:300px}
+.info-placeholder-icon{font-size:40px;opacity:.4}
+.info-placeholder p{font-size:13px;line-height:1.6;max-width:240px}
+
+.info-card{display:none}
+.info-card.show{display:block}
+.info-path{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.info-path span{color:var(--muted2)}
+.info-path .sep{color:var(--muted)}
+.info-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.info-icon-big{font-size:28px;line-height:1}
+.info-title{font-size:20px;font-weight:600;margin-bottom:4px;font-family:var(--mono)}
+.info-type-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)}
+.info-desc{font-size:14px;color:var(--muted2);line-height:1.75;margin-bottom:20px}
+.info-section{margin-bottom:20px}
+.info-section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.info-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.info-list li{font-size:13px;color:var(--muted2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.info-list li::before{content:"›";color:#6366F1;flex-shrink:0;margin-top:1px}
+.info-list li strong{color:var(--text);font-weight:500}
+.info-code{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:#94A3B8;line-height:1.7;white-space:pre;overflow-x:auto;margin-top:8px}
+.info-code::-webkit-scrollbar{height:3px}
+.info-code::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.info-chips{display:flex;flex-wrap:wrap;gap:6px}
+.info-chip{font-size:11px;font-family:var(--mono);padding:3px 8px;border-radius:4px;border:1px solid var(--border2);color:var(--muted2)}
+
+/* highlight matched search */
+.node-name.match{background:rgba(245,158,11,.15);border-radius:2px}
+
+@media(max-width:700px){
+  .tree-panel{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:45vh}
+  .layout{flex-direction:column}
+  .info-panel{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-box">🧠</div>
+    TeachClone <span style="color:var(--muted);font-weight:400;font-size:13px;margin-left:6px">/ project structure</span>
+  </div>
+  <div class="hdr-controls">
+    <input class="search-box" placeholder="Search files…" oninput="search(this.value)" id="searchInput">
+    <button class="ctrl-btn" onclick="expandAll()">Expand all</button>
+    <button class="ctrl-btn" onclick="collapseAll()">Collapse all</button>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-dir)"></div>Directory</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-ts)"></div>.ts / .tsx</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-py)"></div>.py</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-yml)"></div>.yml / .yaml</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-json)"></div>.json</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-md)"></div>.md</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-docker)"></div>Docker</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--c-env)"></div>.env</div>
+</div>
+
+<div class="layout">
+<div class="tree-panel" id="tree"></div>
+<div class="info-panel" id="infoPanel">
+  <div class="info-placeholder">
+    <div class="info-placeholder-icon">📂</div>
+    <p>Click any file or folder to see what it does and what goes inside it</p>
+  </div>
+  <div class="info-card" id="infoCard"></div>
+</div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const INFO = {
+  'teachclone': {icon:'📦',type:'ROOT',color:'#7986CB',desc:'Monorepo root. Managed with pnpm workspaces. Contains two apps (web + api) and shared packages. Run everything from here.',
+    keys:['pnpm install — installs all workspace deps','pnpm dev — starts both web and api in parallel','docker compose up — starts Postgres, Redis, Qdrant, API, Worker, Web'],
+    code:`teachclone/
+├── apps/           ← web + api apps
+├── packages/       ← shared types + config
+├── docker/         ← compose + Dockerfiles
+├── .github/        ← CI/CD workflows
+├── scripts/        ← dev utility scripts
+└── docs/           ← architecture docs`},
+
+  'apps': {icon:'🗂️',type:'DIR',color:'#7986CB',desc:'Contains the two runnable applications: the Next.js frontend and the FastAPI backend.',keys:[]},
+  'apps/web': {icon:'🌐',type:'NEXT.JS APP',color:'#4FC3F7',desc:'Next.js 14 frontend with App Router. TypeScript, Tailwind CSS, shadcn/ui. Deployed to Vercel.',
+    keys:['App Router with route groups: (auth) and (protected)','Clerk for authentication + middleware','Vercel AI SDK for streaming chat','Zustand + React Query for state management'],
+    chips:['Next.js 14','TypeScript','Tailwind CSS','shadcn/ui','Clerk','Stripe','Vercel AI SDK']},
+
+  'apps/web/app': {icon:'📁',type:'NEXT.JS PAGES',color:'#7986CB',desc:'All routes for the web app using Next.js App Router. Each folder = a URL route. Route groups in parentheses don\'t appear in the URL.',
+    keys:['(auth) group → /sign-in, /sign-up (public, Clerk-handled)','(protected) group → all authenticated pages','app/api/ → server-side API routes (webhooks)','layout.tsx at root wraps every page with ClerkProvider + QueryProvider']},
+
+  'apps/web/app/(auth)': {icon:'🔐',type:'ROUTE GROUP',color:'#7986CB',desc:'Public auth pages. These are not protected by Clerk middleware. Contains sign-in and sign-up pages powered by Clerk components.',
+    code:`(auth)/
+├── sign-in/[[...sign-in]]/page.tsx   ← Clerk <SignIn />
+└── sign-up/[[...sign-up]]/page.tsx   ← Clerk <SignUp />`},
+
+  'apps/web/app/(protected)': {icon:'🔒',type:'ROUTE GROUP',color:'#7986CB',desc:'All authenticated routes. Every page here is protected by Clerk middleware — unauthenticated users are redirected to /sign-in.',
+    code:`(protected)/
+├── dashboard/         ← /dashboard — main hub
+├── onboarding/        ← /onboarding — post-signup wizard
+├── chat/[session_id]/ ← /chat/abc123 — AI teaching session
+├── profiles/
+│   ├── new/           ← create teacher profile
+│   └── [id]/          ← manage a profile
+├── progress/          ← XP, streaks, badges
+├── pricing/           ← plan comparison + upgrade
+├── settings/
+│   ├── account/       ← profile, preferences
+│   └── api/           ← API key management
+└── admin/[org_slug]/  ← institution admin panel`},
+
+  'apps/web/app/(protected)/dashboard': {icon:'🏠',type:'PAGE',color:'#4FC3F7',desc:'Main hub after login. Shows teacher profile cards, recent sessions, monthly usage bar, and quick-action buttons.',
+    keys:['Fetches GET /teacher-profiles (user\'s profiles)','Fetches GET /sessions (recent 5)','Fetches GET /billing/status (usage this month)','Renders TeacherProfileCard grid + RecentSessions list'],
+    code:`dashboard/
+├── page.tsx       ← server component, fetches data
+├── loading.tsx    ← skeleton loader
+└── error.tsx      ← error boundary`},
+
+  'apps/web/app/(protected)/chat/[session_id]': {icon:'💬',type:'PAGE',color:'#4FC3F7',desc:'The core AI teaching chat interface. Streaming messages, citation chips, voice input, quiz trigger, and session controls.',
+    keys:['useChat from Vercel AI SDK for streaming','Left sidebar: session info + teacher profile + export button','Message thread: markdown rendering + citation chips','Bottom input: text + mic button + send','"Simpler ↓" / "Deeper ↑" buttons below each AI message'],
+    code:`chat/[session_id]/
+├── page.tsx          ← fetches session + messages
+├── loading.tsx
+└── _components/      ← page-local components
+    ├── ChatThread.tsx
+    ├── SessionSidebar.tsx
+    └── QuizTrigger.tsx`},
+
+  'apps/web/app/(protected)/admin/[org_slug]': {icon:'🏢',type:'ADMIN PAGES',color:'#4FC3F7',desc:'Institution admin panel. Only accessible by org admins. Manage members, profiles, analytics, and security settings.',
+    code:`admin/[org_slug]/
+├── dashboard/    ← overview stats + charts
+├── members/      ← invite, remove, change roles
+├── profiles/     ← manage org teacher profiles
+├── analytics/    ← student progress, usage
+└── settings/
+    ├── general/  ← org name, logo
+    ├── security/ ← SSO, 2FA, allowed domains
+    └── billing/  ← seats, invoices`},
+
+  'apps/web/components': {icon:'🧩',type:'COMPONENTS',color:'#7986CB',desc:'All reusable React components, organized by feature domain. Each subfolder owns a specific product concern.',
+    code:`components/
+├── ui/            ← shadcn/ui base components (auto-generated)
+├── chat/          ← chat bubble, citations, streaming indicator
+├── media/         ← dropzone, progress bar, YouTube input
+├── quiz/          ← quiz modal, question types, results
+├── profile/       ← teacher profile card, style badges
+├── gamification/  ← XP bar, badge grid, level-up modal
+├── admin/         ← members table, analytics charts
+└── layout/        ← sidebar, header, mobile nav`},
+
+  'apps/web/components/chat': {icon:'💬',type:'COMPONENTS',color:'#4FC3F7',desc:'Chat UI components. These compose the main /chat/[session_id] experience.',
+    code:`chat/
+├── MessageBubble.tsx      ← renders user or AI message with markdown
+├── CitationChip.tsx       ← "[0:42]" badge with timestamp tooltip
+├── StreamingIndicator.tsx ← animated "..." while AI is responding
+├── ChatInput.tsx          ← textarea + send + mic button
+└── VoiceButton.tsx        ← mic icon, handles SpeechRecognition API`},
+
+  'apps/web/components/media': {icon:'🎬',type:'COMPONENTS',color:'#4FC3F7',desc:'Media upload UI. Handles YouTube URL input and drag-and-drop file uploads with real-time progress.',
+    code:`media/
+├── MediaDropzone.tsx       ← drag-and-drop area, calls useMediaUpload hook
+├── ProcessingProgress.tsx  ← connects to SSE, shows stage + progress bar
+└── YouTubeInput.tsx        ← URL input with format validation`},
+
+  'apps/web/components/quiz': {icon:'📝',type:'COMPONENTS',color:'#4FC3F7',desc:'Quiz generation and taking UI. Handles MCQ, true/false, and short-answer questions.',
+    code:`quiz/
+├── QuizModal.tsx     ← full-screen modal wrapping the quiz flow
+├── QuizQuestion.tsx  ← renders one question (adapts to type)
+└── QuizResults.tsx   ← score, per-question feedback, source clips`},
+
+  'apps/web/components/gamification': {icon:'🏆',type:'COMPONENTS',color:'#4FC3F7',desc:'XP and achievement UI. Drives daily retention through visible progress.',
+    code:`gamification/
+├── XPBar.tsx          ← animated level progress bar
+├── BadgeGrid.tsx      ← all badges: earned (glow) / locked (dim)
+├── StreakBadge.tsx    ← "🔥 7 days" shown in chat sidebar
+└── LevelUpModal.tsx   ← celebration animation on level up`},
+
+  'apps/web/lib': {icon:'🔧',type:'LIB',color:'#7986CB',desc:'All non-component frontend logic: API client, custom hooks, Zustand stores, and utility functions.',
+    code:`lib/
+├── api-client.ts     ← typed axios instance with Clerk auth interceptor
+├── hooks/            ← custom React hooks
+├── stores/           ← Zustand global stores
+└── utils/            ← formatters, validators, helpers`},
+
+  'apps/web/lib/api-client.ts': {icon:'🔌',type:'TS FILE',color:'#4FC3F7',desc:'Typed API client. Axios instance preconfigured with base URL, auth interceptor (attaches Clerk JWT), and error normalization.',
+    keys:['Base URL: process.env.NEXT_PUBLIC_API_URL','Request interceptor: await clerk.session?.getToken() → Bearer header','Response interceptor: maps errors to { message, code, status }','Exports typed functions: getMe(), syncUser(), getProfiles(), etc.'],
+    code:`// Usage
+import api from '@/lib/api-client'
+const profiles = await api.get<TeacherProfile[]>('/teacher-profiles')`},
+
+  'apps/web/lib/hooks': {icon:'⚓',type:'HOOKS',color:'#7986CB',desc:'Custom React hooks encapsulating complex stateful logic.',
+    code:`hooks/
+├── useMediaUpload.ts    ← presign → upload to R2 → complete (with progress %)
+├── useVoiceInput.ts     ← SpeechRecognition API wrapper + MediaRecorder fallback
+├── useStreamingChat.ts  ← wraps Vercel AI SDK useChat for TeachClone API format
+└── useQuota.ts          ← fetches /billing/status, returns { canUpload, canChat }`},
+
+  'apps/web/lib/stores': {icon:'🗃️',type:'ZUSTAND',color:'#7986CB',desc:'Zustand global state stores. Kept minimal — most server state lives in React Query.',
+    code:`stores/
+├── useSessionStore.ts  ← active session_id, student_profile, current_level
+└── useUserStore.ts     ← current user, plan, org membership`},
+
+  'apps/web/middleware.ts': {icon:'🛡️',type:'TS FILE',color:'#4FC3F7',desc:'Next.js middleware. Uses Clerk\'s authMiddleware to protect routes and handle redirects.',
+    code:`// Public routes (no auth needed)
+publicRoutes: ['/', '/pricing', '/sign-in', '/sign-up', '/api/webhooks/(.*)']
+
+// After sign-in → redirect to /dashboard
+// After sign-up → redirect to /onboarding
+// Unauthenticated access to protected routes → redirect to /sign-in`},
+
+  'apps/web/next.config.js': {icon:'⚙️',type:'CONFIG',color:'#A5D6A7',desc:'Next.js configuration. Sets up env vars, image domains, security headers, and experimental features.',
+    keys:['images.domains: includes Clerk CDN + R2 public URL','headers(): CSP, X-Frame-Options, HSTS for all routes','experimental.serverActions: true','env: exposes NEXT_PUBLIC_* vars to browser']},
+
+  'apps/api': {icon:'🐍',type:'FASTAPI APP',color:'#FFD54F',desc:'Python FastAPI backend. Handles all business logic, AI orchestration, and database operations. Deployed to Railway/Render.',
+    chips:['FastAPI','Python 3.11','SQLAlchemy 2.0','Celery','Qdrant','Anthropic Claude','OpenAI'],
+    code:`api/
+├── app/           ← main application package
+├── alembic.ini    ← migration config
+├── requirements.txt
+└── Dockerfile`},
+
+  'apps/api/app/main.py': {icon:'🚀',type:'PY FILE',color:'#FFD54F',desc:'FastAPI app factory. Creates the app, registers all routers, adds middleware, and handles startup/shutdown events.',
+    keys:['Creates FastAPI(title="TeachClone API", version="1.0.0")','CORS middleware: allows NEXT_PUBLIC_APP_URL origin','Mounts all routers with prefixes (/auth, /media, /chat, /v1, etc.)','Startup: ensure Qdrant collection exists, test DB connection','Includes custom exception handlers for auth, quota, not-found errors'],
+    code:`app = FastAPI(title="TeachClone API")
+app.add_middleware(CORSMiddleware, allow_origins=[settings.APP_URL])
+app.include_router(health.router)
+app.include_router(auth.router, prefix="/auth")
+app.include_router(media.router, prefix="/media")
+app.include_router(chat.router, prefix="/chat")
+app.include_router(v1.router, prefix="/v1")`},
+
+  'apps/api/app/config.py': {icon:'⚙️',type:'PY FILE',color:'#FFD54F',desc:'Pydantic Settings class. Reads all environment variables with type validation and provides defaults.',
+    code:`class Settings(BaseSettings):
+  DATABASE_URL: str
+  REDIS_URL: str
+  QDRANT_URL: str = "http://localhost:6333"
+  OPENAI_API_KEY: str
+  ANTHROPIC_API_KEY: str
+  CLERK_SECRET_KEY: str
+  CLERK_WEBHOOK_SECRET: str
+  STRIPE_SECRET_KEY: str
+  R2_BUCKET_NAME: str
+  ...
+settings = Settings()  # singleton, import everywhere`},
+
+  'apps/api/app/dependencies.py': {icon:'🔗',type:'PY FILE',color:'#FFD54F',desc:'FastAPI dependency functions. Injected into route handlers via Depends().',
+    code:`async def get_db() -> AsyncSession          # DB session per request
+async def verify_clerk_token(auth: str)      # validate JWT, return clerk_id
+async def get_current_user(db, token) -> User # fetch user from DB
+async def require_plan(plan: str)             # 402 if user plan insufficient
+async def check_api_key(key: str) -> User     # for /v1/* routes`},
+
+  'apps/api/app/models': {icon:'🗄️',type:'MODELS',color:'#7986CB',desc:'SQLAlchemy ORM models. Each file maps to one or more database tables.',
+    code:`models/
+├── user.py            ← users table
+├── organization.py    ← organizations table
+├── org_member.py      ← org_members (user ↔ org junction)
+├── teacher_profile.py ← teacher_profiles + style_profile JSONB
+├── media_source.py    ← media_sources (videos/audio)
+├── transcript_chunk.py← transcript_chunks (text + timestamps)
+├── processing_job.py  ← job tracking per media_source
+├── student_session.py ← sessions with student_profile JSONB
+├── message.py         ← chat messages with citations JSONB
+├── quiz.py            ← quizzes + student_answers JSONB
+├── api_key.py         ← hashed API keys for /v1 access
+├── audit_log.py       ← immutable action log for enterprise
+├── user_stats.py      ← XP, streaks, level for gamification
+├── user_badge.py      ← earned badges per user
+└── usage_log.py       ← event log for quota metering`},
+
+  'apps/api/app/routers': {icon:'🛣️',type:'ROUTERS',color:'#7986CB',desc:'All API route definitions. Each file groups related endpoints. All routes require auth via Depends(get_current_user) unless noted.',
+    code:`routers/
+├── health.py           ← GET /health (public)
+├── auth.py             ← POST /auth/sync, /webhooks/clerk (public)
+├── users.py            ← GET /users/me, PUT /users/me
+├── organizations.py    ← CRUD + member management
+├── teacher_profiles.py ← CRUD + style profile endpoint
+├── media.py            ← YouTube + file upload + status SSE
+├── sessions.py         ← create/list/delete sessions
+├── chat.py             ← POST /chat/{id}/message (streaming SSE)
+├── quizzes.py          ← generate + submit + results
+├── billing.py          ← checkout, portal, status + Stripe webhook
+├── voice.py            ← POST /voice/transcribe, /chat/{id}/speak
+├── export.py           ← POST /sessions/{id}/export (PDF/MD)
+├── webhooks.py         ← Clerk + Stripe webhook handlers
+└── v1/                 ← Public API (API-key auth)
+    ├── profiles.py
+    ├── sessions.py
+    └── chat.py`},
+
+  'apps/api/app/services': {icon:'⚡',type:'SERVICES',color:'#7986CB',desc:'Business logic layer. Pure Python classes/functions. No FastAPI dependencies — fully testable in isolation.',
+    code:`services/
+├── storage.py           ← Cloudflare R2 (presign, upload, delete)
+├── audio_extractor.py   ← yt-dlp + FFmpeg → .wav file
+├── transcriber.py       ← faster-whisper → timestamped chunks
+├── frame_sampler.py     ← FFmpeg frame extraction + dedup
+├── vision_analyzer.py   ← GPT-4o Vision → visual descriptions
+├── style_extractor.py   ← analyze transcript → StyleProfile JSON
+├── embedder.py          ← OpenAI text-embedding-3-large (batched)
+├── vector_store.py      ← Qdrant client (upsert, hybrid search, delete)
+├── retrieval.py         ← full hybrid retrieval pipeline
+├── prompt_builder.py    ← build_system_prompt(teacher, student, context)
+├── quiz_generator.py    ← generate + grade quizzes via Claude
+├── session_summarizer.py← summarize session → SessionSummary
+├── export_service.py    ← PDF (ReportLab) + Markdown export
+├── tts_service.py       ← OpenAI TTS → MP3 bytes (with R2 cache)
+├── billing.py           ← Stripe checkout, portal, quota checks
+├── gamification.py      ← award_xp(), check_badges(), streak logic
+├── api_keys.py          ← generate, hash, verify API keys
+└── email.py             ← Resend SDK for invitation emails`},
+
+  'apps/api/app/services/prompt_builder.py': {icon:'🧠',type:'PY FILE',color:'#FFD54F',desc:'The most critical file in the codebase. Dynamically builds the LLM system prompt by combining teacher style, student profile, and retrieved content.',
+    keys:['build_system_prompt(teacher_profile, student_session, context_chunks) → str','LEVEL_INSTRUCTIONS dict: per-level vocabulary guidance (k5 → professional)','STYLE_INSTRUCTIONS dict: per-learning-style explanation ordering','format_context_chunks(): formats RAG results as numbered knowledge entries','Re-evaluated on every chat turn — never cached'],
+    code:`def build_system_prompt(teacher, session, chunks) -> str:
+  style = teacher.style_profile
+  student = session.student_profile
+  level = session.current_effective_level
+  return f"""You are an AI version of {teacher.name}...
+  TEACHER STYLE: {style.tone_type}, {style.explanation_pattern}
+  STUDENT LEVEL: {level} — {LEVEL_INSTRUCTIONS[level]}
+  KNOWLEDGE BASE:
+  {format_context_chunks(chunks)}
+  RULES: ..."""`},
+
+  'apps/api/app/services/style_extractor.py': {icon:'🎭',type:'PY FILE',color:'#FFD54F',desc:'Extracts a structured StyleProfile from transcript chunks. Combines statistical NLP analysis with LLM classification.',
+    keys:['Flesch-Kincaid grade level via textstat library','Analogy density: regex search for "like","imagine","think of","similar to"','Signature phrase extraction: Counter on 3-5 word n-grams','LLM analysis via Claude: tone_type, explanation_pattern, pacing','Averaging: if teacher has multiple videos, profiles are averaged'],
+    code:`class StyleExtractor:
+  async def extract(self, chunks) -> StyleProfile:
+    text = join(chunks)
+    stats = {
+      vocabulary_score: flesch_kincaid(text),    # textstat
+      avg_sentence_length: nltk.sent_tokenize(),
+      analogy_density: regex_count(ANALOGY_WORDS),
+      signature_phrases: top_ngrams(text, n=3-5)
+    }
+    llm = await self._llm_analyze(chunks[:15])   # Claude
+    return StyleProfile(**stats, **llm)`},
+
+  'apps/api/app/services/vector_store.py': {icon:'🔍',type:'PY FILE',color:'#FFD54F',desc:'Qdrant vector database client. Manages the collection, upserts embeddings, and performs hybrid search.',
+    keys:['Collection: "teachclone_chunks" with 3072-dim dense + sparse vectors','Hybrid search: dense (semantic) + BM25 sparse, merged with RRF','Namespace isolation: filter by teacher_profile_id on every search','Metadata stored in payload: text, timestamps, media_source_id, content_type'],
+    code:`async def hybrid_search(query_dense, query_sparse, teacher_profile_id, top_k=8):
+  dense_results = await client.search(
+    collection_name=COLLECTION,
+    query_vector=query_dense,
+    query_filter=Filter(must=[FieldCondition(key="teacher_profile_id"...)])
+  )
+  sparse_results = await client.search(using="sparse", ...)
+  return rrf_merge(dense_results, sparse_results, k=60)[:top_k]`},
+
+  'apps/api/app/tasks': {icon:'⚙️',type:'CELERY TASKS',color:'#7986CB',desc:'Celery background task modules. These handle all long-running AI processing that can\'t happen in a web request.',
+    code:`tasks/
+├── media_tasks.py      ← process_youtube, process_uploaded_file
+│                          (download audio, run transcription, save chunks)
+├── embedding_tasks.py  ← embed_and_store
+│                          (batch embed chunks, upsert to Qdrant)
+├── style_tasks.py      ← extract_style
+│                          (analyze full transcript → StyleProfile JSON)
+└── vision_tasks.py     ← analyze_frames
+│                          (sample frames, GPT-4o vision, save visual chunks)
+│
+│   TASK CHAIN (triggered after media upload):
+│   process_youtube → embed_and_store ┐
+│                                      ├─ chord → extract_style
+│                     analyze_frames  ┘`},
+
+  'apps/api/app/worker/__init__.py': {icon:'🔄',type:'PY FILE',color:'#FFD54F',desc:'Celery application instance. Imported by all task files and the worker Docker container.',
+    code:`celery_app = Celery(
+  'teachclone',
+  broker=settings.REDIS_URL,
+  backend=settings.REDIS_URL,
+  include=['app.tasks.media_tasks', 'app.tasks.embedding_tasks',
+           'app.tasks.style_tasks', 'app.tasks.vision_tasks']
+)
+# Task routing
+celery_app.conf.task_routes = {
+  'media.*': {'queue': 'media'},
+  'ai.*':    {'queue': 'ai'}
+}`},
+
+  'apps/api/app/db': {icon:'🗄️',type:'DATABASE',color:'#7986CB',desc:'Database connection and Alembic migration setup.',
+    code:`db/
+├── session.py      ← async engine + AsyncSessionLocal factory
+├── base.py         ← imports ALL models (required for Alembic autogenerate)
+└── migrations/     ← Alembic migration files
+    ├── env.py
+    ├── script.py.mako
+    └── versions/
+        ├── 001_initial_schema.py
+        ├── 002_add_gamification.py
+        └── 003_add_audit_logs.py`},
+
+  'packages': {icon:'📦',type:'PACKAGES',color:'#7986CB',desc:'Shared packages used by both apps. Published as internal workspace packages via pnpm workspaces.',
+    code:`packages/
+├── types/    ← @teachclone/types — TypeScript interfaces
+└── config/   ← @teachclone/config — ESLint, tsconfig, Prettier`},
+
+  'packages/types': {icon:'📐',type:'TS PACKAGE',color:'#4FC3F7',desc:'Shared TypeScript type definitions. Used by both the Next.js frontend and any other TypeScript consumers.',
+    code:`types/src/index.ts exports:
+
+interface User { id, clerkId, email, fullName, plan, ... }
+interface TeacherProfile { id, name, styleProfile, ... }
+interface StyleProfile { vocabularyLevel, toneType, explanationPattern,
+                          analogyDensity, signaturePhrases, ... }
+interface StudentProfile { level, goal, learningStyle, priorKnowledge }
+interface Message { id, role, content, citations: Citation[], ... }
+interface Citation { mediaSourceId, startTime, endTime, chunkText }
+interface QuizData { title, questions: Question[], ... }
+interface GamificationResult { xpEarned, newTotal, levelUp, newBadges, streak }
+
+type StudentLevel = 'k5'|'middle'|'highschool'|'undergrad'|'masters'|'professional'
+type LearningStyle = 'examples'|'theory'|'qa'|'storytelling'
+type Plan          = 'free'|'pro'|'creator'|'institution'`},
+
+  'docker': {icon:'🐳',type:'DOCKER',color:'#29B6F6',desc:'All Docker configuration. Docker Compose orchestrates the full local development environment.',
+    code:`docker/
+├── docker-compose.yml       ← local dev (all 6 services)
+├── docker-compose.prod.yml  ← production overrides (no web service)
+├── Dockerfile.api           ← FastAPI app container
+└── Dockerfile.worker        ← Celery worker (heavier: includes ML deps)`},
+
+  'docker/docker-compose.yml': {icon:'🐳',type:'YAML',color:'#FFCC02',desc:'Local development Docker Compose. Starts 6 services: postgres, redis, qdrant, api, worker, web.',
+    code:`services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: teachclone, POSTGRES_PASSWORD: password }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes: [qdrantdata:/qdrant/storage]
+    ports: ["6333:6333", "6334:6334"]
+
+  api:
+    build: { context: .., dockerfile: docker/Dockerfile.api }
+    volumes: [../apps/api:/app]    # hot reload
+    command: uvicorn app.main:app --reload --host 0.0.0.0
+    ports: ["8000:8000"]
+    depends_on: [postgres, redis, qdrant]
+
+  worker:
+    build: { context: .., dockerfile: docker/Dockerfile.worker }
+    command: celery -A app.worker worker --loglevel=info -Q media,ai
+    depends_on: [redis, postgres]
+
+  web:
+    build: { context: ../apps/web }
+    ports: ["3000:3000"]
+    depends_on: [api]`},
+
+  'docker/Dockerfile.worker': {icon:'🐳',type:'DOCKERFILE',color:'#29B6F6',desc:'Celery worker image. Heavier than the API image — includes ML libraries (faster-whisper, torch, ffmpeg).',
+    code:`FROM python:3.11-slim
+
+# System deps: ffmpeg for audio/video processing
+RUN apt-get update && apt-get install -y ffmpeg yt-dlp
+
+# Python deps (includes ML libs)
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# faster-whisper model (downloaded at build time)
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('large-v3')"
+
+WORKDIR /app
+COPY . .
+CMD ["celery", "-A", "app.worker", "worker", "--loglevel=info"]`},
+
+  '.github/workflows': {icon:'🤖',type:'CI/CD',color:'#7986CB',desc:'GitHub Actions workflows for automated testing and deployment.',
+    code:`workflows/
+├── ci.yml      ← runs on every PR + push to main
+│   jobs:
+│   ├── lint-frontend: pnpm lint + tsc --noEmit
+│   ├── lint-backend:  ruff check + mypy
+│   └── test-backend:  pytest apps/api/tests/
+│
+└── deploy.yml  ← runs on merge to main
+    jobs:
+    ├── deploy-web:    vercel --prod (via Vercel CLI)
+    └── deploy-api:    railway up --service api
+                       railway up --service worker`},
+
+  'scripts': {icon:'📜',type:'SCRIPTS',color:'#66BB6A',desc:'Developer utility scripts. Run these manually during setup or for maintenance tasks.',
+    code:`scripts/
+├── seed_dev.py                ← creates test user + teacher profile + sample session
+├── create_qdrant_collection.py← ensures Qdrant collection exists with correct schema
+└── migrate.sh                 ← shortcut: alembic upgrade head (with env check)`},
+
+  'docs': {icon:'📚',type:'DOCS',color:'#80CBC4',desc:'Technical documentation kept close to the code.',
+    code:`docs/
+├── architecture.md   ← system design, data flow diagrams, ADRs
+├── api-reference.md  ← supplement to auto-generated Swagger docs
+└── deployment.md     ← step-by-step production deploy guide`},
+
+  '.env.example': {icon:'🔑',type:'ENV',color:'#FF8A65',desc:'Template for required environment variables. Copy to .env and fill in real values. Never commit .env to git.',
+    code:`# Database
+DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/teachclone
+
+# Cache + Queue
+REDIS_URL=redis://localhost:6379/0
+
+# Vector DB
+QDRANT_URL=http://localhost:6333
+
+# AI APIs
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Auth (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+CLERK_WEBHOOK_SECRET=whsec_...
+
+# Payments (Stripe)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_PRO_PRICE_ID=price_...
+STRIPE_CREATOR_PRICE_ID=price_...
+STRIPE_INSTITUTION_PRICE_ID=price_...
+
+# Storage (Cloudflare R2)
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=teachclone-media
+R2_PUBLIC_URL=https://pub-xxx.r2.dev
+
+# Email (Resend)
+RESEND_API_KEY=re_...
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000`},
+
+  'pnpm-workspace.yaml': {icon:'📦',type:'YAML',color:'#FFCC02',desc:'pnpm workspace configuration. Tells pnpm which directories are workspace packages.',
+    code:`packages:
+  - 'apps/*'
+  - 'packages/*'`},
+
+  'apps/api/requirements.txt': {icon:'📋',type:'PY DEPS',color:'#FFD54F',desc:'All Python dependencies for the API and Celery worker.',
+    code:`# API Framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic[email]==2.7.0
+python-dotenv==1.0.1
+
+# Database
+sqlalchemy[asyncio]==2.0.30
+asyncpg==0.29.0
+alembic==1.13.1
+
+# AI / ML
+openai==1.30.0
+anthropic==0.28.0
+faster-whisper==1.0.0
+qdrant-client==1.9.1
+
+# Media Processing
+yt-dlp==2024.8.6
+ffmpeg-python==0.2.0
+
+# NLP (for style extraction)
+textstat==0.7.3
+nltk==3.8.1
+
+# Background Jobs
+celery[redis]==5.4.0
+redis==5.0.4
+
+# Storage
+boto3==1.34.0          # R2 (S3-compatible)
+
+# Payments
+stripe==9.9.0
+
+# Auth
+pyjwt[crypto]==2.8.0   # Clerk JWT verification
+svix==1.21.0           # Clerk webhook signature
+
+# Export
+reportlab==4.2.0       # PDF generation
+weasyprint==61.0       # HTML → PDF alternative
+
+# Email
+resend==2.0.0
+
+# Monitoring
+sentry-sdk[fastapi]==2.5.0
+
+# Dev only
+pytest==8.2.0
+pytest-asyncio==0.23.7
+httpx==0.27.0          # test client`},
+};
+
+// ─── TREE DATA ───────────────────────────────────────────────────────────────
+const TREE = {
+  name:'teachclone', type:'dir', key:'teachclone', open:true, children:[
+    {name:'apps', type:'dir', key:'apps', open:true, children:[
+      {name:'web', type:'dir', key:'apps/web', open:true, tag:'Next.js 14', tagColor:'#4FC3F7', children:[
+        {name:'app', type:'dir', key:'apps/web/app', open:false, children:[
+          {name:'(auth)', type:'dir', key:'apps/web/app/(auth)', open:false, children:[
+            {name:'sign-in', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+            {name:'sign-up', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+          ]},
+          {name:'(protected)', type:'dir', key:'apps/web/app/(protected)', open:false, children:[
+            {name:'dashboard', type:'dir', key:'apps/web/app/(protected)/dashboard', open:false, children:[
+              {name:'page.tsx',type:'ts'},{name:'loading.tsx',type:'ts'},{name:'error.tsx',type:'ts'}]},
+            {name:'onboarding', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+            {name:'chat', type:'dir', open:false, children:[
+              {name:'[session_id]', type:'dir', key:'apps/web/app/(protected)/chat/[session_id]', open:false, children:[
+                {name:'page.tsx',type:'ts'},{name:'loading.tsx',type:'ts'},
+                {name:'_components', type:'dir', open:false, children:[
+                  {name:'ChatThread.tsx',type:'ts'},{name:'SessionSidebar.tsx',type:'ts'},{name:'QuizTrigger.tsx',type:'ts'}]}]}]},
+            {name:'profiles', type:'dir', open:false, children:[
+              {name:'new', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+              {name:'[id]', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'},{name:'_components',type:'dir',open:false,children:[]}]}]},
+            {name:'progress', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+            {name:'pricing', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+            {name:'settings', type:'dir', open:false, children:[
+              {name:'account', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+              {name:'api', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]}]},
+            {name:'admin', type:'dir', key:'apps/web/app/(protected)/admin/[org_slug]', open:false, children:[
+              {name:'[org_slug]', type:'dir', open:false, children:[
+                {name:'dashboard', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+                {name:'members', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+                {name:'profiles', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+                {name:'analytics', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+                {name:'settings', type:'dir', open:false, children:[
+                  {name:'general', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+                  {name:'security', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]},
+                  {name:'billing', type:'dir', open:false, children:[{name:'page.tsx',type:'ts'}]}]}]}]},
+          ]},
+          {name:'api', type:'dir', open:false, children:[
+            {name:'webhooks', type:'dir', open:false, children:[
+              {name:'clerk', type:'dir', open:false, children:[{name:'route.ts',type:'ts'}]}]}]},
+          {name:'layout.tsx', type:'ts'},{name:'page.tsx', type:'ts'},{name:'globals.css', type:'css'},
+        ]},
+        {name:'components', type:'dir', key:'apps/web/components', open:false, children:[
+          {name:'ui', type:'dir', open:false, tag:'shadcn', tagColor:'#7986CB', children:[]},
+          {name:'chat', type:'dir', key:'apps/web/components/chat', open:false, children:[
+            {name:'MessageBubble.tsx',type:'ts'},{name:'CitationChip.tsx',type:'ts'},
+            {name:'StreamingIndicator.tsx',type:'ts'},{name:'ChatInput.tsx',type:'ts'},
+            {name:'VoiceButton.tsx',type:'ts'}]},
+          {name:'media', type:'dir', key:'apps/web/components/media', open:false, children:[
+            {name:'MediaDropzone.tsx',type:'ts'},{name:'ProcessingProgress.tsx',type:'ts'},
+            {name:'YouTubeInput.tsx',type:'ts'}]},
+          {name:'quiz', type:'dir', key:'apps/web/components/quiz', open:false, children:[
+            {name:'QuizModal.tsx',type:'ts'},{name:'QuizQuestion.tsx',type:'ts'},{name:'QuizResults.tsx',type:'ts'}]},
+          {name:'profile', type:'dir', open:false, children:[
+            {name:'TeacherProfileCard.tsx',type:'ts'},{name:'StyleProfileBadges.tsx',type:'ts'},{name:'LevelSelector.tsx',type:'ts'}]},
+          {name:'gamification', type:'dir', key:'apps/web/components/gamification', open:false, children:[
+            {name:'XPBar.tsx',type:'ts'},{name:'BadgeGrid.tsx',type:'ts'},
+            {name:'StreakBadge.tsx',type:'ts'},{name:'LevelUpModal.tsx',type:'ts'}]},
+          {name:'admin', type:'dir', open:false, children:[
+            {name:'MembersTable.tsx',type:'ts'},{name:'AnalyticsCharts.tsx',type:'ts'},{name:'Leaderboard.tsx',type:'ts'}]},
+          {name:'layout', type:'dir', open:false, children:[
+            {name:'Sidebar.tsx',type:'ts'},{name:'Header.tsx',type:'ts'},{name:'MobileNav.tsx',type:'ts'}]},
+        ]},
+        {name:'lib', type:'dir', key:'apps/web/lib', open:false, children:[
+          {name:'api-client.ts', type:'ts', key:'apps/web/lib/api-client.ts'},
+          {name:'hooks', type:'dir', key:'apps/web/lib/hooks', open:false, children:[
+            {name:'useMediaUpload.ts',type:'ts'},{name:'useVoiceInput.ts',type:'ts'},
+            {name:'useStreamingChat.ts',type:'ts'},{name:'useQuota.ts',type:'ts'}]},
+          {name:'stores', type:'dir', key:'apps/web/lib/stores', open:false, children:[
+            {name:'useSessionStore.ts',type:'ts'},{name:'useUserStore.ts',type:'ts'}]},
+          {name:'utils', type:'dir', open:false, children:[
+            {name:'formatters.ts',type:'ts'},{name:'validators.ts',type:'ts'}]},
+        ]},
+        {name:'public', type:'dir', open:false, children:[]},
+        {name:'middleware.ts', type:'ts', key:'apps/web/middleware.ts'},
+        {name:'next.config.js', type:'json', key:'apps/web/next.config.js'},
+        {name:'tailwind.config.ts', type:'ts'},
+        {name:'tsconfig.json', type:'json'},
+        {name:'package.json', type:'json'},
+      ]},
+      {name:'api', type:'dir', key:'apps/api', open:true, tag:'FastAPI', tagColor:'#FFD54F', children:[
+        {name:'app', type:'dir', open:true, children:[
+          {name:'main.py', type:'py', key:'apps/api/app/main.py'},
+          {name:'config.py', type:'py', key:'apps/api/app/config.py'},
+          {name:'dependencies.py', type:'py', key:'apps/api/app/dependencies.py'},
+          {name:'db', type:'dir', key:'apps/api/app/db', open:false, children:[
+            {name:'session.py',type:'py'},{name:'base.py',type:'py'},
+            {name:'migrations', type:'dir', open:false, children:[
+              {name:'env.py',type:'py'},{name:'script.py.mako',type:'py'},
+              {name:'versions', type:'dir', open:false, children:[
+                {name:'001_initial_schema.py',type:'py'},
+                {name:'002_add_gamification.py',type:'py'},
+                {name:'003_add_audit_logs.py',type:'py'}]}]}]},
+          {name:'models', type:'dir', key:'apps/api/app/models', open:false, children:[
+            {name:'user.py',type:'py'},{name:'organization.py',type:'py'},{name:'org_member.py',type:'py'},
+            {name:'teacher_profile.py',type:'py'},{name:'media_source.py',type:'py'},
+            {name:'transcript_chunk.py',type:'py'},{name:'processing_job.py',type:'py'},
+            {name:'student_session.py',type:'py'},{name:'message.py',type:'py'},
+            {name:'quiz.py',type:'py'},{name:'api_key.py',type:'py'},
+            {name:'audit_log.py',type:'py'},{name:'user_stats.py',type:'py'},
+            {name:'user_badge.py',type:'py'},{name:'usage_log.py',type:'py'}]},
+          {name:'schemas', type:'dir', open:false, children:[
+            {name:'user.py',type:'py'},{name:'organization.py',type:'py'},
+            {name:'teacher_profile.py',type:'py'},{name:'media.py',type:'py'},
+            {name:'session.py',type:'py'},{name:'chat.py',type:'py'},
+            {name:'quiz.py',type:'py'},{name:'billing.py',type:'py'},{name:'common.py',type:'py'}]},
+          {name:'routers', type:'dir', key:'apps/api/app/routers', open:false, children:[
+            {name:'health.py',type:'py'},{name:'auth.py',type:'py'},{name:'users.py',type:'py'},
+            {name:'organizations.py',type:'py'},{name:'teacher_profiles.py',type:'py'},
+            {name:'media.py',type:'py'},{name:'sessions.py',type:'py'},{name:'chat.py',type:'py'},
+            {name:'quizzes.py',type:'py'},{name:'billing.py',type:'py'},
+            {name:'voice.py',type:'py'},{name:'export.py',type:'py'},{name:'webhooks.py',type:'py'},
+            {name:'v1', type:'dir', open:false, children:[
+              {name:'__init__.py',type:'py'},{name:'profiles.py',type:'py'},
+              {name:'sessions.py',type:'py'},{name:'chat.py',type:'py'}]}]},
+          {name:'services', type:'dir', key:'apps/api/app/services', open:false, children:[
+            {name:'storage.py',type:'py'},{name:'audio_extractor.py',type:'py'},
+            {name:'transcriber.py',type:'py'},{name:'frame_sampler.py',type:'py'},
+            {name:'vision_analyzer.py',type:'py'},
+            {name:'style_extractor.py',type:'py', key:'apps/api/app/services/style_extractor.py'},
+            {name:'embedder.py',type:'py'},
+            {name:'vector_store.py',type:'py', key:'apps/api/app/services/vector_store.py'},
+            {name:'retrieval.py',type:'py'},
+            {name:'prompt_builder.py',type:'py', key:'apps/api/app/services/prompt_builder.py'},
+            {name:'quiz_generator.py',type:'py'},{name:'session_summarizer.py',type:'py'},
+            {name:'export_service.py',type:'py'},{name:'tts_service.py',type:'py'},
+            {name:'billing.py',type:'py'},{name:'gamification.py',type:'py'},
+            {name:'api_keys.py',type:'py'},{name:'email.py',type:'py'}]},
+          {name:'tasks', type:'dir', key:'apps/api/app/tasks', open:false, children:[
+            {name:'__init__.py',type:'py'},{name:'media_tasks.py',type:'py'},
+            {name:'embedding_tasks.py',type:'py'},{name:'style_tasks.py',type:'py'},
+            {name:'vision_tasks.py',type:'py'}]},
+          {name:'worker', type:'dir', open:false, children:[
+            {name:'__init__.py', type:'py', key:'apps/api/app/worker/__init__.py'}]},
+          {name:'middleware', type:'dir', open:false, children:[
+            {name:'auth.py',type:'py'},{name:'rate_limit.py',type:'py'},{name:'audit.py',type:'py'}]},
+        ]},
+        {name:'alembic.ini', type:'json'},
+        {name:'requirements.txt', type:'py', key:'apps/api/requirements.txt'},
+        {name:'Dockerfile', type:'docker'},
+      ]},
+    ]},
+    {name:'packages', type:'dir', key:'packages', open:true, children:[
+      {name:'types', type:'dir', key:'packages/types', open:false, children:[
+        {name:'src', type:'dir', open:false, children:[{name:'index.ts',type:'ts'}]},
+        {name:'package.json',type:'json'},{name:'tsconfig.json',type:'json'}]},
+      {name:'config', type:'dir', open:false, children:[
+        {name:'eslint-preset.js',type:'json'},{name:'tsconfig-base.json',type:'json'},
+        {name:'prettier.config.js',type:'json'}]},
+    ]},
+    {name:'docker', type:'dir', key:'docker', open:false, children:[
+      {name:'docker-compose.yml', type:'yml', key:'docker/docker-compose.yml'},
+      {name:'docker-compose.prod.yml', type:'yml'},
+      {name:'Dockerfile.api', type:'docker'},
+      {name:'Dockerfile.worker', type:'docker', key:'docker/Dockerfile.worker'},
+    ]},
+    {name:'.github', type:'dir', open:false, children:[
+      {name:'workflows', type:'dir', key:'.github/workflows', open:false, children:[
+        {name:'ci.yml', type:'yml'},{name:'deploy.yml', type:'yml'}]}]},
+    {name:'scripts', type:'dir', key:'scripts', open:false, children:[
+      {name:'seed_dev.py', type:'py'},{name:'create_qdrant_collection.py', type:'py'},
+      {name:'migrate.sh', type:'sh'}]},
+    {name:'docs', type:'dir', key:'docs', open:false, children:[
+      {name:'architecture.md', type:'md'},{name:'api-reference.md', type:'md'},
+      {name:'deployment.md', type:'md'}]},
+    {name:'pnpm-workspace.yaml', type:'yml', key:'pnpm-workspace.yaml'},
+    {name:'.env.example', type:'env', key:'.env.example'},
+    {name:'.gitignore', type:'md'},
+    {name:'README.md', type:'md'},
+  ]
+};
+
+// ─── FILE TYPE CONFIG ─────────────────────────────────────────────────────────
+const FT = {
+  dir:    {icon:'📁', color:'var(--c-dir)'},
+  ts:     {icon:'📄', color:'var(--c-ts)'},
+  py:     {icon:'🐍', color:'var(--c-py)'},
+  css:    {icon:'🎨', color:'var(--c-css)'},
+  md:     {icon:'📝', color:'var(--c-md)'},
+  json:   {icon:'{}',color:'var(--c-json)'},
+  yml:    {icon:'⚙️', color:'var(--c-yml)'},
+  docker: {icon:'🐳', color:'var(--c-docker)'},
+  sh:     {icon:'💻', color:'var(--c-sh)'},
+  env:    {icon:'🔑', color:'var(--c-env)'},
+};
+
+// ─── RENDER TREE ─────────────────────────────────────────────────────────────
+let selectedKey = null;
+
+function getKey(node, parentKey) {
+  return node.key || (parentKey ? parentKey + '/' + node.name : node.name);
+}
+
+function renderNode(node, depth, parentKey, isLast) {
+  const key = getKey(node, parentKey);
+  const ft = FT[node.type] || FT.ts;
+  const isDir = node.type === 'dir';
+  const hasChildren = isDir && node.children && node.children.length > 0;
+
+  const div = document.createElement('div');
+  div.className = 'node';
+  div.dataset.key = key;
+  div.dataset.name = node.name.toLowerCase();
+
+  const row = document.createElement('div');
+  row.className = 'node-row';
+  row.style.paddingLeft = '8px';
+
+  // Indent
+  const indent = document.createElement('div');
+  indent.className = 'node-indent';
+  for (let i = 0; i < depth; i++) {
+    const line = document.createElement('div');
+    line.className = i < depth - 1 ? 'indent-line' : 'indent-space';
+    indent.appendChild(line);
+  }
+  row.appendChild(indent);
+
+  // Toggle
+  const toggle = document.createElement('div');
+  toggle.className = 'toggle-icon' + (hasChildren ? (node.open ? ' open' : '') : ' leaf');
+  toggle.textContent = '›';
+  row.appendChild(toggle);
+
+  // Icon
+  const icon = document.createElement('div');
+  icon.className = 'node-icon';
+  icon.textContent = ft.icon;
+  row.appendChild(icon);
+
+  // Name
+  const name = document.createElement('div');
+  name.className = 'node-name' + (isDir ? ' dir' : '');
+  name.style.color = isDir ? 'var(--c-dir)' : ft.color;
+  name.textContent = node.name;
+  row.appendChild(name);
+
+  // Tag
+  if (node.tag) {
+    const tag = document.createElement('span');
+    tag.className = 'node-tag';
+    tag.style.background = (node.tagColor || '#6366F1') + '22';
+    tag.style.color = node.tagColor || '#818CF8';
+    tag.textContent = node.tag;
+    row.appendChild(tag);
+  }
+
+  div.appendChild(row);
+
+  // Children
+  if (hasChildren) {
+    const children = document.createElement('div');
+    children.className = 'children' + (node.open ? '' : ' collapsed');
+    node.children.forEach((child, i) => {
+      children.appendChild(renderNode(child, depth + 1, key, i === node.children.length - 1));
+    });
+    div.appendChild(children);
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const collapsed = children.classList.toggle('collapsed');
+      toggle.classList.toggle('open', !collapsed);
+      node.open = !collapsed;
+    });
+    row.addEventListener('click', () => {
+      const collapsed = children.classList.toggle('collapsed');
+      toggle.classList.toggle('open', !collapsed);
+      node.open = !collapsed;
+      selectNode(key, row);
+    });
+  } else {
+    row.addEventListener('click', () => selectNode(key, row));
+  }
+
+  return div;
+}
+
+function selectNode(key, row) {
+  document.querySelectorAll('.node-row.selected').forEach(r => r.classList.remove('selected'));
+  row.classList.add('selected');
+  selectedKey = key;
+  showInfo(key);
+}
+
+function showInfo(key) {
+  const info = INFO[key];
+  const card = document.getElementById('infoCard');
+  const placeholder = document.querySelector('.info-placeholder');
+
+  if (!info) {
+    // Show generic file info
+    placeholder.style.display = 'flex';
+    card.classList.remove('show');
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  card.classList.add('show');
+
+  // Build path breadcrumbs
+  const parts = key.split('/');
+  const pathHtml = parts.map((p,i) => `<span>${p}</span>${i < parts.length-1 ? '<span class="sep">/</span>' : ''}`).join('');
+
+  let html = `<div class="info-path">${pathHtml}</div>
+<div class="info-header">
+  <div class="info-icon-big">${info.icon}</div>
+  <div>
+    <div class="info-title">${parts[parts.length-1]}</div>
+    <span class="info-type-badge" style="background:${(info.color||'#6366F1')}22;color:${info.color||'#818CF8'}">${info.type}</span>
+  </div>
+</div>
+<div class="info-desc">${info.desc}</div>`;
+
+  if (info.keys && info.keys.length) {
+    html += `<div class="info-section"><div class="info-section-title">Key points</div>
+<ul class="info-list">${info.keys.map(k=>`<li>${k}</li>`).join('')}</ul></div>`;
+  }
+
+  if (info.chips && info.chips.length) {
+    html += `<div class="info-section"><div class="info-section-title">Tech used</div>
+<div class="info-chips">${info.chips.map(c=>`<span class="info-chip">${c}</span>`).join('')}</div></div>`;
+  }
+
+  if (info.code) {
+    html += `<div class="info-section"><div class="info-section-title">Structure / example</div>
+<div class="info-code">${info.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`;
+  }
+
+  card.innerHTML = html;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+const treeEl = document.getElementById('tree');
+const root = document.createElement('div');
+root.className = 'tree-root';
+root.appendChild(renderNode(TREE, 0, '', true));
+treeEl.appendChild(root);
+
+// ─── EXPAND / COLLAPSE ALL ───────────────────────────────────────────────────
+function expandAll() {
+  document.querySelectorAll('.children').forEach(el => { el.classList.remove('collapsed'); });
+  document.querySelectorAll('.toggle-icon:not(.leaf)').forEach(el => { el.classList.add('open'); });
+}
+function collapseAll() {
+  document.querySelectorAll('.children').forEach(el => { el.classList.add('collapsed'); });
+  document.querySelectorAll('.toggle-icon').forEach(el => { el.classList.remove('open'); });
+}
+
+// ─── SEARCH ──────────────────────────────────────────────────────────────────
+let searchTimeout;
+function search(q) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    const query = q.toLowerCase().trim();
+    document.querySelectorAll('.node-name').forEach(el => el.classList.remove('match'));
+
+    if (!query) return;
+
+    document.querySelectorAll('.node').forEach(node => {
+      const name = (node.dataset.name || '').toLowerCase();
+      if (name.includes(query)) {
+        const nameEl = node.querySelector('.node-row > .node-name');
+        if (nameEl) nameEl.classList.add('match');
+        // Expand parents
+        let p = node.parentElement;
+        while (p) {
+          if (p.classList.contains('children')) {
+            p.classList.remove('collapsed');
+            const toggle = p.previousElementSibling?.querySelector('.toggle-icon');
+            if (toggle) toggle.classList.add('open');
+          }
+          p = p.parentElement;
+        }
+      }
+    });
+  }, 200);
+}
+
+// Show root info on load
+setTimeout(() => showInfo('teachclone'), 100);
+</script>
+</body>
+</html>

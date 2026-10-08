@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment files (secrets)
+.env
+.env.local
+
+# Database files
+*.db
+*.sqlite3
+
+# Test files (not needed in production image)
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Storage and generated data
+storage_data/
+dna_reports/
+system_prompts/
+review_log.txt
+billing_log.json
+email_log.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Logs
+*.log

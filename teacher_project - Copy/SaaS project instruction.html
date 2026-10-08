@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeachClone — Codex Prompts by Phase</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0E1A;--surface:#111827;--card:#1a2235;
+  --border:rgba(99,102,241,0.2);--border2:rgba(99,102,241,0.4);
+  --indigo:#6366F1;--indigo-l:#818CF8;
+  --cyan:#06B6D4;--emerald:#10B981;--amber:#F59E0B;--rose:#F43F5E;--violet:#8B5CF6;
+  --text:#F1F5F9;--muted:#94A3B8;--muted2:#64748B;
+  --mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* HEADER */
+.hdr{background:rgba(10,14,26,.97);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px}
+.logo-box{width:30px;height:30px;background:linear-gradient(135deg,var(--indigo),var(--cyan));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.hdr-note{font-size:12px;color:var(--muted);background:rgba(99,102,241,.1);border:1px solid var(--border);padding:4px 12px;border-radius:20px}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 57px)}
+
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;border-right:1px solid var(--border);padding:20px 0;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.sidebar-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);padding:0 20px;margin-bottom:8px;margin-top:16px}
+.sidebar-label:first-child{margin-top:0}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 20px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--text);background:rgba(99,102,241,.06)}
+.sb-item.active{color:var(--indigo-l);border-left-color:var(--indigo);background:rgba(99,102,241,.08)}
+.sb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* MAIN */
+.main{flex:1;padding:32px;max-width:900px;overflow-x:hidden}
+
+/* PHASE HEADER */
+.phase-banner{border-radius:14px;padding:24px 28px;margin-bottom:24px;border:1px solid}
+.phase-num{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;opacity:.7}
+.phase-title{font-size:22px;font-weight:600;margin-bottom:6px}
+.phase-sub{font-size:14px;opacity:.75;line-height:1.6}
+.phase-meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+.meta-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;opacity:.9}
+
+/* PROMPT CARDS */
+.prompt-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;transition:border-color .2s}
+.prompt-card:hover{border-color:var(--border2)}
+.prompt-top{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+.prompt-label{display:flex;align-items:center;gap:10px}
+.prompt-index{font-family:var(--mono);font-size:11px;background:rgba(99,102,241,.15);color:var(--indigo-l);padding:2px 8px;border-radius:4px;font-weight:500}
+.prompt-title{font-size:14px;font-weight:500}
+.prompt-actions{display:flex;gap:8px;align-items:center}
+.copy-btn{background:rgba(99,102,241,.15);border:1px solid var(--border);color:var(--indigo-l);font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.copy-btn:hover{background:rgba(99,102,241,.3)}
+.copy-btn.copied{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#34D399}
+.toggle-btn{color:var(--muted);font-size:18px;cursor:pointer;transition:transform .2s;background:none;border:none;padding:2px 6px}
+.prompt-card.open .toggle-btn{transform:rotate(90deg)}
+.prompt-body{display:none;border-top:1px solid var(--border)}
+.prompt-body.show{display:block}
+.prompt-code{background:#080C18;padding:20px;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#CBD5E1;white-space:pre-wrap;word-break:break-word;max-height:520px;overflow-y:auto}
+.prompt-code::-webkit-scrollbar{width:4px;height:4px}
+.prompt-code::-webkit-scrollbar-track{background:transparent}
+.prompt-code::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+/* syntax highlights */
+.c-comment{color:#475569}
+.c-key{color:#818CF8}
+.c-str{color:#34D399}
+.c-head{color:#F59E0B;font-weight:500}
+
+/* COPY ALL */
+.copy-all{display:flex;align-items:center;justify-content:space-between;background:rgba(99,102,241,.07);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:20px}
+.copy-all-txt{font-size:13px;color:var(--muted)}
+.copy-all-btn{background:var(--indigo);color:white;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.copy-all-btn:hover{opacity:.85}
+
+/* hidden sections */
+.phase-section{display:none}
+.phase-section.active{display:block}
+
+@media(max-width:700px){.sidebar{display:none}.main{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-box">🧠</div>
+    TeachClone <span style="font-size:12px;color:var(--muted);margin-left:4px">/ Codex Prompts</span>
+  </div>
+  <div class="hdr-note">Paste each prompt directly into Codex</div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-label">Phases</div>
+  <div class="sb-item active" onclick="switchPhase('p00',this)"><span class="sb-dot" style="background:#64748B"></span>Phase 00 · Foundation</div>
+  <div class="sb-item" onclick="switchPhase('p01',this)"><span class="sb-dot" style="background:var(--indigo)"></span>Phase 01 · MVP Core</div>
+  <div class="sb-item" onclick="switchPhase('p02',this)"><span class="sb-dot" style="background:var(--amber)"></span>Phase 02 · Intelligence</div>
+  <div class="sb-item" onclick="switchPhase('p03',this)"><span class="sb-dot" style="background:var(--emerald)"></span>Phase 03 · SaaS Platform</div>
+  <div class="sb-item" onclick="switchPhase('p04',this)"><span class="sb-dot" style="background:var(--violet)"></span>Phase 04 · Growth</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ===== PHASE 00 ===== -->
+<div class="phase-section active" id="p00">
+  <div class="phase-banner" style="background:rgba(100,116,139,.08);border-color:rgba(100,116,139,.3)">
+    <div class="phase-num">Phase 00</div>
+    <div class="phase-title">Foundation &amp; Project Setup</div>
+    <div class="phase-sub">Monorepo scaffolding, database schema, Docker environment, and shared config before any product code.</div>
+    <div class="phase-meta">
+      <span class="meta-pill" style="background:rgba(100,116,139,.2);color:#CBD5E1">Weeks 1–2</span>
+      <span class="meta-pill" style="background:rgba(100,116,139,.2);color:#CBD5E1">3 prompts</span>
+      <span class="meta-pill" style="background:rgba(100,116,139,.2);color:#CBD5E1">No AI features yet</span>
+    </div>
+  </div>
+
+  <div class="copy-all">
+    <span class="copy-all-txt">3 prompts in this phase — run them in order, top to bottom</span>
+  </div>
+
+  <!-- P00-1 -->
+  <div class="prompt-card" id="card-p00-1">
+    <div class="prompt-top" onclick="toggleCard('p00-1')">
+      <div class="prompt-label">
+        <span class="prompt-index">P00-1</span>
+        <span class="prompt-title">Monorepo scaffold + tooling</span>
+      </div>
+      <div class="prompt-actions">
+        <button class="copy-btn" onclick="copyPrompt('p00-1',event)">Copy prompt</button>
+        <button class="toggle-btn">›</button>
+      </div>
+    </div>
+    <div class="prompt-body" id="body-p00-1">
+      <div class="prompt-code" id="text-p00-1">You are an expert full-stack engineer. Scaffold a production-ready monorepo for a SaaS called TeachClone.
+
+## PROJECT OVERVIEW
+TeachClone lets users upload any YouTube URL or video file, processes it with AI, and teaches
+students interactively in the same style as the reference teacher — adapting to the student's grade level.
+
+## MONOREPO STRUCTURE TO CREATE
+Use pnpm workspaces. Create the following structure:
+
+teachclone/
+├── apps/
+│   ├── web/              ← Next.js 14 frontend (App Router, TypeScript)
+│   └── api/              ← FastAPI backend (Python 3.11)
+├── packages/
+│   ├── types/            ← Shared TypeScript types
+│   └── config/           ← Shared eslint, tsconfig, prettier config
+├── docker/
+│   ├── docker-compose.yml
+│   ├── Dockerfile.api
+│   └── Dockerfile.worker
+├── .github/
+│   └── workflows/
+│       ├── ci.yml        ← lint + test on every PR
+│       └── deploy.yml    ← deploy on merge to main
+├── pnpm-workspace.yaml
+├── .env.example
+└── README.md
+
+## FRONTEND (apps/web)
+- Next.js 14 with App Router
+- TypeScript strict mode
+- Tailwind CSS v3
+- shadcn/ui (install base components: button, input, card, dialog, tabs, toast)
+- Zustand for client state
+- React Query (TanStack Query v5) for server state
+- Vercel AI SDK (ai package) for streaming LLM responses
+- Clerk for authentication (install @clerk/nextjs)
+- Stripe for payments (install @stripe/stripe-js)
+- Axios for API calls
+- next.config.js configured for: env vars, image domains, experimental serverActions
+
+## BACKEND (apps/api)
+- FastAPI with Python 3.11
+- Pydantic v2 for data validation
+- SQLAlchemy 2.0 (async) + asyncpg for PostgreSQL
+- Alembic for database migrations
+- python-dotenv for env vars
+- httpx for async HTTP calls
+- structlog for structured logging
+- Install: fastapi, uvicorn, sqlalchemy, asyncpg, alembic, pydantic, python-dotenv, httpx, structlog, celery, redis
+
+## DOCKER COMPOSE (docker-compose.yml)
+Services to include:
+- postgres: postgres:16-alpine, port 5432, persistent volume
+- redis: redis:7-alpine, port 6379
+- qdrant: qdrant/qdrant:latest, port 6333 + 6334, persistent volume
+- api: builds from Dockerfile.api, port 8000, hot-reload with volume mount
+- worker: builds from Dockerfile.worker (Celery worker), same codebase as api
+- web: builds from apps/web, port 3000, hot-reload
+
+## .ENV.EXAMPLE
+Include all required env vars with placeholder values:
+# Database
+DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/teachclone
+# Redis
+REDIS_URL=redis://localhost:6379/0
+# Qdrant
+QDRANT_URL=http://localhost:6333
+# OpenAI
+OPENAI_API_KEY=sk-...
+# Anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+CLERK_WEBHOOK_SECRET=whsec_...
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+# Cloudflare R2
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=teachclone-media
+R2_PUBLIC_URL=https://...
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+API_URL=http://localhost:8000
+
+## GITHUB ACTIONS (ci.yml)
+- Trigger on: push to main, pull_request
+- Jobs: lint-frontend (pnpm lint), lint-backend (ruff + mypy), test-backend (pytest)
+
+## ACCEPTANCE CRITERIA
+- `docker compose up` starts all services with no errors
+- `pnpm install` installs all workspace deps
+- `pnpm dev` (from root) starts both web and api in parallel
+- All env vars documented in .env.example
+- README has: project overview, local setup steps, architecture diagram in ASCII</div>
+    </div>
+  </div>
+
+  <!-- P00-2 -->
+  <div class="prompt-card" id="card-p00-2">
+    <div class="prompt-top" onclick="toggleCard('p00-2')">
+      <div class="prompt-label">
+        <span class="prompt-index">P00-2</span>
+        <span class="prompt-title">Database schema + migrations</span>
+      </div>
+      <div class="prompt-actions">
+        <button class="copy-btn" onclick="copyPrompt('p00-2',event)">Copy prompt</button>
+        <button class="toggle-btn">›</button>
+      </div>
+    </div>
+    <div class="prompt-body" id="body-p00-2">
+      <div class="prompt-code" id="text-p00-2">The monorepo from P00-1 is already scaffolded. Now design and implement the full PostgreSQL database schema for TeachClone using SQLAlchemy 2.0 async models and Alembic migrations.
+
+## CONTEXT
+TeachClone is a multi-tenant SaaS. Users (students, creators, institutions) upload reference videos.
+The system processes them and provides AI-powered adaptive teaching sessions.
+
+## MODELS TO CREATE (apps/api/app/models/)
+
+### users.py
+- id: UUID primary key
+- clerk_id: str unique (maps to Clerk auth)
+- email: str unique
+- full_name: str
+- avatar_url: str nullable
+- plan: Enum('free','pro','creator','institution')
+- stripe_customer_id: str nullable
+- stripe_subscription_id: str nullable
+- created_at, updated_at: timestamp
+
+### organizations.py (for institution tier)
+- id: UUID
+- name: str
+- slug: str unique
+- owner_id: FK → users
+- plan: str
+- seat_limit: int default 50
+- stripe_subscription_id: str nullable
+- logo_url: str nullable
+- created_at, updated_at
+
+### org_members.py
+- id: UUID
+- org_id: FK → organizations
+- user_id: FK → users
+- role: Enum('admin','teacher','student')
+- created_at
+
+### teacher_profiles.py
+- id: UUID
+- user_id: FK → users (nullable, for personal profiles)
+- org_id: FK → organizations (nullable)
+- name: str (e.g. "3Blue1Brown Style")
+- description: str nullable
+- is_public: bool default false
+- style_profile: JSONB  ← stores extracted style data
+- total_videos: int default 0
+- created_at, updated_at
+
+### media_sources.py
+- id: UUID
+- teacher_profile_id: FK → teacher_profiles
+- uploaded_by: FK → users
+- source_type: Enum('youtube_url','file_upload','audio_upload')
+- original_url: str nullable (YouTube URL)
+- storage_key: str nullable (R2 object key)
+- file_name: str nullable
+- duration_seconds: int nullable
+- status: Enum('pending','processing','completed','failed')
+- error_message: str nullable
+- transcript_chunks: int nullable (count of chunks created)
+- processing_started_at, processing_completed_at: timestamp nullable
+- created_at, updated_at
+
+### processing_jobs.py
+- id: UUID
+- media_source_id: FK → media_sources
+- job_type: Enum('transcription','embedding','style_extraction','frame_analysis')
+- celery_task_id: str nullable
+- status: Enum('queued','running','completed','failed')
+- progress: int default 0 (0-100)
+- result_metadata: JSONB nullable
+- error: str nullable
+- started_at, completed_at: timestamp nullable
+- created_at
+
+### student_sessions.py
+- id: UUID
+- student_id: FK → users
+- teacher_profile_id: FK → teacher_profiles
+- student_profile: JSONB  ← {level, goal, learning_style, prior_knowledge}
+- message_count: int default 0
+- last_activity_at: timestamp
+- session_notes: text nullable
+- created_at, updated_at
+
+### messages.py
+- id: UUID
+- session_id: FK → student_sessions
+- role: Enum('user','assistant')
+- content: text
+- citations: JSONB nullable  ← [{source_id, timestamp_start, timestamp_end, chunk_text}]
+- tokens_used: int nullable
+- model_used: str nullable
+- created_at
+
+### quizzes.py
+- id: UUID
+- session_id: FK → student_sessions
+- teacher_profile_id: FK → teacher_profiles
+- questions: JSONB  ← array of question objects
+- student_answers: JSONB nullable
+- score: float nullable
+- completed_at: timestamp nullable
+- created_at
+
+### usage_logs.py (for metering)
+- id: UUID
+- user_id: FK → users
+- event_type: Enum('video_processed','session_started','message_sent','quiz_generated','export_created')
+- metadata: JSONB
+- billing_period: str (YYYY-MM format)
+- created_at
+
+## REQUIREMENTS
+- All models inherit from a Base with created_at/updated_at auto-timestamps
+- Use UUID default via uuid4
+- Add proper indexes: FK columns, status columns, billing_period
+- Create Alembic migration: `alembic revision --autogenerate -m "initial schema"`
+- Add a `apps/api/app/db/session.py` with async engine + session factory
+- Add `apps/api/app/db/base.py` that imports all models so Alembic sees them
+- Seed script: `apps/api/scripts/seed_dev.py` that creates 1 test user + 1 teacher profile
+
+## ACCEPTANCE CRITERIA
+- `alembic upgrade head` runs without errors
+- All tables created in PostgreSQL
+- Relationships navigable (user.teacher_profiles, session.messages, etc.)
+- seed_dev.py inserts test data successfully</div>
+    </div>
+  </div>
+
+  <!-- P00-3 -->
+  <div class="prompt-card" id="card-p00-3">
+    <div class="prompt-top" onclick="toggleCard('p00-3')">
+      <div class="prompt-label">
+        <span class="prompt-index">P00-3</span>
+        <span class="prompt-title">Shared API client + type system</span>
+      </div>
+      <div class="prompt-actions">
+        <button class="copy-btn" onclick="copyPrompt('p00-3',event)">Copy prompt</button>
+        <button class="toggle-btn">›</button>
+      </div>
+    </div>
+    <div class="prompt-body" id="body-p00-3">
+      <div class="prompt-code" id="text-p00-3">Database schema and monorepo exist. Now set up the shared type system and API client that the frontend will use to talk to the FastAPI backend.
+
+## TASK 1: FastAPI app structure (apps/api/app/)
+Create the base FastAPI application:
+
+apps/api/app/
+├── main.py              ← FastAPI app init, CORS, routers, startup events
+├── config.py            ← Pydantic Settings class, reads from .env
+├── dependencies.py      ← get_db(), get_current_user(), verify_clerk_token()
+├── routers/
+│   ├── __init__.py
+│   ├── health.py        ← GET /health → {status: ok, version, timestamp}
+│   ├── auth.py          ← POST /auth/sync (sync Clerk user to DB)
+│   └── users.py         ← GET /users/me
+├── schemas/             ← Pydantic request/response schemas (NOT db models)
+│   ├── user.py
+│   ├── common.py        ← PaginatedResponse, ErrorResponse
+│   └── __init__.py
+├── services/            ← Business logic layer (empty for now)
+├── models/              ← SQLAlchemy models (from P00-2)
+└── db/
+
+## TASK 2: Authentication middleware
+In dependencies.py:
+- verify_clerk_token(authorization: str = Header(...)): validates Clerk JWT
+  - Use Clerk's JWKS endpoint to verify the token
+  - Extract user's clerk_id from sub claim
+- get_current_user(): calls verify_clerk_token, fetches user from DB by clerk_id
+- If user not found in DB, raise 401 with message "User not synced"
+
+## TASK 3: Clerk webhook handler
+POST /webhooks/clerk endpoint:
+- Verify Svix signature using CLERK_WEBHOOK_SECRET
+- Handle events: user.created, user.updated, user.deleted
+- On user.created: insert into users table with plan='free'
+- On user.updated: update name, avatar, email
+- On user.deleted: soft-delete or mark inactive
+
+## TASK 4: Shared TypeScript types (packages/types/)
+Create types/src/index.ts with TypeScript interfaces mirroring the DB schemas:
+
+export interface User { id: string; clerkId: string; email: string; fullName: string; plan: Plan; ... }
+export interface TeacherProfile { id: string; name: string; styleProfile: StyleProfile; ... }
+export interface StudentSession { id: string; studentProfile: StudentProfile; ... }
+export interface Message { id: string; role: 'user'|'assistant'; content: string; citations: Citation[]; ... }
+export interface StyleProfile { vocabularyLevel: string; toneType: string; explanationPattern: string; analogyDensity: number; avgSentenceLength: number; signaturePhrases: string[]; }
+export interface StudentProfile { level: StudentLevel; goal: string; learningStyle: LearningStyle; priorKnowledge: string; }
+export type StudentLevel = 'k5'|'middle'|'highschool'|'undergrad'|'masters'|'professional'
+export type LearningStyle = 'examples'|'theory'|'qa'|'storytelling'
+export type Plan = 'free'|'pro'|'creator'|'institution'
+
+## TASK 5: API client (apps/web/lib/api-client.ts)
+Create a typed axios instance:
+- Base URL from NEXT_PUBLIC_API_URL env var
+- Request interceptor: attach Clerk session token as Bearer
+- Response interceptor: normalize errors to { message, code, status }
+- Export typed functions: getMe(), syncUser()
+- Use @teachclone/types for all return types
+
+## TASK 6: Next.js middleware (apps/web/middleware.ts)
+- Use Clerk's authMiddleware
+- Public routes: /, /sign-in, /sign-up, /api/webhooks/(.*)
+- Protected routes: /dashboard/(.*), /chat/(.*), /profile/(.*)
+- After sign-in: redirect to /dashboard
+- After sign-up: redirect to /onboarding
+
+## ACCEPTANCE CRITERIA
+- GET /health returns 200 with correct payload
+- POST /webhooks/clerk processes user.created and creates DB record
+- Frontend api-client correctly attaches auth token
+- TypeScript compiles with zero errors across all packages
+- `pnpm build` succeeds for the web app</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== PHASE 01 ===== -->
+<div class="phase-section" id="p01">
+  <div class="phase-banner" style="background:rgba(99,102,241,.07);border-color:rgba(99,102,241,.3)">
+    <div class="phase-num">Phase 01</div>
+    <div class="phase-title">MVP Core — The Pipeline</div>
+    <div class="phase-sub">Media ingestion → transcription → RAG → basic chat. Users paste a URL and talk to the content.</div>
+    <div class="phase-meta">
+      <span class="meta-pill" style="background:rgba(99,102,241,.15);color:var(--indigo-l)">Weeks 3–10</span>
+      <span class="meta-pill" style="background:rgba(99,102,241,.15);color:var(--indigo-l)">6 prompts</span>
+      <span class="meta-pill" style="background:rgba(99,102,241,.15);color:var(--indigo-l)">First working demo</span>
+    </div>
+  </div>
+  <div class="copy-all"><span class="copy-all-txt">Run prompts P01-1 through P01-6 in order. Each one builds on the last.</span></div>
+
+  <!-- P01-1 -->
+  <div class="prompt-card" id="card-p01-1">
+    <div class="prompt-top" onclick="toggleCard('p01-1')">
+      <div class="prompt-label"><span class="prompt-index">P01-1</span><span class="prompt-title">Media ingestion API + Cloudflare R2 upload</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p01-1',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p01-1">
+      <div class="prompt-code" id="text-p01-1">Foundation from Phase 00 is complete. Now build the media ingestion system that accepts YouTube URLs and direct file uploads.
+
+## CONTEXT
+Stack: FastAPI backend (apps/api), Cloudflare R2 for storage, Celery + Redis for job queue.
+All endpoints require authentication via get_current_user() dependency.
+
+## TASK 1: Celery setup (apps/api/app/worker/)
+Create apps/api/app/worker/__init__.py:
+- Celery app named 'teachclone'
+- Broker: Redis (REDIS_URL from config)
+- Result backend: Redis
+- Task serializer: json
+- Timezone: UTC
+- Task routing: {'media.*': {'queue': 'media'}, 'ai.*': {'queue': 'ai'}}
+
+## TASK 2: R2 storage service (apps/api/app/services/storage.py)
+Using boto3 with S3-compatible config pointing to Cloudflare R2:
+- async def generate_presigned_upload_url(key: str, content_type: str, expires: int = 3600) -> str
+- async def generate_presigned_download_url(key: str, expires: int = 86400) -> str
+- async def delete_object(key: str) -> bool
+- async def object_exists(key: str) -> bool
+- Key naming convention: f"{user_id}/{teacher_profile_id}/{uuid4()}/{filename}"
+
+## TASK 3: Media router (apps/api/app/routers/media.py)
+
+POST /media/youtube
+  Body: { teacher_profile_id: str, youtube_url: str }
+  - Validate URL with regex (youtube.com/watch?v= or youtu.be/)
+  - Check user quota (free plan: max 3 media_sources per month)
+  - Create media_source record with status='pending'
+  - Enqueue Celery task: process_youtube.delay(media_source_id)
+  - Return: { id, status, estimated_minutes }
+
+POST /media/upload/initiate
+  Body: { teacher_profile_id: str, file_name: str, file_size: int, content_type: str }
+  - Validate content_type in ['video/mp4','video/webm','audio/mpeg','audio/wav','audio/mp4']
+  - Validate file_size <= 500MB (free), 2GB (pro+)
+  - Generate R2 key and presigned upload URL (15 min expiry)
+  - Create media_source record with status='pending'
+  - Return: { media_source_id, upload_url, upload_key, expires_at }
+
+POST /media/upload/complete
+  Body: { media_source_id: str, storage_key: str }
+  - Verify object exists in R2
+  - Update media_source: storage_key, status='pending'
+  - Enqueue Celery task: process_uploaded_file.delay(media_source_id)
+  - Return: { id, status }
+
+GET /media/{media_source_id}/status
+  - Return: { id, status, progress, error_message, transcript_chunks }
+
+GET /media/teacher/{teacher_profile_id}
+  - Return paginated list of media_sources for a teacher profile
+
+DELETE /media/{media_source_id}
+  - Only owner can delete
+  - Delete from R2 if file upload
+  - Delete Qdrant vectors by filter: media_source_id
+  - Delete DB record
+
+## TASK 4: Celery task stubs (apps/api/app/tasks/media_tasks.py)
+Create placeholder Celery tasks (full implementation in P01-2):
+- @celery_app.task(name='media.process_youtube', bind=True)
+  def process_youtube(self, media_source_id: str): pass
+- @celery_app.task(name='media.process_uploaded_file', bind=True)
+  def process_uploaded_file(self, media_source_id: str): pass
+Both should update status to 'processing' and log the task start.
+
+## TASK 5: Frontend - file upload hook (apps/web/lib/hooks/useMediaUpload.ts)
+React hook that:
+1. Calls POST /media/upload/initiate → gets presigned URL
+2. Uploads directly to R2 using fetch with PUT method (no API proxy)
+3. Tracks progress with XMLHttpRequest (onprogress event)
+4. On complete, calls POST /media/upload/complete
+5. Returns: { upload, progress, status, error }
+
+## ACCEPTANCE CRITERIA
+- POST /media/youtube returns 201 with media_source record
+- Presigned upload URL works: file uploaded directly from browser to R2
+- POST /media/upload/complete triggers Celery task (visible in logs)
+- GET /media/{id}/status returns current status
+- Quota enforcement works: free users blocked after 3 uploads</div>
+    </div>
+  </div>
+
+  <!-- P01-2 -->
+  <div class="prompt-card" id="card-p01-2">
+    <div class="prompt-top" onclick="toggleCard('p01-2')">
+      <div class="prompt-label"><span class="prompt-index">P01-2</span><span class="prompt-title">Transcription pipeline with faster-whisper</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p01-2',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p01-2">
+      <div class="prompt-code" id="text-p01-2">Media ingestion API from P01-1 is complete. Now implement the actual transcription Celery tasks.
+
+## CONTEXT
+When a media_source is created, a Celery task is enqueued. This task must:
+1. Download/retrieve the audio
+2. Transcribe it with faster-whisper
+3. Save timestamped chunks to PostgreSQL
+4. Trigger next task: embed_and_store
+
+## TASK 1: Install dependencies in Dockerfile.worker
+Add to requirements.txt:
+- faster-whisper==1.0.0
+- yt-dlp==2024.8.6
+- ffmpeg-python==0.2.0
+- pyannote.audio==3.3.0 (speaker diarization)
+- torch==2.3.0 (CPU version for worker)
+
+## TASK 2: Audio extraction service (apps/api/app/services/audio_extractor.py)
+
+class AudioExtractor:
+  async def from_youtube_url(self, url: str, output_dir: str) -> str:
+    """Download YouTube audio with yt-dlp. Return path to .wav file."""
+    # Use yt-dlp with options:
+    # format: bestaudio/best
+    # postprocessors: FFmpegExtractAudio, preferredcodec: wav, preferredquality: 16
+    # outtmpl: output_dir/%(id)s.%(ext)s
+    # quiet: True
+    # no_warnings: True
+
+  async def from_r2_video(self, storage_key: str, output_dir: str) -> str:
+    """Download from R2, extract audio with ffmpeg. Return path to .wav file."""
+    # 1. Download from R2 to temp file using boto3
+    # 2. Run: ffmpeg -i input -vn -acodec pcm_s16le -ar 16000 -ac 1 output.wav
+    # 3. Return output path
+
+## TASK 3: Transcription service (apps/api/app/services/transcriber.py)
+
+from faster_whisper import WhisperModel
+
+class Transcriber:
+  def __init__(self):
+    # Load model once: WhisperModel("large-v3", device="cpu", compute_type="int8")
+    # Cache model instance at module level
+
+  def transcribe(self, audio_path: str) -> list[TranscriptChunk]:
+    """Returns list of TranscriptChunk with word-level timestamps."""
+    # faster_whisper segments have: id, start, end, text, words
+    # Return chunks of ~512 tokens each, preserving sentence boundaries
+    # Each chunk: { text, start_time, end_time, speaker (if diarized) }
+
+  def _merge_segments_to_chunks(self, segments, max_tokens=512) -> list[dict]:
+    """Group whisper segments into RAG-friendly chunks with overlap."""
+    # Target: ~400 tokens per chunk, 50 token overlap
+    # Never split mid-sentence
+
+## TASK 4: Full Celery task implementation (apps/api/app/tasks/media_tasks.py)
+
+@celery_app.task(name='media.process_youtube', bind=True, max_retries=3)
+def process_youtube(self, media_source_id: str):
+  # 1. Update status → 'processing', update progress → 10
+  # 2. Use AudioExtractor.from_youtube_url()  (update progress → 30)
+  # 3. Use Transcriber.transcribe()           (update progress → 70)
+  # 4. Save chunks to DB (transcript_chunks table — create this model)
+  # 5. Update media_source: status='completed', transcript_chunks=count  (progress → 90)
+  # 6. Enqueue next task: embed_and_store.delay(media_source_id)         (progress → 100)
+  # On any exception: update status='failed', error_message=str(e), retry with backoff
+
+Same pattern for process_uploaded_file.
+
+## TASK 5: transcript_chunks table (add migration)
+New model: TranscriptChunk
+- id: UUID
+- media_source_id: FK → media_sources
+- chunk_index: int
+- text: text
+- start_time: float (seconds)
+- end_time: float (seconds)
+- speaker_label: str nullable
+- token_count: int
+- embedding_id: str nullable (Qdrant point ID)
+- created_at
+
+## TASK 6: Progress SSE endpoint
+GET /media/{media_source_id}/progress (Server-Sent Events)
+- Stream progress updates every 2 seconds
+- Event format: data: {"status": "processing", "progress": 45, "stage": "transcribing"}
+- Close stream when status is 'completed' or 'failed'
+
+## ACCEPTANCE CRITERIA
+- Paste a YouTube URL → within 5 mins → media_source.status = 'completed'
+- transcript_chunks populated with correct timestamps
+- SSE endpoint streams real-time progress to browser
+- Failed jobs update status and are retryable
+- Audio temp files cleaned up after processing</div>
+    </div>
+  </div>
+
+  <!-- P01-3 -->
+  <div class="prompt-card" id="card-p01-3">
+    <div class="prompt-top" onclick="toggleCard('p01-3')">
+      <div class="prompt-label"><span class="prompt-index">P01-3</span><span class="prompt-title">RAG pipeline — embedding + Qdrant vector store</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p01-3',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p01-3">
+      <div class="prompt-code" id="text-p01-3">Transcription pipeline is complete (P01-2). Transcript chunks are stored in PostgreSQL. Now embed them and store in Qdrant for retrieval.
+
+## TASK 1: Qdrant collection setup (apps/api/app/services/vector_store.py)
+
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.models import *
+
+class VectorStore:
+  client: AsyncQdrantClient  # singleton
+
+  COLLECTION = "teachclone_chunks"
+  VECTOR_DIM = 3072  # text-embedding-3-large
+
+  async def ensure_collection(self):
+    """Create collection if not exists with hybrid search config."""
+    # Vectors config: { "dense": VectorParams(size=3072, distance=Cosine) }
+    # Sparse vectors: { "sparse": SparseVectorParams() }  ← for BM25 keyword search
+    # Payload indexes: media_source_id (keyword), teacher_profile_id (keyword),
+    #                  start_time (float), topic_tag (keyword)
+
+  async def upsert_chunks(self, chunks: list[ChunkPoint]) -> int:
+    """Batch upsert. ChunkPoint has: id, dense_vector, sparse_vector, payload"""
+    # Batch size: 100 points per upsert call
+    # payload fields: text, media_source_id, teacher_profile_id, start_time,
+    #                 end_time, speaker_label, chunk_index, source_type
+
+  async def hybrid_search(self, query_dense: list[float], query_sparse: dict,
+                          teacher_profile_id: str, top_k: int = 8) -> list[SearchResult]:
+    """Reciprocal Rank Fusion of dense + sparse results."""
+    # Dense search with filter: teacher_profile_id == value
+    # Sparse search with same filter
+    # RRF merge with k=60
+    # Return top_k results with score, text, start_time, end_time, media_source_id
+
+  async def delete_by_media_source(self, media_source_id: str):
+    """Delete all points where payload.media_source_id == value"""
+
+## TASK 2: Embedding service (apps/api/app/services/embedder.py)
+
+from openai import AsyncOpenAI
+from sklearn.feature_extraction.text import TfidfVectorizer  # for sparse
+
+class Embedder:
+  openai: AsyncOpenAI
+  MODEL = "text-embedding-3-large"
+
+  async def embed_texts(self, texts: list[str]) -> list[list[float]]:
+    """Batch embed. OpenAI allows 2048 texts per call. Handle batching."""
+    # Batch into groups of 100
+    # Return list of 3072-dim vectors
+
+  def compute_sparse_vectors(self, texts: list[str]) -> list[dict[int, float]]:
+    """BM25-style sparse vectors using TF-IDF for keyword matching."""
+    # Use TfidfVectorizer, return sparse indices + values per text
+
+## TASK 3: Embedding Celery task (apps/api/app/tasks/embedding_tasks.py)
+
+@celery_app.task(name='ai.embed_and_store', bind=True)
+def embed_and_store(self, media_source_id: str):
+  # 1. Fetch all TranscriptChunks for media_source_id from DB
+  # 2. Extract texts
+  # 3. Batch embed with Embedder.embed_texts()
+  # 4. Compute sparse vectors
+  # 5. Build ChunkPoint objects (id = str(chunk.id))
+  # 6. Upsert to Qdrant via VectorStore.upsert_chunks()
+  # 7. Update each TranscriptChunk.embedding_id in DB
+  # 8. Enqueue next task: extract_style.delay(media_source_id)
+  # Progress updates: 10% → fetched chunks, 50% → embedded, 90% → stored in Qdrant
+
+## TASK 4: Retrieval function (apps/api/app/services/retrieval.py)
+async def retrieve_context(query: str, teacher_profile_id: str, top_k: int = 8) -> list[RetrievedChunk]:
+  """Full hybrid retrieval pipeline for a user query."""
+  # 1. Embed query with Embedder
+  # 2. Compute sparse vector for query
+  # 3. Call VectorStore.hybrid_search()
+  # 4. Return RetrievedChunk(text, start_time, end_time, media_source_id, score)
+
+## TASK 5: Test endpoint
+POST /debug/retrieve (dev only, remove in prod)
+  Body: { query: str, teacher_profile_id: str }
+  Returns: list of retrieved chunks with scores
+
+## ACCEPTANCE CRITERIA
+- After embed_and_store task: all transcript chunks have embedding_id set
+- Qdrant collection has correct number of points
+- hybrid_search returns relevant chunks for test queries
+- Retrieval latency < 500ms for 10k chunks
+- Points correctly filtered by teacher_profile_id (no cross-contamination between profiles)</div>
+    </div>
+  </div>
+
+  <!-- P01-4 -->
+  <div class="prompt-card" id="card-p01-4">
+    <div class="prompt-top" onclick="toggleCard('p01-4')">
+      <div class="prompt-label"><span class="prompt-index">P01-4</span><span class="prompt-title">Chat API with streaming RAG responses</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p01-4',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p01-4">
+      <div class="prompt-code" id="text-p01-4">RAG pipeline is complete (P01-3). Now build the chat API that powers the actual AI teaching conversation.
+
+## TASK 1: Session management router (apps/api/app/routers/sessions.py)
+
+POST /sessions
+  Body: { teacher_profile_id: str }
+  - Create student_session record
+  - Return: { session_id, teacher_profile, created_at }
+
+GET /sessions/{session_id}
+  - Return session with last 20 messages
+
+GET /sessions (user's own sessions)
+  - Paginated list, newest first
+
+DELETE /sessions/{session_id}
+  - Delete session + messages
+
+## TASK 2: Chat endpoint with streaming (apps/api/app/routers/chat.py)
+
+POST /chat/{session_id}/message
+  Body: { content: str }
+  Response: text/event-stream (SSE)
+
+  Implementation steps:
+  1. Fetch session + teacher_profile (with style_profile JSONB)
+  2. Fetch last 10 messages for conversation history
+  3. Call retrieve_context(content, teacher_profile_id, top_k=8)
+  4. Build system prompt (see SYSTEM PROMPT TEMPLATE below)
+  5. Call Anthropic Claude API with stream=True:
+     - model: claude-3-5-sonnet-20241022
+     - max_tokens: 1500
+     - system: <built system prompt>
+     - messages: [history + current user message]
+  6. Stream response tokens via SSE: data: {"token": "...", "type": "content"}
+  7. On stream complete:
+     - Save user message to DB
+     - Save assistant message to DB (with citations extracted from context)
+     - Send final SSE: data: {"type": "done", "message_id": "...", "citations": [...]}
+  8. Update session.message_count, last_activity_at
+
+## SYSTEM PROMPT TEMPLATE
+Build this dynamically in apps/api/app/services/prompt_builder.py:
+
+def build_system_prompt(teacher_profile, student_profile, context_chunks) -> str:
+  return f"""You are an AI teaching assistant trained to explain concepts in the style of {teacher_profile.name}.
+
+TEACHER STYLE PROFILE:
+- Vocabulary level: {style.vocabulary_level}
+- Tone: {style.tone_type}
+- Explanation pattern: {style.explanation_pattern} (use this ordering when explaining)
+- Analogy density: {"Use frequent analogies" if style.analogy_density > 0.5 else "Use analogies sparingly"}
+- Sentence length: {"Keep explanations concise" if style.avg_sentence_length < 15 else "Detailed explanations are fine"}
+
+STUDENT PROFILE:
+- Level: {student_profile.level} — calibrate ALL vocabulary and complexity to this level
+- Learning goal: {student_profile.goal}
+- Learning style: {student_profile.learning_style}
+- Prior knowledge: {student_profile.prior_knowledge}
+
+KNOWLEDGE BASE (retrieved from reference content):
+{format_context_chunks(context_chunks)}
+
+RULES:
+1. ALWAYS respond at the {student_profile.level} vocabulary level — no exceptions
+2. Follow the teacher's {style.explanation_pattern} explanation pattern
+3. If the question isn't covered in the knowledge base, say so — never hallucinate
+4. When citing a concept, reference [Source: {timestamp}] inline
+5. End each response with one Socratic follow-up question to deepen understanding
+6. Match the teacher's tone: {style.tone_type}"""
+
+## TASK 3: Citation extraction
+In the chat response, extract citations as:
+[{ media_source_id, start_time, end_time, chunk_text_preview }]
+Parse the assistant response for [Source: X] markers and map to retrieved chunks.
+
+## TASK 4: Message router additions
+GET /chat/{session_id}/messages
+  - Return all messages with citations
+  - Include media_source details (for timestamp links)
+
+POST /chat/{session_id}/regenerate
+  - Delete last assistant message
+  - Re-run the same user message
+  - Stream new response
+
+## ACCEPTANCE CRITERIA
+- POST /chat/{id}/message streams tokens within 500ms of receiving request
+- Full response saved to DB with citations
+- Conversation history included in context (last 10 messages)
+- Anthropic API errors handled gracefully (retry once, then 503)
+- Rate limit: 50 messages/day on free plan, enforced via usage_logs</div>
+    </div>
+  </div>
+
+  <!-- P01-5 -->
+  <div class="prompt-card" id="card-p01-5">
+    <div class="prompt-top" onclick="toggleCard('p01-5')">
+      <div class="prompt-label"><span class="prompt-index">P01-5</span><span class="prompt-title">Frontend — dashboard + video upload UI</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p01-5',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p01-5">
+      <div class="prompt-code" id="text-p01-5">Backend APIs are complete. Build the Next.js frontend pages for the core user flow.
+
+## PAGES TO BUILD (all in apps/web/app/)
+
+### /dashboard (protected)
+Main hub. Show:
+- User's teacher profiles (grid of cards with name, video count, last used)
+- Quick action: "New Teacher Profile" button
+- Recent sessions list (last 5, with teacher name + message count)
+- Usage stats bar (videos used / plan limit this month)
+Layout: sidebar nav + main content area
+
+### /profiles/new (protected)
+Create teacher profile form:
+- Name field (e.g. "3Blue1Brown Style")
+- Description (optional)
+- Is public toggle
+- Submit → POST /teacher-profiles → redirect to /profiles/{id}
+
+### /profiles/{id} (protected)
+Teacher profile page:
+- Profile header (name, description, video count, created date)
+- Tab 1: "Add Content" — YouTube URL input + file dropzone
+  - YouTube URL: text input, validate format, submit calls POST /media/youtube
+  - File upload: drag-and-drop zone, calls useMediaUpload hook (from P01-1)
+  - Show processing progress bar (connect to SSE /media/{id}/progress)
+- Tab 2: "Content Library" — list of processed media_sources with status badges
+- Tab 3: "Start Learning" — button to create new session with this profile
+
+### /chat/{session_id} (protected)
+Main chat interface (most important page):
+- Left sidebar: session info, teacher profile name, "New Session" button
+- Main area: message thread
+  - User messages: right-aligned, plain
+  - Assistant messages: left-aligned, with:
+    - Rendered markdown (use react-markdown + remark-gfm)
+    - Citation chips at bottom: "[0:42 - 1:15]" clickable badges
+    - "Explain simpler" and "Go deeper" buttons below each response
+- Bottom input: textarea + send button, Enter to send, Shift+Enter for newline
+- Streaming: use Vercel AI SDK's useChat hook pointing to /chat/{id}/message
+- Show typing indicator while streaming
+
+### /onboarding (protected, shown after signup)
+Multi-step wizard:
+- Step 1: "What's your level?" — grid of level cards (K-5, Middle School, High School, Undergrad, Masters, Professional)
+- Step 2: "How do you prefer to learn?" — 4 style cards with icons
+- Step 3: "What do you want to learn today?" — free text input
+- Save to localStorage (used as default student_profile when creating sessions)
+- Redirect to /dashboard on complete
+
+## COMPONENTS TO BUILD (apps/web/components/)
+- <MessageBubble> — renders single message with markdown + citations
+- <CitationChip> — "[0:42]" badge, on click shows preview tooltip
+- <ProcessingProgress> — connects to SSE, shows stage label + progress bar
+- <TeacherProfileCard> — card with name, stats, "Learn" button
+- <MediaDropzone> — drag-and-drop with upload progress
+- <LevelSelector> — grid of level cards with icons and descriptions
+- <StreamingIndicator> — animated "..." dots while AI responds
+
+## ACCEPTANCE CRITERIA
+- Full flow works: sign up → onboarding → create profile → add YouTube URL → wait for processing → start chat → get streaming AI response
+- Chat messages render markdown correctly (bold, lists, code blocks)
+- Citation chips show timestamp on hover
+- Upload progress bar updates in real time
+- Mobile responsive layout</div>
+    </div>
+  </div>
+
+  <!-- P01-6 -->
+  <div class="prompt-card" id="card-p01-6">
+    <div class="prompt-top" onclick="toggleCard('p01-6')">
+      <div class="prompt-label"><span class="prompt-index">P01-6</span><span class="prompt-title">Stripe billing — free + pro plans</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p01-6',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p01-6">
+      <div class="prompt-code" id="text-p01-6">Core chat flow is working. Now add Stripe billing to enforce plan limits and allow upgrades.
+
+## STRIPE PRODUCTS TO CREATE (do this in Stripe Dashboard, then use price IDs in config)
+- Free: no Stripe product needed (default)
+- Student Pro: $12/month recurring → STRIPE_PRO_PRICE_ID
+- Creator: $39/month recurring → STRIPE_CREATOR_PRICE_ID
+- Institution: $299/month recurring → STRIPE_INSTITUTION_PRICE_ID
+
+## TASK 1: Billing service (apps/api/app/services/billing.py)
+
+class BillingService:
+  stripe_client: stripe.AsyncStripe  # use stripe Python library
+
+  async def create_checkout_session(self, user: User, price_id: str, success_url: str, cancel_url: str) -> str:
+    """Create Stripe Checkout session. Return checkout URL."""
+    # customer: use existing stripe_customer_id or create new
+    # mode: 'subscription'
+    # metadata: { user_id: str(user.id) }
+
+  async def create_customer_portal_session(self, user: User, return_url: str) -> str:
+    """Return Stripe Customer Portal URL for managing subscription."""
+
+  async def get_plan_limits(self, plan: str) -> PlanLimits:
+    """Return limits for a given plan."""
+    limits = {
+      'free':        PlanLimits(videos_per_month=3, messages_per_day=50, sessions=10),
+      'pro':         PlanLimits(videos_per_month=20, messages_per_day=500, sessions=999),
+      'creator':     PlanLimits(videos_per_month=999, messages_per_day=999, sessions=999),
+      'institution': PlanLimits(videos_per_month=999, messages_per_day=999, sessions=999),
+    }
+    return limits[plan]
+
+  async def check_quota(self, user: User, event_type: str) -> tuple[bool, str]:
+    """Return (allowed: bool, reason: str). Log to usage_logs if allowed."""
+
+## TASK 2: Stripe webhook handler (apps/api/app/routers/billing.py)
+POST /webhooks/stripe
+Handle events:
+- checkout.session.completed → update user.plan + stripe_subscription_id
+- customer.subscription.updated → update plan based on price_id
+- customer.subscription.deleted → downgrade user to plan='free'
+Use Stripe signature verification with STRIPE_WEBHOOK_SECRET
+
+## TASK 3: Billing router
+POST /billing/checkout
+  Body: { plan: 'pro'|'creator'|'institution' }
+  → create checkout session, return { checkout_url }
+
+POST /billing/portal
+  → create portal session, return { portal_url }
+
+GET /billing/status
+  → return { plan, limits, usage_this_month: { videos, messages } }
+
+## TASK 4: Frontend - pricing page (/pricing)
+Show 4 plan cards (Free / Pro $12 / Creator $39 / Institution $299)
+Current plan highlighted. Upgrade button calls POST /billing/checkout → redirect to Stripe.
+"Manage subscription" button calls POST /billing/portal → redirect to Stripe portal.
+
+## TASK 5: Quota enforcement middleware
+In FastAPI, add a dependency check_quota_middleware:
+- On POST /media/youtube and POST /media/upload/initiate: check video quota
+- On POST /chat/{id}/message: check message quota
+- If over limit: return 402 with { error: "quota_exceeded", plan: current, upgrade_url: "/pricing" }
+
+## ACCEPTANCE CRITERIA
+- Free user blocked from uploading 4th video this month (402 returned)
+- Stripe Checkout opens correctly for Pro upgrade
+- After payment: user.plan updated to 'pro' within 30 seconds (via webhook)
+- Customer portal allows cancellation; on cancellation plan reverts to free
+- GET /billing/status returns accurate current month usage</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== PHASE 02 ===== -->
+<div class="phase-section" id="p02">
+  <div class="phase-banner" style="background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3)">
+    <div class="phase-num">Phase 02</div>
+    <div class="phase-title">Intelligence Layer — Style + Adaptation</div>
+    <div class="phase-sub">Teacher style cloning, video frame analysis, student profiling, and the adaptive prompt engine. This is your product moat.</div>
+    <div class="phase-meta">
+      <span class="meta-pill" style="background:rgba(245,158,11,.15);color:var(--amber)">Weeks 11–18</span>
+      <span class="meta-pill" style="background:rgba(245,158,11,.15);color:var(--amber)">4 prompts</span>
+      <span class="meta-pill" style="background:rgba(245,158,11,.15);color:var(--amber)">Core AI moat</span>
+    </div>
+  </div>
+  <div class="copy-all"><span class="copy-all-txt">4 prompts. These build the AI intelligence that makes TeachClone different from a simple chatbot.</span></div>
+
+  <!-- P02-1 -->
+  <div class="prompt-card" id="card-p02-1">
+    <div class="prompt-top" onclick="toggleCard('p02-1')">
+      <div class="prompt-label"><span class="prompt-index">P02-1</span><span class="prompt-title">Teacher style extraction module</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p02-1',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p02-1">
+      <div class="prompt-code" id="text-p02-1">MVP chat is working but uses no teacher style yet. Build the style extraction module that analyzes a teacher's transcript and produces a structured style profile.
+
+## CONTEXT
+After embed_and_store task completes, a new task extract_style is enqueued.
+Output: teacher_profiles.style_profile JSONB populated with StyleProfile.
+
+## TASK 1: StyleProfile schema (add to packages/types + Pydantic model)
+
+StyleProfile:
+  vocabulary_level: Literal['elementary','intermediate','advanced','technical']
+  vocabulary_score: float        # Flesch-Kincaid grade level (0-20)
+  tone_type: Literal['strict','friendly','socratic','storytelling','energetic','calm']
+  tone_confidence: float         # 0-1
+  explanation_pattern: Literal['analogy_first','example_first','theory_first','problem_first','narrative']
+  analogy_density: float         # analogies per 1000 words
+  avg_sentence_length: float     # words per sentence
+  use_of_humor: float            # 0-1 scale
+  use_of_questions: float        # rhetorical questions per 1000 words
+  signature_phrases: list[str]   # up to 10 recurring phrases
+  vocabulary_samples: list[str]  # 10 characteristic words
+  pacing: Literal['slow','moderate','fast']
+  explanation_depth: Literal['surface','moderate','deep']
+  raw_analysis: str              # LLM's free-form analysis paragraph
+
+## TASK 2: Style extractor service (apps/api/app/services/style_extractor.py)
+
+class StyleExtractor:
+  async def extract(self, transcript_chunks: list[TranscriptChunk]) -> StyleProfile:
+    """Analyze full transcript and return structured StyleProfile."""
+
+    # Step 1: Statistical analysis (no LLM needed)
+    full_text = " ".join(c.text for c in transcript_chunks)
+    vocabulary_score = self._flesch_kincaid_grade(full_text)  # use textstat library
+    avg_sentence_length = self._avg_sentence_length(full_text)  # use nltk
+    analogy_density = self._count_analogy_markers(full_text)    # regex: "like", "imagine", "think of", "similar to", "just as"
+    use_of_questions = self._count_questions(full_text) / (len(full_text)/1000)
+    signature_phrases = self._extract_phrases(full_text)        # use Counter on n-grams (3-5 words)
+
+    # Step 2: LLM analysis on a sample (first 6000 tokens of transcript)
+    # Build prompt asking Claude to analyze:
+    # - tone_type (choose from enum)
+    # - explanation_pattern (how does teacher typically structure explanations?)
+    # - pacing description
+    # - use_of_humor level
+    # - 3-sentence raw_analysis of teaching style
+    # Request JSON output matching StyleProfile schema
+    llm_profile = await self._llm_analyze(transcript_chunks[:15])  # first 15 chunks
+
+    # Step 3: Merge statistical + LLM analysis into StyleProfile
+    return StyleProfile(
+      vocabulary_level=self._score_to_level(vocabulary_score),
+      vocabulary_score=vocabulary_score,
+      avg_sentence_length=avg_sentence_length,
+      analogy_density=analogy_density,
+      use_of_questions=use_of_questions,
+      signature_phrases=signature_phrases[:10],
+      **llm_profile
+    )
+
+  def _llm_analyze(self, sample_chunks):
+    """Call Claude with sample transcript, return dict matching StyleProfile LLM fields."""
+    prompt = f"""Analyze the following transcript excerpt from an educational video.
+Return ONLY a valid JSON object with these exact fields:
+{{
+  "tone_type": one of ["strict","friendly","socratic","storytelling","energetic","calm"],
+  "tone_confidence": float 0-1,
+  "explanation_pattern": one of ["analogy_first","example_first","theory_first","problem_first","narrative"],
+  "use_of_humor": float 0-1 (0=none, 1=very frequent),
+  "pacing": one of ["slow","moderate","fast"],
+  "explanation_depth": one of ["surface","moderate","deep"],
+  "vocabulary_samples": [list of 10 characteristic words this teacher uses],
+  "raw_analysis": "2-3 sentence description of this teacher's unique style"
+}}
+
+TRANSCRIPT SAMPLE:
+{chr(10).join(c.text for c in sample_chunks)}"""
+    # Call Claude API, parse JSON response
+
+## TASK 3: Celery task (apps/api/app/tasks/style_tasks.py)
+@celery_app.task(name='ai.extract_style')
+def extract_style(media_source_id: str):
+  # 1. Fetch all TranscriptChunks for this media_source
+  # 2. Call StyleExtractor.extract()
+  # 3. Get teacher_profile_id from media_source
+  # 4. Load existing style_profile from teacher_profiles (if any)
+  # 5. Merge: if profile exists, average the statistical values with new ones
+  #    (teacher may have multiple videos — running average of style)
+  # 6. Save merged StyleProfile to teacher_profiles.style_profile
+  # Log: "Style extraction complete for teacher_profile {id}: tone={}, pattern={}"
+
+## TASK 4: API endpoint
+GET /profiles/{teacher_profile_id}/style
+  Return the StyleProfile JSON for display in the frontend
+
+## TASK 5: Frontend - style preview card
+In /profiles/{id} (Tab 1 or new Tab "Style Profile"):
+Show a visual breakdown of the extracted style:
+- Vocabulary level: badge (Elementary / Intermediate / Advanced / Technical)
+- Tone: icon + label
+- Explanation pattern: description of what it means
+- Analogy density: "Uses X analogies per 1000 words"
+- Signature phrases: chip list
+
+## ACCEPTANCE CRITERIA
+- After processing a 30-min YouTube lecture: style_profile JSONB populated in DB
+- Vocabulary score within ±1 grade level of manual reading level assessment
+- LLM tone classification matches human expectation for 5 test videos
+- Multiple videos from same teacher: style_profile reflects averaged profile
+- Style profile visible in frontend dashboard</div>
+    </div>
+  </div>
+
+  <!-- P02-2 -->
+  <div class="prompt-card" id="card-p02-2">
+    <div class="prompt-top" onclick="toggleCard('p02-2')">
+      <div class="prompt-label"><span class="prompt-index">P02-2</span><span class="prompt-title">Video frame analysis + diagram extraction</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p02-2',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p02-2">
+      <div class="prompt-code" id="text-p02-2">Style extraction is complete. Now add visual understanding by sampling video frames and extracting diagram/whiteboard content using GPT-4o Vision.
+
+## CONTEXT
+Only runs for video sources (not audio-only). Run in parallel with or after transcription.
+Output: additional TranscriptChunks of type 'visual' merged into the same Qdrant collection.
+
+## TASK 1: Frame sampler service (apps/api/app/services/frame_sampler.py)
+
+class FrameSampler:
+  async def sample_frames(self, video_path: str, interval_seconds: int = 10) -> list[FrameSample]:
+    """
+    Extract frames every N seconds using ffmpeg.
+    FrameSample: { timestamp: float, image_path: str, frame_index: int }
+    
+    ffmpeg command:
+    ffmpeg -i {video_path} -vf "select=not(mod(n\,{fps*interval}))" -vsync 0 
+           -frame_pts 1 {output_dir}/frame_%06d.jpg -q:v 3
+    
+    Skip near-duplicate frames using image diff (compare consecutive frames,
+    skip if similarity > 95% using PIL ImageChops.difference + histogram).
+    Typical output: 2-4 frames per 10 seconds after deduplication.
+    """
+
+  async def extract_keyframes(self, video_path: str) -> list[FrameSample]:
+    """
+    Use ffmpeg scene detection to get only scene-change frames.
+    ffmpeg -i input -vf "select=gt(scene\,0.3)" -vsync 0 frames/frame_%06d.jpg
+    Use this for long videos (>30 min) instead of fixed-interval sampling.
+    """
+
+## TASK 2: Vision analyzer service (apps/api/app/services/vision_analyzer.py)
+
+from openai import AsyncOpenAI
+import base64
+
+class VisionAnalyzer:
+  async def analyze_frames(self, frames: list[FrameSample]) -> list[VisualDescription]:
+    """
+    Send frames to GPT-4o Vision in batches of 4.
+    For each batch, include timestamp context.
+    
+    Prompt: 
+    "You are analyzing frames from an educational video. For each frame:
+    1. Describe what is shown (diagram, equation, code, text, presenter, etc.)
+    2. If it shows a diagram/equation/code: extract the FULL content as text
+    3. If it's a talking head with no visual content: respond with 'SKIP'
+    4. Include any text visible on screen verbatim
+    
+    Return JSON array: [{"timestamp": float, "content_type": str, "description": str, "extracted_text": str|null}]"
+    
+    content_type options: 'diagram','equation','code','text_slide','whiteboard','graph','talking_head'
+    Skip frames where content_type == 'talking_head' (already covered by audio)
+    """
+
+  async def _encode_image(self, image_path: str) -> str:
+    """Return base64 encoded image."""
+    with open(image_path, 'rb') as f:
+      return base64.b64encode(f.read()).decode()
+
+## TASK 3: VisualDescription → TranscriptChunk conversion
+For each VisualDescription that isn't SKIP:
+  Create a TranscriptChunk with:
+  - text: f"[VISUAL at {timestamp}s] {description}. {extracted_text}"
+  - start_time: timestamp
+  - end_time: timestamp + 10
+  - speaker_label: "visual_content"
+  - chunk_index: (after last audio chunk)
+
+These visual chunks get embedded alongside audio chunks in Qdrant.
+Add payload field: content_type = 'visual' for filtering.
+
+## TASK 4: Celery task (apps/api/app/tasks/vision_tasks.py)
+@celery_app.task(name='ai.analyze_frames')
+def analyze_frames(media_source_id: str):
+  # Only run if source_type in ['youtube_url', 'file_upload'] (not audio_upload)
+  # 1. Get video file path (download from R2 if needed)
+  # 2. FrameSampler: use keyframes for >30min, fixed-interval for shorter
+  # 3. VisionAnalyzer.analyze_frames() in batches
+  # 4. Convert to TranscriptChunks, save to DB
+  # 5. Embed the new visual chunks (call embed_and_store for just these chunks)
+  # Clean up: delete temp frame images after embedding
+  # Progress: 10% frames extracted, 60% analyzed, 90% embedded
+
+## TASK 5: Run vision analysis in parallel with style extraction
+Update the task chain:
+Old: transcription → embedding → style_extraction
+New: transcription → [embedding + frame_analysis in parallel] → style_extraction (after both)
+Use Celery chord: chord([embed_and_store.s(), analyze_frames.s()])(extract_style.s())
+
+## ACCEPTANCE CRITERIA
+- A math lecture video: equations extracted as LaTeX text and searchable
+- A coding tutorial: code snippets from screen extracted verbatim
+- User asks "what was on the board at 5 minutes?" → AI retrieves visual chunk at ~300s
+- Frame analysis adds ≥10% more retrievable information vs audio-only
+- Cost: GPT-4o vision calls ≤$0.15 per 30-min video (batch efficiently)</div>
+    </div>
+  </div>
+
+  <!-- P02-3 -->
+  <div class="prompt-card" id="card-p02-3">
+    <div class="prompt-top" onclick="toggleCard('p02-3')">
+      <div class="prompt-label"><span class="prompt-index">P02-3</span><span class="prompt-title">Student onboarding + adaptive prompt engine</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p02-3',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p02-3">
+      <div class="prompt-code" id="text-p02-3">Style extraction is working. Now wire in student profiling and make the AI actually adapt its language and complexity to the student's level.
+
+## TASK 1: Upgrade session creation flow
+POST /sessions now requires a student_profile:
+{
+  teacher_profile_id: str,
+  student_profile: {
+    level: 'k5'|'middle'|'highschool'|'undergrad'|'masters'|'professional',
+    goal: str,                    # "I want to understand backpropagation"
+    learning_style: 'examples'|'theory'|'qa'|'storytelling',
+    prior_knowledge: str          # "I know basic calculus but not linear algebra"
+  }
+}
+Save to student_sessions.student_profile JSONB.
+
+## TASK 2: Level-calibrated vocabulary constraints
+In prompt_builder.py, add per-level instructions:
+
+LEVEL_INSTRUCTIONS = {
+  'k5':           "Use words a 10-year-old knows. Short sentences. Lots of analogies to everyday things like toys, sports, food. No jargon.",
+  'middle':       "Use words a 13-year-old knows. Relate concepts to school subjects. Brief analogies. Avoid technical terms without explaining them.",
+  'highschool':   "Use clear language for a 16-year-old. Some technical terms are fine if defined. Practical examples from real life.",
+  'undergrad':    "University-level vocabulary is fine. Assume basic domain knowledge. Use precise terminology with brief definitions for specialized terms.",
+  'masters':      "Expert vocabulary. Assume strong domain background. Focus on nuance, tradeoffs, and depth rather than basics.",
+  'professional': "Peer-level communication. Dense, precise, jargon-heavy as needed. Assume 5+ years field experience.",
+}
+
+STYLE_INSTRUCTIONS = {
+  'examples':     "Lead with a concrete real-world example before any theory. Make the example specific and vivid.",
+  'theory':       "Lead with the underlying principle or mechanism. Then illustrate with examples.",
+  'qa':           "Answer as if in a Socratic dialogue. Ask a clarifying question back after each answer. Guide discovery.",
+  'storytelling': "Frame explanations as a story or journey. Use narrative arc: setup → conflict → resolution.",
+}
+
+## TASK 3: Dynamic complexity re-evaluation
+Every 5 messages, add this check to the chat endpoint:
+  Analyze last 5 student messages. If student seems confused (short responses, "I don't understand",
+  repeated questions): automatically soften vocabulary level one step.
+  If student seems advanced (uses domain terms, asks deep questions): suggest going deeper.
+
+Add field to student_sessions: current_effective_level (may drift from initial level)
+
+POST /sessions/{id}/adjust-level
+  Body: { direction: 'simpler'|'deeper' }
+  Update current_effective_level +/- 1 step
+
+## TASK 4: Upgrade prompt builder with all components
+apps/api/app/services/prompt_builder.py — rewrite build_system_prompt():
+
+def build_system_prompt(teacher_profile, student_session, context_chunks, conversation_turn) -> str:
+  style = teacher_profile.style_profile
+  student = student_session.student_profile
+  level = student_session.current_effective_level or student.level
+
+  return f"""You are an AI version of {teacher_profile.name}, recreating their teaching style.
+
+=== YOUR TEACHING IDENTITY ===
+{style.raw_analysis}
+Tone: {style.tone_type}
+Explain using: {style.explanation_pattern} — always structure explanations this way
+{f"Frequently use analogies — aim for one per explanation" if style.analogy_density > 0.3 else ""}
+{f"Include light humor naturally" if style.use_of_humor > 0.4 else ""}
+Characteristic phrases to use occasionally: {", ".join(style.signature_phrases[:5])}
+
+=== YOUR STUDENT ===
+Level: {level} — {LEVEL_INSTRUCTIONS[level]}
+Learning style: {student.learning_style} — {STYLE_INSTRUCTIONS[student.learning_style]}
+Goal: {student.goal}
+Prior knowledge: {student.prior_knowledge}
+{"[Turn {}: Student seems to understand well — you may increase depth]".format(conversation_turn) if conversation_turn > 10 else ""}
+
+=== REFERENCE KNOWLEDGE (use ONLY this content) ===
+{format_context_chunks(context_chunks)}
+If the answer isn't in the knowledge base above, say: "The reference content doesn't cover this — but from general knowledge..."
+
+=== RESPONSE RULES ===
+- Calibrate EVERY word to the {level} vocabulary level
+- Follow {student.learning_style} style ordering
+- End with ONE Socratic follow-up question (not a yes/no question)
+- Source citations: use [⏱ {'{'}timestamp{'}'}] inline when referencing specific content
+- Max response length: {"2-3 short paragraphs" if level in ['k5','middle'] else "4-6 paragraphs"}"""
+
+## TASK 5: Frontend - "Explain Simpler" / "Go Deeper" buttons
+Below each assistant message add two icon buttons:
+- "Simpler ↓" → calls POST /sessions/{id}/adjust-level {direction: 'simpler'}
+           → then sends hidden message "Please re-explain this more simply"
+- "Deeper ↑"  → calls POST /sessions/{id}/adjust-level {direction: 'deeper'}
+           → then sends hidden message "Please go deeper on this topic"
+
+## ACCEPTANCE CRITERIA
+- K-5 response for "explain gravity" uses words like "pull" and "heavy" — not "gravitational force"
+- Masters response uses correct domain vocabulary for the same question
+- "Simpler" button measurably changes response vocabulary in follow-up
+- Style signature phrases appear naturally in responses (verified by string search in tests)
+- Conversation turn 6+ auto-evaluates complexity and may adjust level</div>
+    </div>
+  </div>
+
+  <!-- P02-4 -->
+  <div class="prompt-card" id="card-p02-4">
+    <div class="prompt-top" onclick="toggleCard('p02-4')">
+      <div class="prompt-label"><span class="prompt-index">P02-4</span><span class="prompt-title">Auto-quiz generator + spaced repetition</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p02-4',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p02-4">
+      <div class="prompt-code" id="text-p02-4">Adaptive prompt engine is complete. Now build the quiz generator that creates contextual questions from reference content.
+
+## TASK 1: Quiz generation service (apps/api/app/services/quiz_generator.py)
+
+class QuizGenerator:
+  async def generate_quiz(self, session: StudentSession, teacher_profile: TeacherProfile,
+                           topic: str = None, num_questions: int = 5) -> QuizData:
+    """
+    Generate a contextually-relevant quiz.
+    If topic provided: retrieve context for that topic first.
+    If no topic: use last 5 messages from session as context.
+    """
+
+    # Retrieve relevant content
+    context = await retrieve_context(topic or session_summary, teacher_profile.id)
+
+    prompt = f"""You are generating a quiz for a {student_profile.level} student
+about content from {teacher_profile.name}'s material.
+
+CONTENT TO TEST:
+{format_context_chunks(context)}
+
+STUDENT LEVEL: {student_profile.level}
+STUDENT'S GOAL: {student_profile.goal}
+
+Generate exactly {num_questions} questions. Mix of:
+- 60% Multiple choice (4 options, one correct)
+- 20% True/False with explanation
+- 20% Short answer (open-ended, 1-3 sentences expected)
+
+CRITICAL: Questions must be answerable from the CONTENT above only.
+Calibrate difficulty and vocabulary to {student_profile.level} level.
+
+Return ONLY valid JSON:
+{{
+  "title": "Quiz title",
+  "questions": [
+    {{
+      "id": "q1",
+      "type": "mcq",
+      "question": "...",
+      "options": {{"A": "...", "B": "...", "C": "...", "D": "..."}},
+      "correct_answer": "A",
+      "explanation": "Why A is correct...",
+      "source_timestamp": 142.5,
+      "difficulty": "easy|medium|hard"
+    }},
+    {{
+      "id": "q2",
+      "type": "true_false",
+      "question": "...",
+      "correct_answer": true,
+      "explanation": "..."
+    }},
+    {{
+      "id": "q3",
+      "type": "short_answer",
+      "question": "...",
+      "sample_answer": "Model answer for grading reference...",
+      "key_concepts": ["concept1", "concept2"]
+    }}
+  ]
+}}"""
+
+    response = await claude_client.complete(prompt)
+    return QuizData(**json.loads(response))
+
+## TASK 2: Short-answer grading service
+async def grade_short_answer(question: dict, student_answer: str, level: str) -> GradingResult:
+  """Use Claude to grade open-ended answers."""
+  prompt = f"""Grade this student's short answer.
+
+QUESTION: {question['question']}
+SAMPLE ANSWER: {question['sample_answer']}
+KEY CONCEPTS REQUIRED: {question['key_concepts']}
+STUDENT LEVEL: {level}
+
+STUDENT'S ANSWER: {student_answer}
+
+Return JSON:
+{{
+  "score": float 0-1,
+  "is_correct": bool (score >= 0.7),
+  "feedback": "1-2 sentences of constructive feedback at {level} vocabulary level",
+  "concepts_covered": ["list of key concepts the student demonstrated"]
+}}"""
+
+## TASK 3: Quiz router (apps/api/app/routers/quizzes.py)
+
+POST /sessions/{session_id}/quiz
+  Body: { topic: str|null, num_questions: int = 5 }
+  - Generate quiz via QuizGenerator
+  - Save to quizzes table (questions JSONB, student_answers = null)
+  - Return quiz (without correct answers for MCQ/TF)
+
+POST /quizzes/{quiz_id}/submit
+  Body: { answers: { q1: "A", q2: true, q3: "..." } }
+  - For MCQ/TF: auto-grade (compare to correct_answer)
+  - For short_answer: call grade_short_answer()
+  - Calculate total score
+  - Update quiz: student_answers, score, completed_at
+  - Return: { score, results: [{question_id, is_correct, feedback, correct_answer}] }
+
+GET /quizzes/{quiz_id}/results
+  - Full results with explanations (only after quiz completed)
+
+## TASK 4: Frontend - quiz UI
+Component: <QuizModal> (full-screen modal or /quiz/{id} page)
+- Progress: "Question 3 of 5"
+- MCQ: 4 radio buttons, submit button
+- True/False: two large buttons
+- Short answer: textarea with char count
+- After submit: show correct/incorrect with explanation and source timestamp chip
+- Final screen: score (e.g., "4/5 — Great job!") + "Review answers" + "Back to chat"
+
+"Generate Quiz" button visible in chat sidebar / below welcome message.
+
+## TASK 5: Usage tracking
+- Free plan: 5 quizzes/month
+- Pro+: unlimited
+- Track in usage_logs with event_type='quiz_generated'
+
+## ACCEPTANCE CRITERIA
+- Generated quiz questions are answerable from the reference video content
+- MCQ distractors are plausible (not obviously wrong)
+- Short-answer grading gives reasonable feedback for 80%+ of responses
+- Quiz UI works end-to-end: generate → answer → get scored results
+- Score saved to DB and visible in future session summary</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== PHASE 03 ===== -->
+<div class="phase-section" id="p03">
+  <div class="phase-banner" style="background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.3)">
+    <div class="phase-num">Phase 03</div>
+    <div class="phase-title">SaaS Platform — Multi-Tenant + Scale</div>
+    <div class="phase-sub">Transform from a working tool into a real product that institutions can pay for and manage.</div>
+    <div class="phase-meta">
+      <span class="meta-pill" style="background:rgba(16,185,129,.15);color:var(--emerald)">Weeks 19–26</span>
+      <span class="meta-pill" style="background:rgba(16,185,129,.15);color:var(--emerald)">3 prompts</span>
+      <span class="meta-pill" style="background:rgba(16,185,129,.15);color:var(--emerald)">First paying institutions</span>
+    </div>
+  </div>
+  <div class="copy-all"><span class="copy-all-txt">3 prompts. Focus: multi-tenancy, analytics, and the admin dashboard that makes TeachClone sellable to schools.</span></div>
+
+  <div class="prompt-card" id="card-p03-1">
+    <div class="prompt-top" onclick="toggleCard('p03-1')">
+      <div class="prompt-label"><span class="prompt-index">P03-1</span><span class="prompt-title">Multi-tenant org system + admin dashboard</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p03-1',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p03-1">
+      <div class="prompt-code" id="text-p03-1">Core product is working. Now build the multi-tenant organization system that allows institutions to manage teachers and students.
+
+## TASK 1: Organization router (apps/api/app/routers/organizations.py)
+
+POST /organizations
+  Body: { name: str, slug: str }
+  - Only users on institution plan can create orgs
+  - Validate slug: lowercase alphanumeric + hyphens, unique
+  - Create org + add creator as admin member
+  - Return org object
+
+POST /organizations/{org_id}/members/invite
+  Body: { email: str, role: 'teacher'|'student' }
+  - Send invitation email (use SendGrid or Resend)
+  - Create pending OrgInvitation record
+  - Invitation expires in 7 days
+
+POST /organizations/invitations/{token}/accept
+  - Validate token, add user to org_members
+  - Redirect to /dashboard
+
+GET /organizations/{org_id}/members
+  - Return list with user info, role, joined_at
+
+PUT /organizations/{org_id}/members/{user_id}/role
+  - Only admins. Change member role.
+
+DELETE /organizations/{org_id}/members/{user_id}
+  - Remove from org. Their personal data stays.
+
+## TASK 2: Organization-scoped teacher profiles
+Modify teacher_profiles:
+- If org_id is set: profile is shared across all org members
+- Teachers in org can create/edit profiles
+- Students in org can use all org profiles
+- Row-level security: user must be org member to access org profiles
+
+## TASK 3: Admin dashboard pages (apps/web/app/admin/)
+
+/admin/[org_slug]/dashboard
+  Overview stats:
+  - Total members (teachers + students)
+  - Active sessions today / this week
+  - Most-used teacher profiles
+  - Total videos processed
+  - Top topics asked (from message content analysis)
+
+/admin/[org_slug]/members
+  - Searchable table: name, email, role, sessions count, last active
+  - Invite button → modal with email + role
+  - Remove member button
+  - Export CSV button
+
+/admin/[org_slug]/profiles
+  - All teacher profiles in org
+  - Per-profile: video count, total sessions, most active students
+  - Create/archive profiles
+
+/admin/[org_slug]/analytics
+  - Line chart: daily active students (last 30 days)
+  - Bar chart: sessions by teacher profile
+  - Table: student progress (name, sessions, quiz avg score, last active)
+  - Use recharts for all charts
+
+## TASK 4: Org middleware
+All /admin/* routes: verify user is org admin
+All /api/* calls with org context: verify user is org member
+Add org_id to request context when user accesses org resources
+
+## TASK 5: Invitation email template
+Use Resend (resend.com) SDK:
+Subject: "You've been invited to join {org_name} on TeachClone"
+HTML email with:
+- Org name + logo
+- Inviter name
+- Role they've been given
+- Big "Accept Invitation" button → /organizations/invitations/{token}/accept
+- Expires in 7 days notice
+
+## ACCEPTANCE CRITERIA
+- Admin can invite teacher, teacher can log in and see org profiles
+- Admin can invite student, student can log in and use org profiles
+- Admin dashboard shows accurate session counts
+- Removing member revokes access to org profiles immediately
+- Invitation email received within 30 seconds</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" id="card-p03-2">
+    <div class="prompt-top" onclick="toggleCard('p03-2')">
+      <div class="prompt-label"><span class="prompt-index">P03-2</span><span class="prompt-title">Session notes export (PDF + Markdown)</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p03-2',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p03-2">
+      <div class="prompt-code" id="text-p03-2">Multi-tenant system is working. Build the session notes export feature that converts a learning session into a structured study document.
+
+## TASK 1: Session summarizer service (apps/api/app/services/session_summarizer.py)
+
+async def summarize_session(session_id: str) -> SessionSummary:
+  """Generate structured study notes from a completed session."""
+  # 1. Fetch all messages (user + assistant) for session
+  # 2. Fetch quiz results if any
+  # 3. Call Claude with this prompt:
+
+  prompt = """Analyze this student learning session and create structured study notes.
+
+SESSION TRANSCRIPT:
+{messages}
+
+QUIZ RESULTS (if any):
+{quiz_results}
+
+Create a structured study document with:
+1. SESSION OVERVIEW: 2-3 sentence summary of what was covered
+2. KEY CONCEPTS: Bullet list of main concepts learned (5-10 bullets)  
+3. IMPORTANT DEFINITIONS: Dictionary-style definitions of new terms introduced
+4. KEY TAKEAWAYS: 3-5 most important insights from the session
+5. QUESTIONS TO EXPLORE: 3 follow-up questions for deeper study
+6. QUIZ PERFORMANCE: If quiz was taken, note score and topics that need review
+
+Return as structured JSON matching SessionSummary schema."""
+
+  return SessionSummary(**parse_llm_response(response))
+
+SessionSummary schema:
+  overview: str
+  key_concepts: list[str]
+  definitions: list[{term: str, definition: str}]
+  takeaways: list[str]
+  questions_to_explore: list[str]
+  quiz_score: float | null
+  topics_to_review: list[str]
+
+## TASK 2: PDF generator (apps/api/app/services/export_service.py)
+Use ReportLab or WeasyPrint for PDF generation:
+
+async def export_as_pdf(session_id: str, summary: SessionSummary) -> bytes:
+  """Generate styled PDF study guide."""
+  # Header: TeachClone logo + teacher profile name + date
+  # Sections with clear headings
+  # Key concepts as bullet list
+  # Definitions in two-column table
+  # Footer: "Generated by TeachClone | {date}"
+  # Return PDF bytes
+
+async def export_as_markdown(session_id: str, summary: SessionSummary) -> str:
+  """Generate clean Markdown for Notion/Obsidian import."""
+  # Use standard Markdown formatting
+  # Include YAML frontmatter: teacher, date, level, session_id
+
+## TASK 3: Export endpoints
+POST /sessions/{session_id}/export
+  Body: { format: 'pdf'|'markdown', include_chat: bool }
+  - Generate summary via summarize_session()
+  - Generate export file
+  - Return file as attachment (Content-Disposition: attachment)
+  - Log to usage_logs: event_type='export_created'
+  - Free plan: 2 exports/month; Pro+: unlimited
+
+GET /sessions/{session_id}/summary
+  - Return SessionSummary JSON (without file generation)
+  - Cache in DB: student_sessions.session_notes JSONB
+  - Generate only on first call; return cached on subsequent calls
+
+## TASK 4: Frontend - export UI
+In /chat/{session_id}:
+Add "Export" button in the session sidebar (below session title):
+- Click → dropdown: "Export as PDF" | "Export as Markdown"
+- On click: POST /sessions/{id}/export → trigger browser download
+- Show loading spinner during generation (can take 5-10 seconds)
+- After download: show toast "Notes saved to your Downloads"
+
+Also: "Session Summary" collapsible panel in sidebar
+- Shows SessionSummary.key_concepts as a bullet list
+- Link to full export
+- Auto-generates after 10+ messages
+
+## ACCEPTANCE CRITERIA
+- PDF exports cleanly at A4 size with proper typography
+- Markdown opens correctly in Notion (paste as Markdown block)
+- Summary generation < 10 seconds for a 30-message session
+- Key concepts accurately reflect what was discussed (verified manually)
+- Free plan export limit enforced</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" id="card-p03-3">
+    <div class="prompt-top" onclick="toggleCard('p03-3')">
+      <div class="prompt-label"><span class="prompt-index">P03-3</span><span class="prompt-title">Public REST API + API key management</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p03-3',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p03-3">
+      <div class="prompt-code" id="text-p03-3">SaaS platform is working. Build the public API that lets developers embed TeachClone in their own apps.
+
+## TASK 1: API key system (apps/api/app/services/api_keys.py)
+Model: ApiKey
+- id: UUID
+- user_id: FK → users
+- key_hash: str (store SHA-256 hash only, never plaintext after creation)
+- key_prefix: str (first 8 chars for display, e.g. "tc_live_AbCd1234...")
+- name: str (user-given label)
+- plan_scope: matches user's plan
+- last_used_at: timestamp
+- requests_today: int
+- is_active: bool
+- created_at
+
+On key creation: generate "tc_live_{urlsafe_b64(32_random_bytes)}"
+Return ONCE to user. Store only SHA-256(key) in DB.
+
+## TASK 2: API key auth middleware
+For routes under /v1/*:
+- Accept: Authorization: Bearer tc_live_...
+- Hash the provided key, look up in api_keys by key_hash
+- If found and active: set request.state.api_user
+- Rate limit: 60 req/min for pro, 10 req/min for free
+- Increment requests_today counter
+
+## TASK 3: V1 API routes (apps/api/app/routers/v1/)
+All routes prefixed /v1/, API-key authenticated:
+
+GET /v1/profiles
+  Return user's teacher profiles list
+
+POST /v1/sessions
+  Body: { teacher_profile_id, student_level, learning_style, goal }
+  Return: { session_id, expires_at }
+
+POST /v1/sessions/{id}/chat
+  Body: { message: str }
+  Response: application/json (NOT streaming for API)
+  { response: str, citations: [], session_id, tokens_used }
+
+POST /v1/sessions/{id}/quiz
+  Body: { num_questions: int, topic?: str }
+  Return quiz JSON
+
+GET /v1/media/{id}/status
+  Return processing status
+
+## TASK 4: API key management UI (/settings/api)
+- List existing API keys (show prefix + name + last used + created)
+- "Create new key" button → modal: enter name → POST /settings/api-keys → show key ONCE with copy button + warning
+- Revoke button per key
+- Usage graph: requests today / this week per key
+
+## TASK 5: API documentation
+Generate OpenAPI docs at /v1/docs (FastAPI auto-generates from route decorators)
+Write detailed docstrings on each v1 route explaining:
+- Authentication method
+- Request/response schemas
+- Rate limits
+- Example requests (curl)
+
+## ACCEPTANCE CRITERIA
+- API key created, key shown once, then only prefix visible
+- curl -H "Authorization: Bearer tc_live_..." /v1/profiles → returns correct data
+- Rate limit returns 429 with Retry-After header
+- Revoked key returns 401 immediately
+- /v1/docs renders complete interactive Swagger UI</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== PHASE 04 ===== -->
+<div class="phase-section" id="p04">
+  <div class="phase-banner" style="background:rgba(139,92,246,.07);border-color:rgba(139,92,246,.3)">
+    <div class="phase-num">Phase 04</div>
+    <div class="phase-title">Growth Features</div>
+    <div class="phase-sub">Voice mode, gamification, enterprise security, and polish features that drive retention and enterprise deals.</div>
+    <div class="phase-meta">
+      <span class="meta-pill" style="background:rgba(139,92,246,.15);color:#A78BFA">Weeks 27–34</span>
+      <span class="meta-pill" style="background:rgba(139,92,246,.15);color:#A78BFA">3 prompts</span>
+      <span class="meta-pill" style="background:rgba(139,92,246,.15);color:#A78BFA">Retention + enterprise</span>
+    </div>
+  </div>
+  <div class="copy-all"><span class="copy-all-txt">3 prompts. These features drive retention (gamification, voice) and unlock enterprise deals (SSO, audit logs).</span></div>
+
+  <div class="prompt-card" id="card-p04-1">
+    <div class="prompt-top" onclick="toggleCard('p04-1')">
+      <div class="prompt-label"><span class="prompt-index">P04-1</span><span class="prompt-title">Voice mode — speak to your AI teacher</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p04-1',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p04-1">
+      <div class="prompt-code" id="text-p04-1">Full text chat is working. Now add voice input and audio response for a hands-free learning experience.
+
+## TASK 1: Voice input (frontend only, apps/web/lib/hooks/useVoiceInput.ts)
+Use Web Speech API (SpeechRecognition):
+
+export function useVoiceInput() {
+  // States: idle | listening | processing | error
+  // On startListening(): SpeechRecognition.start()
+  // On result: set transcript, call onTranscript(text) callback
+  // On end: auto-stop after 3s silence
+  // Browser support check: return isSupported flag
+  // Return: { start, stop, status, transcript, isSupported }
+}
+
+Fallback for unsupported browsers: file-based recording using MediaRecorder API
+- Record webm/opus audio blob
+- POST to /voice/transcribe → returns { text }
+- /voice/transcribe calls faster-whisper on the uploaded audio (reuse Transcriber service)
+
+## TASK 2: Text-to-speech for AI responses (apps/api/app/services/tts_service.py)
+
+Use OpenAI TTS API (model: tts-1, voice: configurable per teacher profile):
+
+async def synthesize(text: str, voice: str = 'nova') -> bytes:
+  """Return MP3 audio bytes for given text."""
+  # OpenAI voices: alloy, echo, fable, onyx, nova, shimmer
+  # Strip markdown before synthesis: remove **, *, #, [source:...] markers
+  # Split on sentences (max 4096 chars per API call)
+  # Concatenate audio bytes
+
+TTS endpoint:
+POST /chat/{session_id}/speak
+  Body: { message_id: str }
+  - Fetch message content
+  - Call synthesize()
+  - Return audio/mpeg stream
+  - Cache: store in R2 at voice/{message_id}.mp3, serve from there on repeat requests
+
+## TASK 3: Voice mode UI component (<VoiceChat>)
+Add microphone button in chat input area (right side of text input):
+- Idle: mic icon
+- Listening: animated red pulse + "Listening..." text
+- Processing: spinner
+- Error: show error toast
+
+Voice response toggle in chat settings:
+- "Read responses aloud" toggle (saved to localStorage)
+- When enabled: after each assistant message, auto-play TTS audio
+- Audio player: small inline player below each message (play/pause/speed 0.75x/1x/1.5x)
+
+## TASK 4: Voice settings per teacher profile
+Allow Creator users to select TTS voice for their profile:
+- Add voice: str field to teacher_profiles (default 'nova')
+- Settings tab in /profiles/{id}: voice picker with 6 voice previews (play sample button)
+- Voice sample: synthesize "Hello! I'm excited to help you learn today."
+
+## TASK 5: Mobile audio handling
+On iOS Safari: AudioContext requires user gesture to start
+Handle autoplay restrictions:
+- Show "Tap to play audio" button on first response if autoplay blocked
+- After first tap: audio plays automatically for subsequent messages
+
+## ACCEPTANCE CRITERIA
+- User speaks question → transcribed within 2 seconds → AI response displayed
+- TTS plays AI response with natural prosody (not robotic)
+- Voice cache: second play of same message is instant (served from R2)
+- Works on Chrome desktop, Safari iOS, Chrome Android
+- Voice toggle remembers state across page refreshes</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" id="card-p04-2">
+    <div class="prompt-top" onclick="toggleCard('p04-2')">
+      <div class="prompt-label"><span class="prompt-index">P04-2</span><span class="prompt-title">Gamification — streaks, XP, and badges</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p04-2',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p04-2">
+      <div class="prompt-code" id="text-p04-2">Core product is complete. Add gamification to drive daily active use and retention.
+
+## TASK 1: Gamification models (new migration)
+
+UserStats:
+- user_id: FK → users (one-to-one)
+- xp_total: int default 0
+- level: int default 1           # level up every 1000 XP
+- streak_days: int default 0
+- longest_streak: int default 0
+- last_session_date: date nullable
+- sessions_completed: int default 0
+- quizzes_completed: int default 0
+- perfect_quizzes: int default 0
+- videos_processed: int default 0
+
+UserBadge:
+- id: UUID
+- user_id: FK → users
+- badge_id: str (slug from BADGE_DEFINITIONS)
+- earned_at: timestamp
+
+## TASK 2: XP system (apps/api/app/services/gamification.py)
+
+XP_EVENTS = {
+  'session_started':     10,
+  'message_sent':        2,
+  'session_completed':   25,   # session with 5+ messages
+  'quiz_completed':      30,
+  'perfect_quiz':        75,   # 100% score
+  'video_processed':     50,   # for creator accounts
+  'daily_streak':        15,   # per day
+  'weekly_streak':       100,  # 7-day streak bonus
+}
+
+BADGE_DEFINITIONS = {
+  'first_lesson':    { name: 'First Step',    icon: '🎓', xp: 0,    condition: 'sessions_completed >= 1' },
+  'curious_mind':   { name: 'Curious Mind',  icon: '🧠', xp: 50,   condition: 'sessions_completed >= 10' },
+  'quiz_ace':       { name: 'Quiz Ace',       icon: '⭐', xp: 75,   condition: 'perfect_quizzes >= 3' },
+  'week_warrior':   { name: 'Week Warrior',   icon: '🔥', xp: 100,  condition: 'streak_days >= 7' },
+  'month_master':   { name: 'Month Master',   icon: '🏆', xp: 500,  condition: 'streak_days >= 30' },
+  'deep_diver':     { name: 'Deep Diver',     icon: '🤿', xp: 200,  condition: 'sessions_completed >= 50' },
+  'knowledge_base': { name: 'Knowledge Base', icon: '📚', xp: 300,  condition: 'videos_processed >= 10' },
+}
+
+async def award_xp(user_id: str, event_type: str, multiplier: float = 1.0):
+  xp = int(XP_EVENTS.get(event_type, 0) * multiplier)
+  # Update user_stats.xp_total += xp
+  # Check level up: new_level = xp_total // 1000 + 1
+  # If level increased: return LevelUpEvent
+  # Check streak: if last_session_date == yesterday → increment streak; if today → no change; else → reset to 1
+  # Check badge conditions: evaluate all BADGE_DEFINITIONS, award any newly earned
+  # Return: GamificationResult { xp_earned, new_total, level_up: bool, new_badges: list, streak: int }
+
+## TASK 3: Gamification hooks in existing endpoints
+After POST /chat/{id}/message (every 5th message in session):
+  award_xp(user_id, 'message_sent', multiplier=5)
+
+After session ends (first time 10+ messages):
+  award_xp(user_id, 'session_completed')
+
+After POST /quizzes/{id}/submit:
+  award_xp(user_id, 'quiz_completed')
+  if score == 1.0: award_xp(user_id, 'perfect_quiz')
+
+On each new day's first session:
+  award_xp(user_id, 'daily_streak')
+
+## TASK 4: Gamification UI
+
+/progress page (new):
+  - XP bar showing current level + progress to next (animated fill)
+  - Current streak: "🔥 7 day streak!"
+  - Stats grid: sessions, quizzes, perfect quizzes, videos processed
+  - Badge collection: all badges, earned ones glowing, unearned ones greyed with condition hint
+
+Chat sidebar additions:
+  - Streak badge (🔥 N days) in top right if streak ≥ 2
+  - XP earned toast after each session ends: "+25 XP · Level 4"
+  - Badge earned modal: full-screen celebration when new badge unlocked
+
+## TASK 5: Leaderboard (org-scoped)
+GET /organizations/{org_id}/leaderboard
+  Return top 10 members by XP this week, with rank, name, xp, level, streak
+
+Display in /admin/ analytics as optional module (toggle for org admins).
+
+## ACCEPTANCE CRITERIA
+- XP awarded within 1 second of qualifying action
+- Streak correctly resets after missing a day
+- Badge modal triggers correctly (tested for first_lesson, quiz_ace badges)
+- Leaderboard returns accurate rankings
+- Level up toast appears when XP crosses threshold (1000, 2000, etc.)</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" id="card-p04-3">
+    <div class="prompt-top" onclick="toggleCard('p04-3')">
+      <div class="prompt-label"><span class="prompt-index">P04-3</span><span class="prompt-title">Enterprise security — SSO, audit logs, GDPR</span></div>
+      <div class="prompt-actions"><button class="copy-btn" onclick="copyPrompt('p04-3',event)">Copy prompt</button><button class="toggle-btn">›</button></div>
+    </div>
+    <div class="prompt-body" id="body-p04-3">
+      <div class="prompt-code" id="text-p04-3">Growth features complete. Add enterprise-grade security and compliance features required for institutional contracts.
+
+## TASK 1: SAML/SSO via Clerk
+Clerk supports Enterprise SSO out of the box for its Team/Enterprise plans.
+Configuration:
+- Enable in Clerk dashboard: Organization Settings → Enterprise SSO
+- Supported: Okta, Azure AD, Google Workspace, custom SAML 2.0
+- In Next.js: when org has sso_enabled=true, redirect Clerk auth to org's IdP
+- Store org SSO config: { provider, entity_id, sso_url, certificate } in orgs table (JSONB)
+
+API endpoint:
+POST /organizations/{org_id}/sso/configure
+  Body: { provider: 'okta'|'azure_ad'|'google'|'saml', metadata_url: str }
+  - Call Clerk API to configure enterprise connection for org
+  - Set org.sso_enabled = true
+
+GET /organizations/{org_id}/sso/status
+  Return: { enabled, provider, last_login_via_sso }
+
+## TASK 2: Audit log system
+
+Model: AuditLog
+- id: UUID
+- org_id: FK → organizations nullable
+- actor_id: FK → users
+- actor_email: str (denormalized for immutability)
+- action: str (e.g. 'member.invited', 'member.removed', 'profile.created', 'session.deleted')
+- resource_type: str
+- resource_id: str
+- metadata: JSONB (before/after state for edits)
+- ip_address: str
+- user_agent: str
+- created_at
+
+Log these actions:
+- member.invited, member.accepted, member.removed, member.role_changed
+- profile.created, profile.deleted, media.uploaded, media.deleted
+- api_key.created, api_key.revoked
+- billing.plan_changed, billing.subscription_cancelled
+- session.exported, session.deleted
+- sso.configured, sso.login
+
+GET /organizations/{org_id}/audit-logs
+  Query params: actor_id, action, date_from, date_to, page, per_page
+  Return paginated audit log entries (admin only)
+
+GET /organizations/{org_id}/audit-logs/export
+  Return CSV of all audit logs (for compliance export)
+
+## TASK 3: Data retention + GDPR endpoints
+
+DELETE /users/me/data
+  "Right to erasure" (GDPR Article 17):
+  1. Anonymize: replace name/email with "Deleted User {id}"
+  2. Delete: all messages, sessions, quiz data
+  3. Delete: Qdrant vectors linked to user's teacher profiles
+  4. Delete: R2 files uploaded by user
+  5. Cancel Stripe subscription
+  6. Deactivate Clerk account
+  7. Keep: usage_logs (anonymized, needed for billing/fraud)
+  8. Audit log: 'user.data_deleted'
+  Return: 202 Accepted (async process)
+
+GET /users/me/data-export
+  "Right of access" (GDPR Article 15):
+  Compile JSON export of all user data:
+  - Profile info
+  - All sessions + messages
+  - Quiz results
+  - Billing history
+  Return as downloadable JSON file
+
+GET /users/me/data-export/status
+  Track export job progress
+
+## TASK 4: Security headers + rate limiting
+Add FastAPI middleware:
+- CORS: only allow NEXT_PUBLIC_APP_URL origin
+- Rate limiting per IP: 100 req/min general, 10/min for auth endpoints
+- Add security headers: X-Content-Type-Options, X-Frame-Options, HSTS
+- Request ID: add X-Request-ID header to every response (for debugging)
+- Remove: Server header (don't expose FastAPI version)
+
+Frontend: Content Security Policy headers in next.config.js
+
+## TASK 5: Admin security settings UI
+New tab in /admin/[org_slug]/settings:
+
+Security tab:
+- SSO configuration section (enable, paste metadata URL, test connection)
+- Session timeout setting: idle timeout (30min / 1hr / 4hr)
+- Allowed email domains: restrict signup to @company.com emails
+- Two-factor auth: enforce 2FA for admin roles
+
+Data & Privacy tab:
+- Data retention policy: auto-delete sessions after N days (30/90/365/never)
+- Download organization data export button
+- View data deletion requests from members
+
+## ACCEPTANCE CRITERIA
+- Okta SSO login works end-to-end with test Okta account
+- Audit log records every listed action with correct metadata
+- GDPR data export returns complete user data as downloadable JSON
+- Data deletion removes all PII within 24 hours (background job)
+- Security headers present on all API responses (verified with securityheaders.com)</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+function switchPhase(id, el) {
+  document.querySelectorAll('.phase-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  const body = document.getElementById('body-' + id);
+  const wasOpen = card.classList.contains('open');
+  // Close all in current phase
+  document.querySelectorAll('.phase-section.active .prompt-card').forEach(c => {
+    c.classList.remove('open');
+    c.querySelector('.prompt-body').classList.remove('show');
+  });
+  if (!wasOpen) {
+    card.classList.add('open');
+    body.classList.add('show');
+  }
+}
+
+function copyPrompt(id, e) {
+  e.stopPropagation();
+  const text = document.getElementById('text-' + id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = e.target;
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Auto-open first card of each phase when switching
+document.querySelectorAll('.sb-item').forEach(item => {
+  item._orig = item.onclick;
+  item.onclick = function(e) {
+    item._orig.call(this, e);
+    setTimeout(() => {
+      const firstCard = document.querySelector('.phase-section.active .prompt-card');
+      if (firstCard && !firstCard.classList.contains('open')) {
+        const id = firstCard.id.replace('card-','');
+        toggleCard(id);
+      }
+    }, 50);
+  };
+});
+
+// Open first card on load
+document.querySelector('.phase-section.active .prompt-card').click();
+</script>
+</body>
+</html>
