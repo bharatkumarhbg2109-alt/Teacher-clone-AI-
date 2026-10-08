@@ -1,0 +1,70 @@
+# Node
+node_modules/
+.next/
+dist/
+.turbo/
+*.log
+.pnpm-store/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Secrets / certs
+*.pem
+*.key
+secrets/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Databases, vector stores & serialized artifacts
+*.db
+*.sqlite3
+chroma/
+*.bin
+*.pkl
+*.pickle
+*.graphml
+
+# ML model weights
+*.pt
+*.onnx
+
+# DNA reports & system prompts artifacts (keep .gitkeep)
+dna_reports/*.json
+!dna_reports/.gitkeep
+system_prompts/*
+!system_prompts/.gitkeep
+
+# Uploads & temporary directories
+uploads/
+apps/api/tmp/*
+!apps/api/tmp/.gitkeep
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# Docker volumes (if bind-mounted locally)
+docker/data/

@@ -56,6 +56,25 @@ Thumbs.db
 *.swp
 *.swo
 
+# Databases, vector stores & serialized artifacts
+*.db
+*.sqlite3
+chroma/
+*.bin
+*.pkl
+*.pickle
+*.graphml
+
+# DNA artifacts & uploads (directories preserved via .gitkeep)
+dna_reports/*.json
+!dna_reports/.gitkeep
+system_prompts/*
+!system_prompts/.gitkeep
+uploads/
+!uploads/**/.gitkeep
+!**/uploads/.gitkeep
+!**/tmp/.gitkeep
+
 # Local audit & logs
 .freebuff/
 .audit-files.txt

@@ -99,7 +99,7 @@ npm run dev
 │
 ├── electron/                 # Electron desktop wrapper (:main.js)
 │
-├── teacher_project - Copy/   # SaaS multi-tenant platform (Next.js + FastAPI)
+├── teachclone/               # SaaS multi-tenant platform (Next.js + FastAPI)
 │   ├── apps/api              # FastAPI SaaS backend (:8000)
 │   ├── apps/web              # Next.js web application (:3000)
 │   └── docker-compose.yml    # SaaS multi-container setup (PostgreSQL, Redis, Qdrant)

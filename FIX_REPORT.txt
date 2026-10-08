@@ -69,11 +69,11 @@ item 3 only adds a PATH-independent fallback.)
 TO START THE PROJECT
 --------------------------------
 Terminal 1 (Backend):
-  cd "E:\AI Teacher Clone\teacher_project - Copy\apps\api"
-  "C:\Users\bhara\anaconda3\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  cd teachclone\apps\api
+  python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 Terminal 2 (Frontend):
-  cd "E:\AI Teacher Clone\teacher_project - Copy\apps\web"
+  cd teachclone\apps\web
   npm run dev
 
 (or just double-click start_backend.bat then start_frontend.bat)

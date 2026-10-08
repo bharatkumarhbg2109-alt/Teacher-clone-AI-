@@ -5,14 +5,14 @@ Easiest: double-click `start_backend.bat`, then `start_frontend.bat`.
 
 ## Backend (FastAPI → http://localhost:8000)
 ```bat
-cd "E:\AI Teacher Clone\teacher_project - Copy\apps\api"
-"C:\Users\bhara\anaconda3\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+cd teachclone\apps\api
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 Health check: open http://localhost:8000/health → `{"status":"ok",...}`
 
 ## Frontend (Next.js → http://localhost:3000)
 ```bat
-cd "E:\AI Teacher Clone\teacher_project - Copy\apps\web"
+cd teachclone\apps\web
 npm run dev
 ```
 Open http://localhost:3000  ·  Admin dashboard: http://localhost:3000/admin

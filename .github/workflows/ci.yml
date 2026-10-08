@@ -59,12 +59,12 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: "teacher_project - Copy/apps/api/requirements-local.txt"
+          cache-dependency-path: "teachclone/apps/api/requirements-local.txt"
       - name: Install SaaS deps
         run: |
-          pip install -r "teacher_project - Copy/apps/api/requirements-local.txt"
+          pip install -r "teachclone/apps/api/requirements-local.txt"
       - name: Run SaaS health check
-        working-directory: "teacher_project - Copy/apps/api"
+        working-directory: "teachclone/apps/api"
         run: |
           python -c "
           import sys, os
