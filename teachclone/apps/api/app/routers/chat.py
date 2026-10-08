@@ -109,13 +109,14 @@ async def send_message(
         # 4. Optional audio output.
         audio_url = None
         message_id = None
+        provider = llm.get_llm_provider()
         async with AsyncSessionLocal() as db2:
             assistant = Message(
                 session_id=session_id,
                 role="assistant",
                 content=full,
                 citations=citations,
-                model_used="claude-opus-4-8",
+                model_used=provider.model_name,
             )
             db2.add(assistant)
             sess = (
@@ -133,11 +134,14 @@ async def send_message(
                     from app.services.storage import storage_service
                     from app.services.tts_service import synthesize
 
-                    audio = await synthesize(full, tts_voice)
-                    key = f"voice/{message_id}.mp3"
-                    audio_url = storage_service.upload_bytes(key, audio, "audio/mpeg")
-                    assistant.audio_url = audio_url
-                except Exception:
+                    tts_res = await synthesize(full, tts_voice)
+                    if tts_res and tts_res.audio:
+                        key = f"voice/{message_id}.{tts_res.ext}"
+                        audio_url = storage_service.upload_bytes(key, tts_res.audio, tts_res.mime)
+                        assistant.audio_url = audio_url
+                except Exception as exc:
+                    import logging
+                    logging.getLogger("teachclone.chat").warning("TTS audio synthesis skipped/failed: %s", exc)
                     audio_url = None
 
             await billing.log_usage(db2, user.id, "message_sent")

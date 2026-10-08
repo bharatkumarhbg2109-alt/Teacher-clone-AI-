@@ -66,10 +66,11 @@ chroma/
 *.graphml
 
 # DNA artifacts & uploads (directories preserved via .gitkeep)
-dna_reports/*.json
-!dna_reports/.gitkeep
-system_prompts/*
-!system_prompts/.gitkeep
+**/dna_reports/*.json
+!**/dna_reports/.gitkeep
+**/system_prompts/*
+!**/system_prompts/.gitkeep
+!**/system_prompts/
 uploads/
 !uploads/**/.gitkeep
 !**/uploads/.gitkeep

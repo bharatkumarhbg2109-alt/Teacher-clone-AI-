@@ -13,6 +13,11 @@ import httpx
 
 from app.config import settings
 
+import logging
+import shutil
+
+log = logging.getLogger("teachclone.tts")
+
 _MD = re.compile(r"(\*\*|*|`|#+\s|\[\d+\]|\[.*?\]\(.*?\))")
 
 
@@ -27,15 +32,32 @@ def _strip_markdown(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-async def synthesize(text: str, voice: str | None = None) -> TtsResult:
+async def synthesize(text: str, voice: str | None = None) -> TtsResult | None:
+    """Synthesize text to speech. Gracefully degrades to None if unconfigured."""
     voice = voice or settings.DEFAULT_TTS_VOICE
     clean = _strip_markdown(text)
-    provider = settings.TTS_PROVIDER
+    provider = (settings.TTS_PROVIDER or "").lower().strip()
+
     if provider == "elevenlabs":
+        if not settings.ELEVENLABS_API_KEY:
+            log.warning("ElevenLabs TTS requested but ELEVENLABS_API_KEY is not configured. TTS audio skipped.")
+            return None
         return await _elevenlabs(clean, voice)
+
     if provider == "piper":
+        if not shutil.which("piper"):
+            log.warning("Piper TTS CLI not found on PATH. Install piper for offline local TTS. TTS audio skipped.")
+            return None
         return _piper(clean, voice)
-    return await _openai(clean, voice)
+
+    if provider == "openai":
+        if not settings.OPENAI_API_KEY:
+            log.warning("OpenAI TTS requested but OPENAI_API_KEY is not configured. TTS audio skipped (recommend piper for local offline TTS).")
+            return None
+        return await _openai(clean, voice)
+
+    log.warning("Unknown TTS provider '%s'. TTS audio skipped.", provider)
+    return None
 
 
 async def _openai(text: str, voice: str) -> TtsResult:

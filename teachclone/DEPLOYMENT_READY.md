@@ -157,8 +157,8 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | `""` | Only needed for non-DNA features |
-| `ANTHROPIC_MODEL` | `claude-opus-4-8` | Model for vision/PDF features |
+| `ANTHROPIC_API_KEY` | `""` | Optional key for paid Claude provider |
+| `ANTHROPIC_MODEL` | `claude-3-5-sonnet-20241022` | Optional Anthropic model |
 
 ### Embeddings
 

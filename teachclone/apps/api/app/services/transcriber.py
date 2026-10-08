@@ -6,6 +6,18 @@ loaded once per worker process.
 import threading
 from dataclasses import dataclass
 
+try:
+    import av
+    _orig_av_open = av.open
+
+    def _safe_av_open(*args, **kwargs):
+        kwargs.pop("metadata_errors", None)
+        return _orig_av_open(*args, **kwargs)
+
+    av.open = _safe_av_open
+except Exception:
+    pass
+
 from faster_whisper import WhisperModel
 
 from app.config import settings

@@ -37,15 +37,19 @@ class Settings(BaseSettings):
     # --- General secret (embed tokens, session signing, etc.) ---------------
     SECRET_KEY: str = ""
 
+    # --- LLM Provider (ollama | anthropic | openai) ------------------------
+    LLM_PROVIDER: str = "ollama"
+
     # --- Anthropic (LLM + vision + PDF) ------------------------------------
     ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_MODEL: str = "claude-opus-4-8"
+    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20241022"
     ANTHROPIC_MAX_TOKENS: int = 4096
     ANTHROPIC_EFFORT: str = "medium"  # low | medium | high | xhigh | max
 
-    # --- Ollama (local LLM for Teacher DNA — 100% offline, no paid API) -----
+    # --- Ollama (local LLM — 100% offline, zero paid API keys) -------------
+    OLLAMA_HOST: str = "http://localhost:11434"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3.1"          # default DNA model
+    OLLAMA_MODEL: str = "llama3.1:8b"       # default model
     OLLAMA_FALLBACK_MODEL: str = "mistral"  # used if the primary model errors
     OLLAMA_TIMEOUT: int = 120               # seconds per request
     OLLAMA_TEMPERATURE: float = 0.1         # low = consistent extraction
@@ -56,7 +60,7 @@ class Settings(BaseSettings):
     # When true, teacher-style extraction uses the local 7-layer DNA pipeline
     # (Ollama + faster-whisper) instead of the legacy statistical method.
     USE_DNA_PIPELINE: bool = True
-    DNA_WHISPER_MODEL: str = "medium"       # medium = accuracy, small = speed
+    DNA_WHISPER_MODEL: str = "base"         # base = fast and offline-friendly
     DNA_TRANSCRIPT_CHAR_LIMIT: int = 12000  # per-layer prompt truncation
     DNA_EMBED_TRANSCRIPTS: bool = True       # also embed DNA transcripts for RAG
     DNA_REPORTS_DIR: str = "./dna_reports"

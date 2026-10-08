@@ -34,7 +34,7 @@ Chat: student(level+subject+pace) ─► retrieve ─► build_system_prompt ─
 | Web | Next.js 14 (App Router) | Client-side app; dev-mode needs no auth |
 | API | FastAPI (async SQLAlchemy 2.0) | Routers → services → models |
 | Worker | Celery + Redis | Ingestion + AI tasks (media, doc, embed, style, vision, clone) |
-| LLM/vision/PDF | Claude `claude-opus-4-8` | Streaming chat, structured JSON, vision, native PDF |
+| LLM/vision/PDF | Ollama (llama3.1:8b by default) / Claude / OpenAI | Streaming chat, structured JSON, vision, native PDF |
 | STT | faster-whisper | Local, any length |
 | Embeddings | OpenAI or local BGE | `EMBEDDING_PROVIDER` |
 | TTS | OpenAI / ElevenLabs / Piper | `TTS_PROVIDER` |

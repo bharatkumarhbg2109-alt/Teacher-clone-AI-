@@ -260,6 +260,18 @@ _whisper_models: dict[str, object] = {}
 
 def _get_whisper(model_name: str):
     if model_name not in _whisper_models:
+        try:
+            import av
+            _orig_av_open = av.open
+
+            def _safe_av_open(*args, **kwargs):
+                kwargs.pop("metadata_errors", None)
+                return _orig_av_open(*args, **kwargs)
+
+            av.open = _safe_av_open
+        except Exception:
+            pass
+
         from faster_whisper import WhisperModel  # lazy: heavy import
 
         log.info("[Phase 3] Loading faster-whisper model '%s'…", model_name)

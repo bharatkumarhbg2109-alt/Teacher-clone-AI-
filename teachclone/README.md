@@ -24,7 +24,7 @@ Coaching institutes can embed it in their own student apps.
 |---|---|
 | Frontend | Next.js 14 (App Router, TypeScript, Tailwind, shadcn/ui) |
 | Backend | FastAPI (Python 3.11, async SQLAlchemy 2.0), Celery workers |
-| LLM / vision / PDF | Claude `claude-opus-4-8` (adaptive thinking, structured outputs) |
+| LLM / vision / PDF | Ollama (local llama3.1:8b by default) / Claude / OpenAI |
 | Speech-to-text | faster-whisper (local) |
 | Embeddings | OpenAI `text-embedding-3-large` or local BGE |
 | Audio output (TTS) | OpenAI TTS / ElevenLabs / local Piper |

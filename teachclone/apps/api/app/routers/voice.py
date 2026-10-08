@@ -70,6 +70,8 @@ async def speak(
     from app.services.tts_service import synthesize
 
     tts_result = await synthesize(msg.content, profile.tts_voice)
+    if not tts_result:
+        return {"audio_url": None, "warning": "TTS not configured or unavailable"}
     key = f"voice/{msg.id}.{tts_result.ext}"
     url = storage_service.upload_bytes(key, tts_result.audio, tts_result.mime)
     msg.audio_url = url

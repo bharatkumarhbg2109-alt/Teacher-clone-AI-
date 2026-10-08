@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from typing import List
 
 from app.config import settings
+import app.db.base  # noqa: F401  (registers every model on Base.metadata)
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("teachclone")
@@ -31,7 +32,11 @@ async def lifespan(app: FastAPI):
 
     # Refuse to start in production with default/empty secrets.
     if not settings.DEBUG:
-        required_secrets = ["SECRET_KEY", "ANTHROPIC_API_KEY", "CLERK_SECRET_KEY"]
+        required_secrets = ["SECRET_KEY"]
+        if getattr(settings, "LLM_PROVIDER", "ollama") == "anthropic":
+            required_secrets.append("ANTHROPIC_API_KEY")
+        if not settings.DEV_MODE:
+            required_secrets.append("CLERK_SECRET_KEY")
         for key in required_secrets:
             value = getattr(settings, key, "")
             if not value or value in ("change-me", "your-key-here", ""):
