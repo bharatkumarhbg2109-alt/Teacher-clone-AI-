@@ -1,15 +1,17 @@
-"""Builds the adaptive teaching system prompt.
+"""Builds the adaptive teaching system prompt with high-fidelity DNA persona injection.
 
 Two persona bases:
-  * NEW — if ``teacher_profile.system_prompt`` is set (a DNA-extracted teacher),
-    that ultra-detailed prompt is used as the persona base.
-  * LEGACY — otherwise the persona is composed from ``style_profile`` fields
-    (backward compatible with pre-DNA teachers).
+  * DNA-first — uses the compiled DNA system prompt (from teacher_profile.system_prompt
+    or synthesized from style_profile DNA layers), plus a mandatory persona execution block.
+  * Legacy fallback — composed from style_profile fields for pre-DNA teachers.
 
-Either way the per-turn dynamic block (student level/subject/pace + retrieved
-knowledge + citation & length rules) is appended so RAG chat keeps working.
-Re-evaluated every turn — never cached.
+The per-turn dynamic block (student level/subject/pace + retrieved knowledge + citation
+and length rules) is appended to guarantee grounded answers with citations.
 """
+import json
+import re
+from typing import Any
+
 from app.services.levels import (
     LEVEL_INSTRUCTIONS,
     LEVEL_LABELS,
@@ -34,32 +36,167 @@ TONE_STYLES = {
 }
 
 
-def build_system_prompt(teacher_profile, session, context_results, turn: int = 0) -> str:
+def _extract_style_data(teacher_profile: Any) -> dict:
+    style = getattr(teacher_profile, "style_profile", None)
+    if not style:
+        return {}
+    if isinstance(style, str):
+        try:
+            return json.loads(style)
+        except Exception:
+            return {}
+    if isinstance(style, dict):
+        return style
+    return {}
+
+
+def _get_signature_phrases(style: dict, dna_prompt: str) -> list[str]:
+    phrases = []
+    if style.get("signature_phrases"):
+        for p in style["signature_phrases"]:
+            if p and str(p).strip():
+                phrases.append(str(p).strip())
+    voc = style.get("vocabulary_dna", {})
+    if isinstance(voc, dict) and voc.get("top_phrases"):
+        for p in voc["top_phrases"]:
+            if p and str(p).strip() and str(p).strip() not in phrases:
+                phrases.append(str(p).strip())
+
+    # Fallback to scanning dna_prompt for phrases if style was sparse
+    if len(phrases) < 3 and dna_prompt:
+        matches = re.findall(r"['\"]([^'\"]{4,50})['\"]", dna_prompt)
+        for m in matches:
+            m_clean = m.strip()
+            if m_clean and m_clean not in phrases and not m_clean.startswith("http"):
+                phrases.append(m_clean)
+
+    # Deduplicate while preserving order
+    seen: set[str] = set()
+    deduped = []
+    for p in phrases:
+        k = p.lower()
+        if k not in seen:
+            seen.add(k)
+            deduped.append(p)
+    return deduped
+
+
+def _get_explanation_order(style: dict) -> list[str]:
+    exp = style.get("explanation_dna", {})
+    if isinstance(exp, dict) and exp.get("explanation_order"):
+        order = exp["explanation_order"]
+        if isinstance(order, list):
+            return [str(s).strip() for s in order if s and str(s).strip()]
+    return [
+        "Intuitive hook or scenario",
+        "Core principle & physical mechanism",
+        "Step-by-step concrete application",
+        "Socratic check / thought-provoking question",
+    ]
+
+
+def _get_opening_examples(style: dict) -> list[str]:
+    exp = style.get("explanation_dna", {})
+    if isinstance(exp, dict) and exp.get("opening_examples"):
+        exs = exp["opening_examples"]
+        if isinstance(exs, list):
+            return [str(e).strip() for e in exs if e and str(e).strip()]
+    return []
+
+
+def _persona_mandate_block(
+    teacher_name: str,
+    sig_phrases: list[str],
+    explanation_order: list[str],
+    opening_examples: list[str],
+) -> str:
+    parts = [
+        "=== MANDATORY TEACHER PERSONA EXECUTION ===",
+        f"You are {teacher_name}. The student came to YOU because they want YOUR specific teaching voice, "
+        "not a neutral textbook or generic automated assistant.",
+    ]
+
+    if sig_phrases:
+        formatted_phrases = "\n".join(f"  - \"{p}\"" for p in sig_phrases[:12])
+        parts.append(
+            "\n1. SIGNATURE PHRASES & VERBAL HABITS (MANDATORY):\n"
+            "You MUST naturally weave at least 3 of your signature phrases/patterns into your response:\n"
+            f"{formatted_phrases}\n"
+            "Students recognize you by these characteristic verbal habits. Do not omit them."
+        )
+
+    if explanation_order:
+        steps_summary = " -> ".join(explanation_order)
+        formatted_steps = "\n".join(f"  Step {i}: {step}" for i, step in enumerate(explanation_order, 1))
+        parts.append(
+            f"\n2. EXPLANATION STRUCTURE (LAYER 2 DNA):\n"
+            f"Follow your exact explanation progression ({steps_summary}):\n"
+            f"{formatted_steps}\n"
+            "- Step 1: Open immediately with your characteristic hook or intuitive analogy.\n"
+            "- Step 2: Establish the core principle or mechanism clearly.\n"
+            "- Step 3: Walk through the concrete application or step-by-step breakdown.\n"
+            "- Final Step: Conclude with your characteristic Socratic check / thought question."
+        )
+
+    if opening_examples:
+        formatted_openings = "\n".join(f"  - \"{ex}\"" for ex in opening_examples[:3])
+        parts.append(
+            f"\n3. HOW YOU TYPICALLY OPEN EXPLANATIONS:\n"
+            f"{formatted_openings}"
+        )
+
+    parts.append(
+        "\n4. FORBIDDEN AI BEHAVIORS (STRICT):\n"
+        "- NEVER begin with generic bot greetings or disclaimers: "
+        "\"Certainly!\", \"Sure!\", \"Sure, I can help with that\", \"Great question!\", "
+        "\"That's an interesting question!\", \"As an AI language model\", \"Hello! How can I assist you?\".\n"
+        f"- Open directly in character as {teacher_name} from the very first word.\n"
+        "- Never say \"I am an AI\" or break character."
+    )
+
+    return "\n".join(parts)
+
+
+def build_system_prompt(teacher_profile: Any, session: Any, context_results: Any, turn: int = 0) -> str:
     """Assemble the full system prompt for one chat turn."""
-    dna_prompt = getattr(teacher_profile, "system_prompt", None)
+    style = _extract_style_data(teacher_profile)
+    dna_prompt = getattr(teacher_profile, "system_prompt", None) or ""
+    teacher_name = getattr(teacher_profile, "name", "the teacher")
+
+    # If dna_prompt is empty but style contains DNA layers, synthesize full DNA system prompt
+    if not dna_prompt.strip() and ("vocabulary_dna" in style or "explanation_dna" in style or "signature_phrases" in style):
+        from app.services import dna_extractor
+        dna_prompt = dna_extractor._fallback_system_prompt(style)
+
+    sig_phrases = _get_signature_phrases(style, dna_prompt)
+    explanation_order = _get_explanation_order(style)
+    opening_examples = _get_opening_examples(style)
+
+    mandate = _persona_mandate_block(teacher_name, sig_phrases, explanation_order, opening_examples)
     dynamic = _dynamic_block(teacher_profile, session, context_results, turn)
 
     if dna_prompt and dna_prompt.strip():
-        # NEW: DNA persona base + the per-turn calibration/knowledge/rules.
-        return f"{dna_prompt.strip()}\n\n{dynamic}"
+        persona_base = dna_prompt.strip()
+    else:
+        persona_base = _legacy_identity(teacher_profile, session)
 
-    # LEGACY: compose the persona from style_profile, then the dynamic block.
-    return f"{_legacy_identity(teacher_profile, session)}\n\n{dynamic}"
+    return f"{persona_base}\n\n{mandate}\n\n{dynamic}"
 
 
 # ----------------------------------------------------------------------------
 #  Per-turn dynamic block (shared by both persona bases)
 # ----------------------------------------------------------------------------
-def _dynamic_block(teacher_profile, session, context_results, turn: int) -> str:
-    student = session.student_profile or {}
-    level = effective_level(student, session.current_effective_level)
-    subject = student.get("subject") or teacher_profile.subject or "this topic"
+def _dynamic_block(teacher_profile: Any, session: Any, context_results: Any, turn: int) -> str:
+    student = getattr(session, "student_profile", None) or {}
+    curr_level = getattr(session, "current_effective_level", None)
+    level = effective_level(student, curr_level)
+    subject = student.get("subject") or getattr(teacher_profile, "subject", None) or "this topic"
     stream = student.get("stream")
     pattern_style = student.get("learning_style", "examples")
     context_text = format_context_chunks(context_results)
 
-    mastery = session.concept_mastery or []
-    review = [c["concept"] for c in mastery if c.get("state") in ("review", "shaky")]
+    mastery = getattr(session, "concept_mastery", None) or []
+    review = [c["concept"] for c in mastery if isinstance(c, dict) and c.get("state") in ("review", "shaky")]
     review_note = (
         f"\nThe student is still shaky on: {', '.join(review[:5])}. Reinforce these when relevant."
         if review
@@ -68,9 +205,9 @@ def _dynamic_block(teacher_profile, session, context_results, turn: int) -> str:
 
     turn_note = ""
     if turn == 0:
-        turn_note = "\n[FIRST TURN: be warm and brief; acknowledge the student's goal, then start teaching.]"
+        turn_note = "\n[FIRST TURN: be warm and brief; acknowledge the student's question, then start teaching directly.]"
     elif turn >= 10:
-        turn_note = f"\n[TURN {turn}: the student is engaged. You may add depth and nuance.]"
+        turn_note = f"\n[TURN {turn}: the student is deeply engaged. You may add depth and nuance.]"
 
     ahead_note = ""
     if student.get("learn_ahead"):
@@ -89,32 +226,32 @@ Prior knowledge: {student.get("prior_knowledge", "Not specified")}
 Preferred structure: {STYLE_INSTRUCTIONS.get(pattern_style, STYLE_INSTRUCTIONS["examples"])}
 
 === REFERENCE KNOWLEDGE BASE ===
-Prefer the content below. If the question isn't covered, say "The reference material doesn't cover this directly — from general knowledge..." and then answer.
+Ground your answer in the content below. If the question isn't covered, explain from general knowledge while keeping your teacher voice:
 {context_text}
 
-=== RULES ===
+=== CITATION & OUTPUT RULES ===
 1. Calibrate EVERY sentence to the {LEVEL_LABELS.get(level, level)} level — not too advanced, not too simple.
-2. Cite specific reference content inline as [1], [2]… matching the numbered items above.
-3. Keep it focused: {"2-3 short paragraphs" if level in ("class_6_8", "class_9_10") else "3-6 paragraphs"}.
-4. End with exactly ONE Socratic follow-up question (not yes/no) to check or deepen understanding.
-5. Never break character or say "As an AI". Give the final teaching answer directly — no meta-commentary about your reasoning."""
+2. Ground your explanations in the reference knowledge items above. Cite reference content inline with brackets like [1], [2] matching the numbered items above. Citations must ONLY reference valid numbers present in the reference knowledge base.
+3. Keep it focused and impactful: {"2-3 short paragraphs" if level in ("class_6_8", "class_9_10") else "3-5 paragraphs"}.
+4. End with your characteristic Socratic follow-up question (not yes/no) to check or deepen understanding.
+5. Strictly adhere to the MANDATORY TEACHER PERSONA EXECUTION rules."""
 
 
 # ----------------------------------------------------------------------------
 #  Legacy persona base (pre-DNA teachers)
 # ----------------------------------------------------------------------------
-def _legacy_identity(teacher_profile, session) -> str:
-    style = teacher_profile.style_profile or {}
-    student = session.student_profile or {}
-    subject = student.get("subject") or teacher_profile.subject or "this topic"
+def _legacy_identity(teacher_profile: Any, session: Any) -> str:
+    style = _extract_style_data(teacher_profile)
+    student = getattr(session, "student_profile", None) or {}
+    subject = student.get("subject") or getattr(teacher_profile, "subject", None) or "this topic"
     tone = style.get("tone_type", "friendly")
-    sig = style.get("signature_phrases", [])[:4]
+    sig = style.get("signature_phrases", [])[:6]
     analysis = style.get("raw_analysis", "A knowledgeable, effective educator.")
     analogy = style.get("analogy_density", 0.2)
     humor = style.get("use_of_humor", 0.1)
 
     phrase_note = (
-        f"Occasionally use phrases like: {', '.join(repr(p) for p in sig)}." if sig else ""
+        f"Use phrases like: {', '.join(repr(p) for p in sig)}." if sig else ""
     )
     analogy_note = (
         "Aim for at least one analogy per explanation."

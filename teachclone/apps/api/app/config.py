@@ -72,6 +72,7 @@ class Settings(BaseSettings):
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-large"
     EMBEDDING_DIM: int = 3072
     LOCAL_EMBEDDING_MODEL: str = "BAAI/bge-large-en-v1.5"
+    RAG_MIN_SCORE: float = 0.01
 
     # --- TTS / audio output (provider: openai | elevenlabs | piper) --------
     TTS_PROVIDER: str = "openai"

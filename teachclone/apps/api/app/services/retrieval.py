@@ -1,14 +1,20 @@
-"""Hybrid retrieval + context formatting for the teaching prompt."""
+from app.config import settings
 from app.services.embedder import embedder
 from app.services.vector_store import SearchResult, vector_store
 
 
 async def retrieve_context(
-    query: str, teacher_profile_id: str, top_k: int = 8
+    query: str,
+    teacher_profile_id: str,
+    top_k: int = 8,
+    min_score: float | None = None,
 ) -> list[SearchResult]:
+    """Retrieve top-k relevant chunks with score threshold to prevent noise."""
     dense = await embedder.embed_single(query)
     sparse = embedder.compute_sparse_vector(query)
-    return await vector_store.hybrid_search(dense, sparse, teacher_profile_id, top_k)
+    results = await vector_store.hybrid_search(dense, sparse, teacher_profile_id, top_k)
+    threshold = min_score if min_score is not None else getattr(settings, "RAG_MIN_SCORE", 0.01)
+    return [r for r in results if r.score >= threshold][:top_k]
 
 
 def _locator(r: SearchResult) -> str:
