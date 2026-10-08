@@ -20,6 +20,7 @@ from app.schemas.quiz import (
     QuizSubmitResponse,
 )
 from app.services import billing, gamification
+from app.services.sm2_scheduler import ConceptCard, quality_from_checkpoint_score, sm2_update
 from app.services.levels import LEVEL_LABELS, effective_level, step_level
 from app.services.quiz_generator import quiz_generator
 from app.services.retrieval import format_context_chunks, retrieve_context
@@ -161,18 +162,37 @@ async def _grade(quiz: Quiz, answers: dict, level_label: str) -> tuple[float, di
 def _update_mastery(session: StudentSession, concept_stats: dict) -> tuple[list[str], list[str]]:
     mastery = {m["concept"]: m for m in (session.concept_mastery or [])}
     mastered, review = [], []
-    now = datetime.now(timezone.utc).isoformat()
+    now_dt = datetime.now(timezone.utc)
+    now_str = now_dt.isoformat()
     for concept, (correct, total) in concept_stats.items():
         m = mastery.get(concept, {"concept": concept, "attempts": 0, "correct": 0, "state": "unseen"})
         m["attempts"] += total
         m["correct"] += correct
         ratio = correct / max(total, 1)
         m["state"] = "mastered" if ratio >= 0.8 else ("shaky" if ratio >= 0.5 else "review")
-        m["last_seen_at"] = now
+        m["mastery_state"] = m["state"]
+        m["last_seen_at"] = now_str
+
+        # SM-2 Spaced Repetition calculation
+        quality = quality_from_checkpoint_score(correct, total)
+        card = ConceptCard(
+            concept_id=concept,
+            student_id=str(session.student_id),
+            easiness=float(m.get("easiness", 2.5)),
+            interval=int(m.get("interval", 1)),
+            repetitions=int(m.get("repetitions", 0)),
+        )
+        card = sm2_update(card, quality, now=now_dt)
+        m["easiness"] = round(card.easiness, 2)
+        m["interval"] = card.interval
+        m["repetitions"] = card.repetitions
+        m["next_review_date"] = card.next_review.date().isoformat() if card.next_review else None
+        m["mastery_score"] = round(card.mastery_score, 2)
+
         mastery[concept] = m
         if m["state"] == "mastered":
             mastered.append(concept)
-        elif m["state"] == "review":
+        elif m["state"] in ("review", "shaky"):
             review.append(concept)
     session.concept_mastery = list(mastery.values())
     return mastered, review

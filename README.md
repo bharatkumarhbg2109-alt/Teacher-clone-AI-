@@ -1,128 +1,131 @@
-# AI Teacher Clone 🎓🤖
+# TeachClone 🎓🤖
 
-An intelligent, interactive AI Teacher platform powered by Knowledge Graphs, Multimodal Vision, and Retrieval-Augmented Generation (RAG).
+**TeachClone** is an end-to-end AI Teacher platform that clones real educators' authentic teaching voices, pedagogies, and explanation habits using a 7-layer Teacher DNA extraction pipeline, grounded by hybrid vector RAG retrieval with citations, adaptive checkpoint quizzes, and SM-2 spaced repetition retention scheduling.
 
-[![CI Pipeline](https://github.com/bharatkumarhbg2109-alt/Teacher-clone-AI-/actions/workflows/ci.yml/badge.svg)](https://github.com/bharatkumarhbg2109-alt/Teacher-clone-AI-/actions/workflows/ci.yml)
-[![Docker Images](https://github.com/bharatkumarhbg2109-alt/Teacher-clone-AI-/actions/workflows/docker-build.yml/badge.svg)](https://github.com/bharatkumarhbg2109-alt/Teacher-clone-AI-/actions/workflows/docker-build.yml)
-
----
-
-## 🌟 Key Features
-
-- **Interactive AI Tutoring**: Conversational teacher powered by LLM and local context.
-- **Multimodal Vision**: Support for image understanding and diagram explanations via Ollama LLaVA.
-- **Knowledge Graph & Curriculum**: Automated concept extraction, prerequisite mapping, and dynamic interactive curriculum generation using NetworkX and Pyvis.
-- **Hybrid Retrieval & RAG**: Semantic vector retrieval using ChromaDB combined with keyword and graph-traversal search.
-- **SM-2 Spaced Repetition**: Memory retention scheduling for concepts and flashcards.
-- **Modern UI**: Fast, responsive React + Vite interface with Zustand state management.
-- **Desktop & Docker Ready**: Run as a desktop application (Electron) or completely containerized with Docker and Docker Compose.
+> **One Product Architecture**: The primary production codebase lives in **[`teachclone/`](./teachclone/)**. The previous desktop prototype has been archived in **[`legacy/`](./legacy/)**.
 
 ---
 
-## 🐳 Quick Start with Docker
+## 🌟 Core Highlights
 
-The easiest way to run the entire AI Teacher Clone stack is using Docker Compose:
-
-```bash
-# Clone the repository
-git clone https://github.com/bharatkumarhbg2109-alt/Teacher-clone-AI-.git
-cd Teacher-clone-AI-
-
-# Build and start all services
-docker compose up --build
-```
-
-### Services Started:
-- **Frontend**: [http://localhost:5175](http://localhost:5175)
-- **Backend API**: [http://localhost:8002](http://localhost:8002)
-- **API Documentation**: [http://localhost:8002/docs](http://localhost:8002/docs)
-- **Ollama LLM**: [http://localhost:11434](http://localhost:11434)
-
-To run in detached (background) mode:
-```bash
-docker compose up -d
-```
-
-To stop containers:
-```bash
-docker compose down
-```
-
----
-
-## 💻 Local Setup (Without Docker)
-
-### 1. Backend Setup (FastAPI :8002)
-```bash
-cd backend
-python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On Linux/macOS:
-source .venv/bin/activate
-
-pip install --upgrade pip
-pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload
-```
-
-### 2. Frontend Setup (React + Vite :5175)
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### Windows One-Click Launchers:
-- Run `setup_env.bat` to configure Python environment.
-- Run `start_backend.bat` to launch backend.
-- Run `start_frontend.bat` to launch web frontend.
+- **7-Layer Teacher DNA Extraction**: Analyzes lecture transcripts to extract vocabulary habits, explanation progression, example sources, Socratic questioning, error-correction patterns, transition markers, and emotional tone.
+- **Zero Paid API Keys Required**: Operates completely local-first with **Ollama** (`llama3.1:8b`) as the default LLM provider, with optional Anthropic/OpenAI keys only when explicitly configured.
+- **DNA Persona Fidelity**: Strictly preserves teacher persona in student doubt chat; verified by automated DNA fidelity evals ensuring $\ge 3$ signature phrases, Layer 2 explanation structure, and zero generic bot boilerplate.
+- **SM-2 Spaced Repetition Scheduler**: Canonical SuperMemo SM-2 algorithm scheduling concept reviews, tracking easiness factors, repetition counts, intervals, and mastery scores.
+- **Grounded RAG with Citations**: Hybrid dense + sparse vector search with relevance score filtering, producing verifiable `[n]` bracketed citations in streaming answers.
+- **Modern Web App**: Next.js 14 + TypeScript frontend (`teachclone/apps/web`) with real-time SSE streaming chat, teacher discovery, interactive quizzes, and gamified progress tracking.
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-├── backend/                  # FastAPI Knowledge Graph & RAG backend (:8002)
-│   ├── core/                 # Structured logging & configs
-│   ├── graph/                # Concept extraction, visualizer, curriculum
-│   ├── graph_db/             # ChromaDB vector store & SQLite database
-│   ├── middleware/           # API key auth middleware
-│   ├── routers/              # Chat, teach, questions, vision endpoints
-│   ├── Dockerfile            # Production Docker image for Backend
-│   └── requirements.txt      # Pinned Python dependencies
-│
-├── frontend/                 # React 18 + Vite frontend (:5175)
-│   ├── src/                  # Components, zustand store, api client
-│   ├── Dockerfile            # Production multi-stage Nginx Docker image
-│   └── nginx.conf            # Nginx reverse proxy configuration
-│
-├── electron/                 # Electron desktop wrapper (:main.js)
-│
-├── teachclone/               # SaaS multi-tenant platform (Next.js + FastAPI)
-│   ├── apps/api              # FastAPI SaaS backend (:8000)
-│   ├── apps/web              # Next.js web application (:3000)
-│   └── docker-compose.yml    # SaaS multi-container setup (PostgreSQL, Redis, Qdrant)
-│
-├── .github/workflows/        # CI/CD and automated Docker build pipelines
-│   ├── ci.yml                # Pytest, ESLint & SaaS tests
-│   └── docker-build.yml      # Builds & pushes Docker images to GHCR
-│
-└── docker-compose.yml        # Root compose file for full AI Teacher Clone stack
+Teacher-clone-AI-/
+├── PROJECT_DOC.md            # Comprehensive project documentation & requirements
+├── docs/                     # End-to-end user journey & guides
+│   └── user-journey.md       # Complete 8-stage student & educator click-path
+├── teachclone/               # THE PRODUCT
+│   ├── apps/
+│   │   ├── api/              # FastAPI backend (:8000)
+│   │   │   ├── app/main.py   # Application entrypoint & loud router registration
+│   │   │   ├── app/models/   # 18 SQLAlchemy async models
+│   │   │   ├── app/routers/  # 19 API routers (chat, DNA, media, quizzes, profiles, etc.)
+│   │   │   ├── app/services/ # Core services (LLM, DNA extractor, prompt builder, SM-2)
+│   │   │   ├── tests/        # 245+ pytest tests (incl. DNA fidelity eval & SM-2)
+│   │   │   └── requirements.txt # Unified local requirements (torch, faster-whisper, yt-dlp)
+│   │   └── web/              # Next.js 14 web frontend (:3000)
+│   │       ├── app/          # App router pages (chat, onboarding, dashboard, quizzes)
+│   │       ├── components/   # UI components
+│   │       └── lib/          # API & SSE streaming client
+│   ├── docs/                 # Architecture & deployment specifications
+│   └── docker-compose.yml    # Containerized production stack
+└── legacy/                   # Archived prototype (backend, frontend, electron — not maintained)
 ```
 
 ---
 
-## 🚀 CI/CD & Automated Container Registry (GHCR)
+## 🚀 Quick Start (Local Development)
 
-Every push to the `main` branch automatically triggers GitHub Actions to:
-1. Run backend pytest suites and frontend linting.
-2. Build optimized multi-platform Docker images.
-3. Publish container images directly to GitHub Container Registry (`ghcr.io`):
-   - `ghcr.io/bharatkumarhbg2109-alt/teacher-clone-backend:latest`
-   - `ghcr.io/bharatkumarhbg2109-alt/teacher-clone-frontend:latest`
+### Prerequisites
+1. **Ollama**: Installed and running with `llama3.1:8b`:
+   ```bash
+   ollama serve
+   ollama pull llama3.1:8b
+   ```
+2. **FFmpeg**: Installed on system PATH (see [`teachclone/docs/ffmpeg_setup.md`](./teachclone/docs/ffmpeg_setup.md)).
+3. **Python 3.11+** & **Node.js 18+**.
 
 ---
 
-## 📄 License
-This project is open-source and available under the MIT License.
+### 1. Backend Setup (`teachclone/apps/api`)
+
+```bash
+cd teachclone/apps/api
+
+# Create & activate virtual environment
+python -m venv .venv
+# Windows:
+.\.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start backend server on port 8000
+uvicorn app.main:app --port 8000 --reload
+```
+
+- **Health check**: `curl http://localhost:8000/health` $\rightarrow$ `{"status":"ok"}`
+- **Interactive OpenAPI docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+### 2. Frontend Setup (`teachclone/apps/web`)
+
+```bash
+cd teachclone/apps/web
+
+# Install dependencies
+npm install
+
+# Start Next.js development server on port 3000
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the web application.
+
+---
+
+## 🧪 Verification & Testing
+
+### Backend Test Suite (Pytest)
+```bash
+cd teachclone/apps/api
+pytest tests -x -q
+```
+- Includes all unit tests, error handling, rate limiting, LLM provider abstraction, and:
+  - `tests/test_dna_fidelity.py`: Automated DNA Persona Fidelity Evaluation Gate.
+  - `tests/test_sm2.py`: SM-2 Spaced Repetition Algorithm & Integration Suite.
+
+### Frontend Type Checking & Production Build
+```bash
+cd teachclone/apps/web
+npx tsc --noEmit
+npm run build
+```
+
+---
+
+## 📜 Full User Journey
+For a step-by-step walkthrough of creating teacher profiles, extracting DNA from video lectures, streaming persona-accurate doubt answers, generating diagnostic checkpoints, and tracking SM-2 concept mastery, see [`docs/user-journey.md`](./docs/user-journey.md).
+
+---
+
+## 📦 Docker Deployment
+
+To launch the full containerized stack:
+```bash
+cd teachclone
+docker compose up -d
+```

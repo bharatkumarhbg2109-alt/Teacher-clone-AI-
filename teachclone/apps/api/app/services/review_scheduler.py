@@ -30,8 +30,8 @@ async def get_due_reviews(db: "AsyncSession") -> list[dict]:  # noqa: F821
     for session in sessions:
         mastery = session.concept_mastery or []
         for concept in mastery:
-            state = concept.get("mastery_state", "")
-            if state not in ("shaky", "review_due"):
+            state = concept.get("mastery_state") or concept.get("state", "")
+            if state not in ("shaky", "review_due", "review"):
                 continue
             next_review = concept.get("next_review_date")
             if next_review:
