@@ -1,7 +1,6 @@
 # TeachClone — How to Start
 
 Two servers must run. Start the **backend first**, then the **frontend**.
-Easiest: double-click `start_backend.bat`, then `start_frontend.bat`.
 
 ## Backend (FastAPI → http://localhost:8000)
 ```bat
