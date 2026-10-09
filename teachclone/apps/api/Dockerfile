@@ -6,12 +6,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system dependencies (libpq for PostgreSQL, libmagic for file validation)
+# Install system dependencies (libpq for PostgreSQL, libmagic for file validation, ffmpeg for media, curl)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         gcc \
         libpq-dev \
         libmagic1 \
+        ffmpeg \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies first (layer caching)

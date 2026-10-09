@@ -104,11 +104,21 @@ def _get_opening_examples(style: dict) -> list[str]:
     return []
 
 
+def _get_socratic_questions(style: dict) -> list[str]:
+    q_dna = style.get("question_dna", {})
+    if isinstance(q_dna, dict) and q_dna.get("actual_questions"):
+        qs = q_dna["actual_questions"]
+        if isinstance(qs, list):
+            return [str(q).strip() for q in qs if q and str(q).strip()]
+    return []
+
+
 def _persona_mandate_block(
     teacher_name: str,
     sig_phrases: list[str],
     explanation_order: list[str],
     opening_examples: list[str],
+    socratic_questions: list[str] | None = None,
 ) -> str:
     parts = [
         "=== MANDATORY TEACHER PERSONA EXECUTION ===",
@@ -135,7 +145,7 @@ def _persona_mandate_block(
             "- Step 1: Open immediately with your characteristic hook or intuitive analogy.\n"
             "- Step 2: Establish the core principle or mechanism clearly.\n"
             "- Step 3: Walk through the concrete application or step-by-step breakdown.\n"
-            "- Final Step: Conclude with your characteristic Socratic check / thought question."
+            "- Final Step: Conclude your explanation with a direct Socratic thought question (ending with '?')."
         )
 
     if opening_examples:
@@ -145,13 +155,22 @@ def _persona_mandate_block(
             f"{formatted_openings}"
         )
 
+    if socratic_questions:
+        formatted_qs = "\n".join(f"  - \"{q}\"" for q in socratic_questions[:3])
+        parts.append(
+            f"\n4. HOW YOU CONCLUDE WITH A SOCRATIC QUESTION:\n"
+            "End your answer with a thought-provoking conceptual question styled like:\n"
+            f"{formatted_qs}"
+        )
+
     parts.append(
-        "\n4. FORBIDDEN AI BEHAVIORS (STRICT):\n"
+        "\n5. FORBIDDEN AI BEHAVIORS (STRICT):\n"
         "- NEVER begin with generic bot greetings or disclaimers: "
         "\"Certainly!\", \"Sure!\", \"Sure, I can help with that\", \"Great question!\", "
         "\"That's an interesting question!\", \"As an AI language model\", \"Hello! How can I assist you?\".\n"
         f"- Open directly in character as {teacher_name} from the very first word.\n"
-        "- Never say \"I am an AI\" or break character."
+        "- Never say \"I am an AI\" or break character.\n"
+        "- NEVER end your response with a flat statement or summary — the final sentence MUST be a Socratic question ending with '?'."
     )
 
     return "\n".join(parts)
@@ -171,8 +190,9 @@ def build_system_prompt(teacher_profile: Any, session: Any, context_results: Any
     sig_phrases = _get_signature_phrases(style, dna_prompt)
     explanation_order = _get_explanation_order(style)
     opening_examples = _get_opening_examples(style)
+    socratic_questions = _get_socratic_questions(style)
 
-    mandate = _persona_mandate_block(teacher_name, sig_phrases, explanation_order, opening_examples)
+    mandate = _persona_mandate_block(teacher_name, sig_phrases, explanation_order, opening_examples, socratic_questions)
     dynamic = _dynamic_block(teacher_profile, session, context_results, turn)
 
     if dna_prompt and dna_prompt.strip():
@@ -233,7 +253,7 @@ Ground your answer in the content below. If the question isn't covered, explain 
 1. Calibrate EVERY sentence to the {LEVEL_LABELS.get(level, level)} level — not too advanced, not too simple.
 2. Ground your explanations in the reference knowledge items above. Cite reference content inline with brackets like [1], [2] matching the numbered items above. Citations must ONLY reference valid numbers present in the reference knowledge base.
 3. Keep it focused and impactful: {"2-3 short paragraphs" if level in ("class_6_8", "class_9_10") else "3-5 paragraphs"}.
-4. End with your characteristic Socratic follow-up question (not yes/no) to check or deepen understanding.
+4. The concluding paragraph MUST end with your characteristic Socratic follow-up question (ending with '?') to check or deepen understanding.
 5. Strictly adhere to the MANDATORY TEACHER PERSONA EXECUTION rules."""
 
 

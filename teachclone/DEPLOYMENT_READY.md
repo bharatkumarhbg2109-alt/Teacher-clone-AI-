@@ -1,5 +1,9 @@
 # TeachClone — Deployment Ready
 
+> [!NOTE]
+> **HISTORICAL ARCHIVE / SUPERSEDED**
+> This document is a historical sprint log from August 2026. For current deployment documentation, see [docs/deployment.md](docs/deployment.md) and [PROJECT_DOC.md](../PROJECT_DOC.md).
+
 **Date:** August 25, 2026  
 **Status:** ✅ All 14 tasks complete, 164 tests passing, frontend builds clean
 

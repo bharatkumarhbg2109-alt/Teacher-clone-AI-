@@ -30,19 +30,19 @@ jobs:
       - name: Build and push Backend image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: ./teachclone/apps/api
+          file: ./teachclone/apps/api/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/teacher-clone-backend:latest
-            ghcr.io/${{ github.repository_owner }}/teacher-clone-backend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/teachclone-api:latest
+            ghcr.io/${{ github.repository_owner }}/teachclone-api:${{ github.sha }}
 
       - name: Build and push Frontend image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: ./teachclone/apps/web
+          file: ./teachclone/apps/web/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/teacher-clone-frontend:latest
-            ghcr.io/${{ github.repository_owner }}/teacher-clone-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/teachclone-web:latest
+            ghcr.io/${{ github.repository_owner }}/teachclone-web:${{ github.sha }}

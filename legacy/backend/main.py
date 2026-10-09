@@ -35,9 +35,14 @@ init_db(DB_PATH)
 app = FastAPI(title="AI Teacher Clone Backend")
 app.add_middleware(APIKeyMiddleware)
 
+from fastapi import Request, HTTPException
+
 @app.get("/auth/key")
-async def get_key():
-    """Local-only endpoint — returns API key for Electron frontend bootstrap."""
+async def get_key(request: Request):
+    """Localhost-only endpoint — returns API key for local frontend bootstrap."""
+    client_host = request.client.host if request.client else ""
+    if client_host not in ("127.0.0.1", "::1", "localhost", "testclient"):
+        raise HTTPException(status_code=403, detail="Forbidden: localhost access only")
     return {"api_key": get_api_key()}
 
 # Register feature routers

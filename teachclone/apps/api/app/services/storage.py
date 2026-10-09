@@ -115,8 +115,13 @@ class StorageService:
     def __init__(self) -> None:
         self._client = None
         self.bucket = settings.S3_BUCKET_NAME
-        if LOCAL:
+        if self.is_local:
             os.makedirs(settings.LOCAL_STORAGE_DIR, exist_ok=True)
+
+    @property
+    def is_local(self) -> bool:
+        from app.services import storage as _storage_mod
+        return getattr(_storage_mod, "LOCAL", settings.STORAGE_BACKEND == "local")
 
     # --- s3 client (lazy) ---------------------------------------------------
     @property
@@ -145,7 +150,7 @@ class StorageService:
     # --- Single-shot upload -------------------------------------------------
     def presign_put(self, key: str, content_type: str, expires: int = 3600) -> str:
         """Legacy PUT URL — kept for local storage backend."""
-        if LOCAL:
+        if self.is_local:
             return f"{settings.API_URL}/storage/put?key={quote(key)}"
         return self.client.generate_presigned_url(
             "put_object",
@@ -173,7 +178,7 @@ class StorageService:
         For the local backend, falls back to a presigned PUT URL (no
         S3 conditions available) wrapped in the same shape.
         """
-        if LOCAL:
+        if self.is_local:
             return {
                 "url": f"{settings.API_URL}/storage/put?key={quote(key)}",
                 "fields": {"Content-Type": content_type},
@@ -193,7 +198,7 @@ class StorageService:
         return response
 
     def presign_get(self, key: str, expires: int = 86400) -> str:
-        if LOCAL:
+        if self.is_local:
             return f"{settings.API_URL}/storage/get?key={quote(key)}"
         return self.client.generate_presigned_url(
             "get_object",
@@ -234,7 +239,7 @@ class StorageService:
 
     # --- Direct helpers -----------------------------------------------------
     def object_exists(self, key: str) -> bool:
-        if LOCAL:
+        if self.is_local:
             return os.path.exists(self._local_path(key))
         try:
             self.client.head_object(Bucket=self.bucket, Key=key)
@@ -243,7 +248,7 @@ class StorageService:
             return False
 
     def object_size(self, key: str) -> int:
-        if LOCAL:
+        if self.is_local:
             p = self._local_path(key)
             return os.path.getsize(p) if os.path.exists(p) else 0
         try:
@@ -252,7 +257,7 @@ class StorageService:
             return 0
 
     def delete_object(self, key: str) -> bool:
-        if LOCAL:
+        if self.is_local:
             try:
                 os.remove(self._local_path(key))
                 return True
@@ -265,13 +270,13 @@ class StorageService:
             return False
 
     def download_to_path(self, key: str, local_path: str) -> None:
-        if LOCAL:
+        if self.is_local:
             shutil.copyfile(self._local_path(key), local_path)
             return
         self.client.download_file(self.bucket, key, local_path)
 
     def upload_bytes(self, key: str, data: bytes, content_type: str) -> str:
-        if LOCAL:
+        if self.is_local:
             path = self._local_path(key)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "wb") as f:
@@ -281,7 +286,7 @@ class StorageService:
         return f"{settings.S3_PUBLIC_URL}/{key}"
 
     def get_bytes(self, key: str) -> bytes:
-        if LOCAL:
+        if self.is_local:
             with open(self._local_path(key), "rb") as f:
                 return f.read()
         return self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()

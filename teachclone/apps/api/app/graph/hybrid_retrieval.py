@@ -15,6 +15,7 @@ from typing import List, Optional
 import chromadb
 import httpx
 
+from app.config import settings
 from app.graph.graph_service import KnowledgeGraphService
 
 from fastapi import APIRouter
@@ -52,8 +53,9 @@ class HybridRetriever:
         self.graph_svc = KnowledgeGraphService()
         self.graph_svc.load_graph()
         self.G = self.graph_svc.graph
-        self.ollama_url = "http://localhost:11434/api/generate"
-        self.model = "llama3.1:8b"
+        ollama_base = getattr(settings, "OLLAMA_HOST", getattr(settings, "OLLAMA_BASE_URL", "http://localhost:11434"))
+        self.ollama_url = f"{ollama_base.rstrip('/')}/api/generate"
+        self.model = getattr(settings, "OLLAMA_MODEL", "llama3.1:8b")
 
     def vector_search(self, query: str, n_results: int = 5) -> List[dict]:
         """Search ChromaDB for chunks semantically similar to the query.

@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     API_URL: str = "http://localhost:8000"
 
     # --- Database ----------------------------------------------------------
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/teachclone"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./teachclone.db"
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
 
@@ -141,7 +141,7 @@ class Settings(BaseSettings):
     # --- Local / no-infra mode (native run without Docker) -----------------
     # storage: s3 | local ; vectors: qdrant | local ; INLINE_TASKS runs the
     # ingestion pipeline in-process (no Redis/Celery worker needed).
-    STORAGE_BACKEND: str = "s3"
+    STORAGE_BACKEND: str = "local"
     VECTOR_BACKEND: str = "qdrant"
     INLINE_TASKS: bool = False
     LOCAL_STORAGE_DIR: str = "./storage_data"
@@ -155,6 +155,12 @@ class Settings(BaseSettings):
         }
 
     def model_post_init(self, __context: object) -> None:
+        # Sync OLLAMA_HOST and OLLAMA_BASE_URL so either env var works transparently
+        if self.OLLAMA_HOST != "http://localhost:11434" and self.OLLAMA_BASE_URL == "http://localhost:11434":
+            object.__setattr__(self, "OLLAMA_BASE_URL", self.OLLAMA_HOST)
+        elif self.OLLAMA_BASE_URL != "http://localhost:11434" and self.OLLAMA_HOST == "http://localhost:11434":
+            object.__setattr__(self, "OLLAMA_HOST", self.OLLAMA_BASE_URL)
+
         # --- C2: DEV_MODE guard -------------------------------------------------
         # DEV_MODE=true with a non-local ENV is a critical misconfiguration.
         if self.DEV_MODE and self.ENV not in ("local", ""):

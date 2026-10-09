@@ -1,5 +1,9 @@
 # TeachClone — brain.md
 
+> [!NOTE]
+> **HISTORICAL ARCHIVE / SUPERSEDED**
+> This task tracker was used during the initial August 2026 sprint. For current project execution status and loops, see [PROJECT_DOC.md](../PROJECT_DOC.md) and [ANTIGRAVITY_LOOPS.md](../ANTIGRAVITY_LOOPS.md).
+
 ## Project Overview
 TeachClone is a SaaS platform for educational AI that lets teachers upload content and students interact with personalized AI teacher profiles. Built with FastAPI (Python) + Next.js (TypeScript).
 

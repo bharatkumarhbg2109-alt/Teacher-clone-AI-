@@ -1,5 +1,9 @@
 # Final Gap Closure Status Report
 
+> [!NOTE]
+> **ARCHIVED & SUPERSEDED**
+> This gap report pertains to the archived prototype in `legacy/`. See [teachclone/](../teachclone/) and [PROJECT_DOC.md](../PROJECT_DOC.md) for the active product.
+
 **Sprint Date:** 2026-09-23  
 **Project Root:** `e:\AI Teacher Clone`  
 **Overall Integration Result:** 5/5 Gap Fixes Passed (100%)

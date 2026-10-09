@@ -20,6 +20,8 @@ import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.config import settings
+
 router = APIRouter()
 
 log = logging.getLogger("concept_extractor")
@@ -63,8 +65,9 @@ class ConceptExtractor:
 
     def __init__(self):
         """Initialize Ollama client, ChromaDB collection, and SQLite tables."""
-        self.ollama_url = "http://localhost:11434/api/generate"
-        self.model = "llama3.1:8b"
+        ollama_base = getattr(settings, "OLLAMA_HOST", getattr(settings, "OLLAMA_BASE_URL", "http://localhost:11434"))
+        self.ollama_url = f"{ollama_base.rstrip('/')}/api/generate"
+        self.model = getattr(settings, "OLLAMA_MODEL", "llama3.1:8b")
         self.db_path = DB_PATH
         self.chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
         self.collection = self.chroma_client.get_or_create_collection("documents")

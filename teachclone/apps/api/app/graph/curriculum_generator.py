@@ -17,6 +17,7 @@ import community as community_louvain
 import httpx
 import networkx as nx
 
+from app.config import settings
 from app.graph.graph_service import KnowledgeGraphService
 
 from fastapi import APIRouter
@@ -48,8 +49,9 @@ class CurriculumGenerator:
     def __init__(self):
         """Load the knowledge graph and initialize curriculum table."""
         self.db_path = DB_PATH
-        self.ollama_url = "http://localhost:11434/api/generate"
-        self.model = "llama3.1:8b"
+        ollama_base = getattr(settings, "OLLAMA_HOST", getattr(settings, "OLLAMA_BASE_URL", "http://localhost:11434"))
+        self.ollama_url = f"{ollama_base.rstrip('/')}/api/generate"
+        self.model = getattr(settings, "OLLAMA_MODEL", "llama3.1:8b")
         self.graph_svc = KnowledgeGraphService()
         self.graph_svc.load_graph()
         self.G = self.graph_svc.graph

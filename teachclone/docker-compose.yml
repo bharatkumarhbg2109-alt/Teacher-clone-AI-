@@ -18,10 +18,16 @@ services:
     environment:
       - DEV_MODE=true
       - ENV=local
-      - DATABASE_URL=postgresql+asyncpg://teachclone:teachclone@postgres:5432/teachclone
+      - POSTGRES_USER=${POSTGRES_USER:-teachclone}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-teachclone_secure_pass}
+      - POSTGRES_DB=${POSTGRES_DB:-teachclone}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-teachclone}:${POSTGRES_PASSWORD:-teachclone_secure_pass}@postgres:5432/${POSTGRES_DB:-teachclone}
       - REDIS_URL=redis://redis:6379/0
       - QDRANT_URL=http://qdrant:6333
+      - OLLAMA_HOST=http://ollama:11434
       - OLLAMA_BASE_URL=http://ollama:11434
+      - LLM_PROVIDER=ollama
+      - OLLAMA_MODEL=llama3.1:8b
       - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
       - APP_URL=http://localhost:3000
       - API_URL=http://localhost:8000
@@ -34,7 +40,8 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     volumes:
       - api-storage:/app/storage_data
-      - api-db:/app
+      - api-dna:/app/dna_reports
+      - api-prompts:/app/system_prompts
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,13 +89,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: teachclone
-      POSTGRES_USER: teachclone
-      POSTGRES_PASSWORD: teachclone
+      POSTGRES_DB: ${POSTGRES_DB:-teachclone}
+      POSTGRES_USER: ${POSTGRES_USER:-teachclone}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-teachclone_secure_pass}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U teachclone -d teachclone"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-teachclone} -d ${POSTGRES_DB:-teachclone}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -166,10 +173,8 @@ services:
       - ollama-data:/root/.ollama
     entrypoint: >
       sh -c "
-        echo 'Pulling llama3.1 model...'
-        ollama pull llama3.1
-        echo 'Pulling mistral model...'
-        ollama pull mistral
+        echo 'Pulling llama3.1:8b model...'
+        ollama pull llama3.1:8b
         echo 'Models ready.'
       "
     restart: "no"
@@ -179,7 +184,8 @@ services:
 # ── Volumes ───────────────────────────────────────────────────────────────
 volumes:
   api-storage:
-  api-db:
+  api-dna:
+  api-prompts:
   postgres-data:
   redis-data:
   qdrant-data:
