@@ -80,3 +80,4 @@ uploads/
 .freebuff/
 .audit-files.txt
 *.log
+review_log.txt
